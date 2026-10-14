@@ -6,13 +6,13 @@ __pycache__/
 .pytest_cache/
 
 # Heavy / regenerable. Re-created by `medvlm prepare` from the committed manifests.
-data/
+/data/
 # Results from the stand-in models are plumbing checks, never findings.
 results/mock/
 results/smolvlm/
 # Raw per-sample model outputs live outside git (shared Drive / copied by hand).
 # Force-add a finished run with `git add -f outputs/<model>/<profile>` if it is small.
-outputs/
+/outputs/
 
 # Machine-local overrides and secrets
 configs/local.yaml

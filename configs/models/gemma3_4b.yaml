@@ -7,3 +7,4 @@ model:
   quantization: null
   device: auto
   system_prompt: true
+run: {batch_size: 1}

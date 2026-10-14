@@ -7,3 +7,6 @@ model:
   quantization: null         # null | 4bit | 8bit  (bitsandbytes; CUDA + Linux only)
   device: auto
   system_prompt: true
+# 15 GB GPUs (Colab T4) hold the 8.6 GB bf16 weights but the vision tower needs ~3 GB of scratch
+# per image batch. Raise on a bigger GPU (e.g. --set run.batch_size=16 on 40-80 GB).
+run: {batch_size: 1}

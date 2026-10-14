@@ -1,0 +1,9 @@
+# Headline results: official TEST splits only (MedGemma lists SLAKE as training data; train splits
+# are reserved for the contamination analysis in the `full` profile).
+name: main
+datasets:
+  - {name: slake,   split: test, n: null, stratify: [modality, answer_type]}   # all 1,061 English questions
+  - {name: vqa_rad, split: test, n: null, stratify: [answer_type]}             # all 451
+  - {name: pathvqa, split: test, n: 1000, stratify: [answer_type]}             # sampled from 6,719
+paraphrase: {n: 5}
+conditions: [orig, noimg, shuf, blank]

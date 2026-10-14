@@ -1,0 +1,9 @@
+# Primary model. Gated: accept the terms at https://huggingface.co/google/medgemma-4b-it,
+# then `huggingface-cli login` (or set HF_TOKEN). Model card pins version 1.0.1.
+model:
+  name: medgemma4b
+  hf_id: google/medgemma-4b-it
+  dtype: bfloat16            # fall back: float16 can overflow on Gemma 3 -> use quantization: 4bit on a T4
+  quantization: null         # null | 4bit | 8bit  (bitsandbytes; CUDA + Linux only)
+  device: auto
+  system_prompt: true

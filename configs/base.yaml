@@ -1,0 +1,41 @@
+# Layering (later wins): base.yaml -> profiles/<profile>.yaml -> models/<model>.yaml
+#                        -> local.yaml (gitignored, per machine) -> --set a.b=c on the CLI
+seed: 1234
+
+paths:                       # relative to repo root; override with MEDVLM_DATA_DIR / MEDVLM_OUTPUTS_DIR
+  data_dir: data
+  manifests_dir: manifests
+  outputs_dir: outputs
+  results_dir: results
+
+prompt:                      # identical text for every condition; only the image is added/removed
+  system: "You are an expert medical imaging analyst."
+  yesno_suffix: "Answer with only 'yes' or 'no'."
+  open_suffix: "Answer with a single word or short phrase."
+
+# Image-side conditions run for every sample. Paraphrase conditions (para1..paraK) are added
+# automatically from the paraphrase file.
+#   orig   original image + original question
+#   noimg  image tokens omitted entirely (the text-only baseline of arXiv 2603.20985)
+#   shuf   a different image of the same dataset + modality (precomputed partner, see manifest)
+#   blank  black image, same size (optional extra control)
+conditions: [orig, noimg, shuf]
+
+paraphrase:
+  n: 5                       # K per sample; strict consistency = all K agree with orig
+  backend: hf                # hf | template | file
+  hf_model: Qwen/Qwen2.5-3B-Instruct
+  min_edit_ratio: 0.15       # paraphrase must differ from the original by at least this much
+
+scoring:
+  open_correct_f1: 0.5       # open answer counts as correct if token-F1 >= this
+  same_answer_f1: 0.5        # two open answers are "the same" if token-F1 >= this (sensitivity-tested)
+
+run:
+  batch_size: 4
+  max_new_tokens: 16
+  score_gold_logprob: true   # teacher-forced log p(gold | image, q): the continuous reliance signal
+
+analysis:
+  bootstrap_B: 2000
+  cluster_col: image_id      # questions on one image are correlated -> bootstrap over images

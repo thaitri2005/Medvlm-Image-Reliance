@@ -1,0 +1,80 @@
+{"k": 1, "reasons": ["too_similar"], "sample_id": "pathvqa-test-109", "style": "lexical", "text": "are collections of histiocytes circumscribed?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-109", "style": "syntactic", "text": "are collections of histiocytes circumscribed?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-142", "style": "lexical", "text": "What part of the body does this area belong to?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-142", "style": "syntactic", "text": "What part of the body does this area belong to?", "valid": true}
+{"k": 1, "reasons": ["too_similar"], "sample_id": "pathvqa-test-198", "style": "lexical", "text": "Is leiomyosarcoma present?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-198", "style": "syntactic", "text": "Is leiomyosarcoma present?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-209", "style": "lexical", "text": "What does this image depict?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-209", "style": "syntactic", "text": "What does this image depict?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-28", "style": "lexical", "text": "Is there an initial stage of reactive osteogenesis in the periosteum?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-28", "style": "syntactic", "text": "Is there an initial stage of reactive bone formation occurring within the perichondrium?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-342", "style": "lexical", "text": "What is visible?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-342", "style": "syntactic", "text": "What is visible?", "valid": true}
+{"k": 1, "reasons": ["too_similar"], "sample_id": "pathvqa-test-405", "style": "lexical", "text": "Does this image depict skin or Kaposi's sarcoma?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-405", "style": "syntactic", "text": "Does this image depict skin or Kaposi's sarcoma?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-41", "style": "lexical", "text": "Does extending infection into the joint space, epiphysis, or skin lead to a drainage sinus?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-41", "style": "syntactic", "text": "Does extending infection into the joint space, epiphysis, or skin lead to a drainage sinus?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-420", "style": "lexical", "text": "Is a stillborn macerated fetus stillborn?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-420", "style": "syntactic", "text": "Is a stillborn macerated fetus still?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-422", "style": "lexical", "text": "What is visible?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-422", "style": "syntactic", "text": "What is visible?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-561", "style": "lexical", "text": "What is visible?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-561", "style": "syntactic", "text": "What is visible?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-95", "style": "lexical", "text": "What does the whorl content vary among some patients?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-95", "style": "syntactic", "text": "What does the whorl structure typically contain?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11964", "style": "lexical", "text": "Where is/are the lesion located?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-11964", "style": "syntactic", "text": "Where is/are the lesion located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12068", "style": "lexical", "text": "Does this image appear to be abnormal?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12068", "style": "syntactic", "text": "Does this image exhibit any abnormalities?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12147", "style": "lexical", "text": "Does this image appear to be normal?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12147", "style": "syntactic", "text": "Does this image appear to be in its usual or expected state?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12158", "style": "lexical", "text": "Does the image show liver?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12158", "style": "syntactic", "text": "Does the image show liver?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12197", "style": "lexical", "text": "Does the image show lungs?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12197", "style": "syntactic", "text": "Does the image show any lung tissue?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12209", "style": "lexical", "text": "Does this image appear to be normal?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12209", "style": "syntactic", "text": "Does this image appear to be in its usual or expected state?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12245", "style": "lexical", "text": "What organ is the white area to the left in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12245", "style": "syntactic", "text": "What organ is the white area located to the left in the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12321", "style": "lexical", "text": "How severe is the injury likely to be if I undergo such an examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12321", "style": "syntactic", "text": "How severe is the physical harm that could result from viewing such an image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12361", "style": "lexical", "text": "Does the chest appear abnormal?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12361", "style": "syntactic", "text": "Does the chest x-ray reveal any abnormalities?", "valid": false}
+{"k": 1, "reasons": ["too_similar"], "sample_id": "slake-test-12439", "style": "lexical", "text": "What color is the lung in the image?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12439", "style": "syntactic", "text": "What color is the lung in the image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12669", "style": "lexical", "text": "Which type of weighting does this image use, T1 or T2?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12669", "style": "syntactic", "text": "Which type of weighting was used in generating this image, T1 or T2?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12694", "style": "lexical", "text": "Which region of the body is this image from?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12694", "style": "syntactic", "text": "Which region of the body is this image associated with?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12771", "style": "lexical", "text": "Does the brain appear abnormal?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12771", "style": "syntactic", "text": "Does the brain exhibit any abnormalities?", "valid": false}
+{"k": 1, "reasons": ["too_similar"], "sample_id": "slake-test-12829", "style": "lexical", "text": "What is the shape of the spinal cord in this image?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12829", "style": "syntactic", "text": "What is the contour of the spinal cord in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12876", "style": "lexical", "text": "Where is/are the lesion located?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12876", "style": "syntactic", "text": "Where is/are the lesion located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12950", "style": "lexical", "text": "Does the image show Brian?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12950", "style": "syntactic", "text": "Does the image show Brian?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-102", "style": "lexical", "text": "Does this patient exhibit signs of peritonitis?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-102", "style": "syntactic", "text": "Does this patient exhibit signs of peritonitis?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1213", "style": "lexical", "text": "What are the dense areas surrounding the periphery?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1213", "style": "syntactic", "text": "What are the areas of high density observed surrounding the periphery?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1297", "style": "lexical", "text": "Is there any air present within the body?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1297", "style": "syntactic", "text": "Is there any air present within the body?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1504", "style": "lexical", "text": "Is the air in the lungs pathological?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1504", "style": "syntactic", "text": "Is there an abnormality in the air within the diaphragm?", "valid": true}
+{"k": 1, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1534", "style": "lexical", "text": "Is the abdominal aortic arch within normal limits?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1534", "style": "syntactic", "text": "Is the abdominal aortic arch within normal limits?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1671", "style": "lexical", "text": "The presence of hypointense hemorrhages suggests which aspect of the bleeding timeline?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1671", "style": "syntactic", "text": "The presence of hypointense hemorrhages suggests which aspect of the bleeding timeline?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1867", "style": "lexical", "text": "What are the dense areas observed at the margins of the aorta?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1867", "style": "syntactic", "text": "What are the areas observed as hyperdense lesions along the aorta's edge?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-391", "style": "lexical", "text": "Is the liver present?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-391", "style": "syntactic", "text": "Is the liver located on the right side of the body?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-392", "style": "lexical", "text": "What is the solid image observed in the liver?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-392", "style": "syntactic", "text": "What is the solid structure observed in the liver?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-446", "style": "lexical", "text": "Is a pneumothorax detected in the left anterior segment?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-446", "style": "syntactic", "text": "Is a pneumothorax detected in the left anterior segment?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-555", "style": "lexical", "text": "Is this superior or inferior?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-555", "style": "syntactic", "text": "Is this superior or inferior?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-857", "style": "lexical", "text": "Which side of the body does the diaphragm typically rise?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-857", "style": "syntactic", "text": "Which side of the body does the diaphragm typically rise?", "valid": true}

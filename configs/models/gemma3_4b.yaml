@@ -1,0 +1,9 @@
+# Controlled comparison for MedGemma: same architecture, no medical post-training.
+# Gated under the same Gemma terms. Answers: does medical tuning change image reliance?
+model:
+  name: gemma3_4b
+  hf_id: google/gemma-3-4b-it
+  dtype: bfloat16
+  quantization: null
+  device: auto
+  system_prompt: true

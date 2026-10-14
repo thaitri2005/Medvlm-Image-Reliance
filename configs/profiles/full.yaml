@@ -1,0 +1,14 @@
+# Stronger-machine profile: adds train/val splits so we can ask whether reliance differs on
+# data the model may have seen during training (contamination analysis), and runs bigger models.
+name: full
+datasets:
+  - {name: slake,   split: test,       n: null, stratify: [modality, answer_type]}
+  - {name: slake,   split: validation, n: null, stratify: [modality, answer_type]}
+  - {name: slake,   split: train,      n: 1500, stratify: [modality, answer_type]}
+  - {name: vqa_rad, split: test,       n: null, stratify: [answer_type]}
+  - {name: vqa_rad, split: train,      n: 800,  stratify: [answer_type]}
+  - {name: pathvqa, split: test,       n: 2000, stratify: [answer_type]}
+  - {name: pathvqa, split: validation, n: 1000, stratify: [answer_type]}
+paraphrase: {n: 5}
+conditions: [orig, noimg, shuf, blank]
+run: {batch_size: 16}

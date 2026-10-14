@@ -1,0 +1,4 @@
+# Deterministic fake model: no weights, no GPU. For tests and for checking the plumbing.
+model:
+  name: mock
+  hf_id: null

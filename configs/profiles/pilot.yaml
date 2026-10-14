@@ -1,0 +1,8 @@
+# First real MedGemma run (Colab T4/L4). ~330 questions, ~3.5k forward passes.
+name: pilot
+datasets:
+  - {name: slake,   split: test, n: 150, stratify: [modality, answer_type]}
+  - {name: vqa_rad, split: test, n: 90,  stratify: [answer_type]}
+  - {name: pathvqa, split: test, n: 90,  stratify: [answer_type]}
+paraphrase: {n: 3}
+conditions: [orig, noimg, shuf]

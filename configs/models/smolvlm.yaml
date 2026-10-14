@@ -1,0 +1,10 @@
+# Laptop-friendly stand-in (256M params, not gated). Used ONLY to exercise the real HF code path
+# on CPU. Its answers are meaningless for the study.
+model:
+  name: smolvlm
+  hf_id: HuggingFaceTB/SmolVLM-256M-Instruct
+  dtype: float32
+  quantization: null
+  device: cpu
+  system_prompt: false
+run: {batch_size: 2}

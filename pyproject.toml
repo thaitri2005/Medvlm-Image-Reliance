@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medvlm"
+version = "0.1.0"
+description = "Image-reliance audit of medical vision-language models (consistency x grounding quadrants)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pillow",
+    "pyyaml",
+    "tqdm",
+    "requests",
+    "scikit-learn",
+    "matplotlib",
+    "huggingface_hub",
+]
+
+[project.optional-dependencies]
+# Dataset loading (PathVQA ships as HF parquet)
+data = ["datasets"]
+# Anything that actually runs a VLM. Gemma 3 / MedGemma needs transformers >= 4.50.
+model = ["torch", "transformers>=4.50", "accelerate", "sentencepiece", "datasets"]
+# 4-bit / 8-bit loading on small GPUs (Linux / Colab only)
+gpu = ["bitsandbytes; platform_system != 'Windows'"]
+dev = ["pytest"]
+
+[project.scripts]
+medvlm = "medvlm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not slow'"
+markers = ["slow: needs network or a real model (deselect with -m 'not slow')"]

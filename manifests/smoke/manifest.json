@@ -1,0 +1,47 @@
+{
+  "profile": "smoke",
+  "seed": 1234,
+  "n_items": 40,
+  "n_images": 37,
+  "datasets": [
+    {
+      "name": "slake",
+      "split": "test",
+      "n": 16,
+      "stratify": [
+        "modality",
+        "answer_type"
+      ]
+    },
+    {
+      "name": "vqa_rad",
+      "split": "test",
+      "n": 12,
+      "stratify": [
+        "answer_type"
+      ]
+    },
+    {
+      "name": "pathvqa",
+      "split": "test",
+      "n": 12,
+      "stratify": [
+        "answer_type"
+      ],
+      "pool_limit": 600
+    }
+  ],
+  "python": "3.12.2",
+  "counts": {
+    "pathvqa|test|pathology|open": 6,
+    "pathvqa|test|pathology|yesno": 6,
+    "slake|test|ct|open": 3,
+    "slake|test|ct|yesno": 3,
+    "slake|test|mri|open": 3,
+    "slake|test|mri|yesno": 3,
+    "slake|test|xray|open": 2,
+    "slake|test|xray|yesno": 2,
+    "vqa_rad|test|radiology|open": 6,
+    "vqa_rad|test|radiology|yesno": 6
+  }
+}

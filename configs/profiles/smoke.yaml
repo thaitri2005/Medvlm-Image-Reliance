@@ -1,0 +1,7 @@
+# Tiny profile for laptop / CPU pipeline checks. Not for reporting results.
+name: smoke
+datasets:
+  - {name: slake,   split: test, n: 16, stratify: [modality, answer_type]}
+  - {name: vqa_rad, split: test, n: 12, stratify: [answer_type]}
+  - {name: pathvqa, split: test, n: 12, stratify: [answer_type], pool_limit: 600}
+paraphrase: {n: 2}

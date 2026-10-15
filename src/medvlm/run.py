@@ -141,8 +141,8 @@ class _Progress:
     """Timestamped progress lines for the log (the tqdm bar only shows in the terminal), plus the
     stop-the-line format check from PLAN.md section 11 (yn_mass < 0.9) and empty open answers."""
 
-    def __init__(self, total: int, every_sec: float, min_yn_mass: float = 0.9):
-        self.total, self.every, self.min_yn_mass = total, every_sec, min_yn_mass
+    def __init__(self, total: int, every_sec: float, min_yn_mass: float = 0.9, warn: bool = True):
+        self.total, self.every, self.min_yn_mass, self.warn = total, every_sec, min_yn_mass, warn
         self.t0 = self.t_last = time.perf_counter()
         self.done = self.done_last = 0
         self.win_yn_min, self.win_empty, self.win_jobs = 1.0, 0, 0
@@ -156,8 +156,9 @@ class _Progress:
                 self.win_yn_min = min(self.win_yn_min, o.yn_mass)
                 if o.yn_mass < self.min_yn_mass:
                     self.low_mass_total += 1
-                    tqdm.write(f"[warn] {j.key}: yn_mass {o.yn_mass:.3f} < {self.min_yn_mass} "
-                          f"(model not answering yes/no); answer {o.text!r}")
+                    if self.warn:
+                        tqdm.write(f"[warn] {j.key}: yn_mass {o.yn_mass:.3f} < {self.min_yn_mass} "
+                                   f"(model not answering yes/no); answer {o.text!r}")
             elif not (o.text or "").strip():
                 self.win_empty += 1
                 self.empty_total += 1
@@ -224,7 +225,7 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
         with open(out_path, "ab") as f:          # previous run died mid-line: close it so records never glue together
             f.write(b"\n")
         print("[run] repaired a half-written last line from an interrupted run")
-    prog = _Progress(len(todo), log_every_sec)
+    prog = _Progress(len(todo), log_every_sec, warn=bool(cfg["run"].get("warn_low_mass", True)))
     with open(out_path, "a", encoding="utf-8", newline="\n") as f, tqdm(total=len(todo), unit="job") as bar:
         for s in range(0, len(todo), chunk):
             if max_minutes and time.perf_counter() - t_start > max_minutes * 60:

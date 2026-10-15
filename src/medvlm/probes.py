@@ -62,6 +62,7 @@ def probe_config(cfg: dict, probe: str) -> dict:
     c["run"]["score_gold_logprob"] = False             # probes only need the answer and its probabilities
     if probe == "abstain":
         c["prompt"]["yesno_suffix"] = ABSTAIN_SUFFIX
+        c["run"]["warn_low_mass"] = False                # abstaining is what this probe measures
     return c
 
 

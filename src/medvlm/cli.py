@@ -9,6 +9,7 @@
   regress       re-run stored jobs and check the numbers did not change (-n jobs)
   pipeline      prepare -> paraphrase -> run in --parts N back-to-back -> analyze, one process
   compare       paired comparison of --model and --model-b on the same questions
+  probes        robustness probes (blank image, abstain-allowed prompt, opposite-answer image); --probe NAME|all
   posthoc       analyses added after the main run (abstention, label-free PMI, probe confounds) + figures
   audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet
   run           run the model on every (sample, condition); resumable
@@ -165,6 +166,14 @@ def _compare(cfg, paths, args):
     compare(cfg, paths, cfg["model"]["name"], args.model_b)
 
 
+def _probes(cfg, paths, args):
+    from .models import load_model
+    from .probes import PROBES, run_probes
+
+    which = list(PROBES) if args.probe in (None, "all") else [args.probe]
+    run_probes(cfg, paths, load_model(cfg), which, max_minutes=args.max_minutes)
+
+
 def _posthoc(cfg, paths, args):
     from .analysis.posthoc import posthoc
 
@@ -190,9 +199,9 @@ def _pipeline(cfg, paths, args):
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
             "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
-            "audit-score": _audit_score, "posthoc": _posthoc}
+            "audit-score": _audit_score, "posthoc": _posthoc, "probes": _probes}
 # Long or GPU commands get a logs/*.log file; quick ones only print.
-LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc"}
+LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc", "probes"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -213,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sec-per-job", type=float, action="append", help="estimate: seconds per job (repeatable)")
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
     ap.add_argument("--no-log", action="store_true", help="do not write a logs/*.log file")
+    ap.add_argument("--probe", help="probes: blank | abstain | opp | all (default all)")
     args = ap.parse_args(argv)
     cfg = load_config(args.profile, args.model, args.set, hardware=args.hardware)
     if args.command in LOGGED and not args.no_log:

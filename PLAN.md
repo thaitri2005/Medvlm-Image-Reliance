@@ -319,3 +319,24 @@ identical across models; the answer-type instruction is gold-derived but disagre
 for 4/3,365; **the Dangerous share has a large chance floor on yes/no** (41.5% / 35.8%), so P3 is
 additionally reported chance-corrected (d-kappa +0.11 [0.04, 0.18]); results unchanged without the pilot
 questions; model card lists SLAKE (not VQA-RAD/PathVQA) as training data.
+
+## 15. Robustness probes (registered 2026-10-16, after the main run, BEFORE running these probes)
+
+Each probe answers a question a skeptical reader would ask of the main results. Outputs go to separate run
+folders (`outputs/<model>__<probe>/main`), so the frozen main run is untouched. Command:
+`medvlm probes --profile main --model <m> --hardware rtx4080` (all three probes, resumable).
+
+| | Probe | Question it answers | Measure | Prediction (directional) |
+|---|---|---|---|---|
+| R1 | **blank**: black image instead of no image (all 1,564 yes/no) | Is "answers without the image" just confusion from missing image tokens? | chance-corrected kappa(orig, blank) per model; Dangerous share under blank; blank yes/no mass | **H6**: kappa(orig, blank) MedGemma > Gemma-3 |
+| R2 | **abstain**: no image, instruction allows "unknown" | Is answering blind real, or compliance with "Answer with only yes or no"? | abstention (first-token yes/no mass < 0.5) per model and dataset | **H7**: Gemma-3 abstains more than MedGemma. If the paired difference falls below 3 points with a CI including 0, we conclude the main-run difference was format compliance |
+| R3 | **opp**: another image of the same dataset and modality on which the same question has the OPPOSITE gold answer (SLAKE, test+validation, 367 questions) | Does the model use the image when one is present? (main-run evidence: 35 swaps) | follow rate (answer changes vs orig); accuracy against the partner's gold; by modality (exploratory) | **H8**: follow rate MedGemma > Gemma-3 |
+
+**Inference.** Paired differences, cluster bootstrap by image (B = 2,000, seed 1234), 95% percentile CIs,
+two-sided p; H6-H8 form one family, Holm-adjusted. These are confirmatory for the probes but registered after
+the main results were seen, and are reported as such (not as part of the original P1-P3 family). R1/R2 use the
+test split; R3 uses SLAKE test+validation (pooled, as for the modality analyses).
+
+**Already observed, post hoc (reported as such):** the Dangerous gap decomposes into Dangerous-and-correct
+(+14.1 [11.1, 17.1]) and Dangerous-and-wrong (-0.4 [-2.7, 2.0]); a larger share of MedGemma's errors are
+Dangerous (44% vs 31%).

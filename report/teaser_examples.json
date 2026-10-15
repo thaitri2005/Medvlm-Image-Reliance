@@ -1,0 +1,220 @@
+{
+ "slake-test-12941": {
+  "question": "Is there spinal cord in this picture?",
+  "gold": "Yes",
+  "image": "slake/slake-634.jpg",
+  "partner": "slake/slake-92.jpg",
+  "modality": "ct",
+  "paraphrases": [
+   "Is there any spinal cord visible in this image?",
+   "Is spinal cord present in this image?"
+  ],
+  "models": {
+   "medgemma4b": {
+    "noimg": {
+     "text": "yes",
+     "p_yes": 0.979,
+     "mass": 0.961
+    },
+    "orig": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para1": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para2": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para3": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para6": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para7": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para8": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "shuf": {
+     "text": "yes",
+     "p_yes": 0.569,
+     "mass": 1.0
+    },
+    "noimg_freetext": "yes"
+   },
+   "gemma3_4b": {
+    "noimg": {
+     "text": "no",
+     "p_yes": 0.011,
+     "mass": 0.003
+    },
+    "orig": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para1": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para2": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para3": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para6": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para7": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para8": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "shuf": {
+     "text": "yes",
+     "p_yes": 0.906,
+     "mass": 1.0
+    },
+    "noimg_freetext": "Please provide the picture. I need to see the image to determine if there is a spinal cord present."
+   }
+  }
+ },
+ "slake-test-12880": {
+  "question": "Does the picture contain heart?",
+  "gold": "Yes",
+  "image": "slake/slake-580.jpg",
+  "partner": "slake/slake-274.jpg",
+  "modality": "ct",
+  "paraphrases": [
+   "Is there a depiction of the heart in the image?",
+   "Does the image show the presence of a heart?"
+  ],
+  "models": {
+   "medgemma4b": {
+    "noimg": {
+     "text": "yes",
+     "p_yes": 0.939,
+     "mass": 0.972
+    },
+    "orig": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para1": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para2": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para3": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para5": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para6": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para7": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "shuf": {
+     "text": "no",
+     "p_yes": 0.0,
+     "mass": 1.0
+    },
+    "noimg_freetext": "yes"
+   },
+   "gemma3_4b": {
+    "noimg": {
+     "text": "no",
+     "p_yes": 0.029,
+     "mass": 0.507
+    },
+    "orig": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para1": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para2": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para3": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para5": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para6": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "para7": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "shuf": {
+     "text": "yes",
+     "p_yes": 1.0,
+     "mass": 1.0
+    },
+    "noimg_freetext": "no"
+   }
+  }
+ }
+}

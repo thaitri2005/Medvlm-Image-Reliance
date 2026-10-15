@@ -34,6 +34,7 @@ class Job:
     item: Item
     condition: str
     question: str
+    image_file: str | None = None      # explicit image for probe conditions (e.g. opposite-answer swap)
 
 
 def build_jobs(items: list[Item], paras: dict[str, list[dict]], conditions: list[str]) -> list[Job]:
@@ -71,6 +72,8 @@ def make_query(job: Job, paths: Paths, score_gold: bool) -> Query:
         image = _open(str(paths.images / it.shuffle_image_file))
     elif c == "blank":
         image = Image.new("RGB", orig.size)
+    elif c == "opp":                                   # same question, image whose correct answer is opposite
+        image = _open(str(paths.images / job.image_file))
     else:  # orig, paraK
         image = orig
     gold = it.answer if (score_gold and c in IMAGE_CONDITIONS) else None
@@ -183,12 +186,13 @@ class _Progress:
 
 
 def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard: tuple[int, int] | None = None,
-        chunk: int | None = None, max_minutes: float | None = None, log_every_sec: float = 120) -> int:
+        chunk: int | None = None, max_minutes: float | None = None, log_every_sec: float = 120,
+        jobs: list[Job] | None = None) -> int:
     profile, mname = cfg["profile"], cfg["model"]["name"]
     chunk = chunk or max(16, 8 * int(cfg["run"]["batch_size"]))
     run_dir = paths.run_dir(mname, profile)
     run_dir.mkdir(parents=True, exist_ok=True)
-    jobs = select_jobs(cfg, paths, shard)
+    jobs = jobs if jobs is not None else select_jobs(cfg, paths, shard)
     finished = done_keys(run_dir)
     todo = [j for j in jobs if j.key not in finished]
     if limit:

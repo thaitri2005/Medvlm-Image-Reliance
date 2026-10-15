@@ -35,11 +35,15 @@ def pipeline(cfg: dict, paths: Paths, *, parts: int = 2, part: int | None = None
 
     # 1. images (skip the network entirely when the local cache already verifies against the manifest)
     if not items_path.exists() or verify(cfg, paths):
+        print("[pipeline] step 1/3: images missing or unverified, fetching", flush=True)
         prepare(cfg, paths)
+    else:
+        print("[pipeline] step 1/3: images verified, skipping download")
     items = load_items(items_path)
 
     # 2. paraphrases (own model, freed before the VLM is loaded)
     para_path = paths.manifest_dir(profile) / "paraphrases.jsonl"
+    print("[pipeline] step 2/3: paraphrases (skipped if already complete)", flush=True)
     generate(items, cfg, para_path, backend=paraphrase_backend)
     _free_gpu()
     ready = sum(len(v) >= cfg["analysis"]["min_paraphrases"] for v in load_valid(para_path, cfg["paraphrase"]["n"]).values())
@@ -47,10 +51,12 @@ def pipeline(cfg: dict, paths: Paths, *, parts: int = 2, part: int | None = None
           f"(of {len(STYLES[:cfg['paraphrase']['n']])} candidates each)")
 
     # 3. the model, once
+    print(f"[pipeline] step 3/3: loading {cfg['model'].get('hf_id', cfg['model']['name'])}", flush=True)
     model = load_model(cfg)
     todo = [part] if part is not None else list(range(parts))
     for i in todo:
         print(f"[pipeline] === part {i + 1} of {parts} ===", flush=True)
         run(cfg, paths, model, shard=(i, parts), max_minutes=max_minutes)
+        print("[pipeline] checkpoint analysis", flush=True)
         analyze(cfg, paths)                       # checkpoint tables from whatever is finished so far
     print("[pipeline] done" if part is None else f"[pipeline] part {part} done")

@@ -182,6 +182,8 @@ COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphra
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
             "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
             "audit-score": _audit_score}
+# Long or GPU commands get a logs/*.log file; quick ones only print.
+LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -201,9 +203,27 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--shards", type=int, default=2, help="status: number of shards to report")
     ap.add_argument("--sec-per-job", type=float, action="append", help="estimate: seconds per job (repeatable)")
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
+    ap.add_argument("--no-log", action="store_true", help="do not write a logs/*.log file")
     args = ap.parse_args(argv)
     cfg = load_config(args.profile, args.model, args.set, hardware=args.hardware)
-    return COMMANDS[args.command](cfg, get_paths(cfg), args) or 0
+    if args.command in LOGGED and not args.no_log:
+        from .logs import start_log
+
+        start_log(args.command, cfg, sys.argv[1:] if argv is None else argv)
+    resumable = args.command in ("run", "pipeline", "paraphrase", "prepare")
+    try:
+        return COMMANDS[args.command](cfg, get_paths(cfg), args) or 0
+    except KeyboardInterrupt:
+        print("\n[interrupted] stopped by Ctrl+C."
+              + (" Finished jobs are saved; re-run the same command to continue." if resumable else ""))
+        return 130
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+        print("[crashed] see the traceback above."
+              + (" Finished jobs are saved; re-run the same command to continue." if resumable else ""))
+        return 1
 
 
 if __name__ == "__main__":

@@ -24,3 +24,6 @@ configs/local.yaml
 .vscode/
 .DS_Store
 *.zip
+
+# Session logs (logs/*.log); attach one when reporting a problem
+/logs/

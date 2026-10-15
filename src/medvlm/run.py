@@ -115,8 +115,75 @@ def status(cfg: dict, paths: Paths, n_shards: int) -> None:
     print(f"   total: {tot_done}/{tot} ({tot_done / max(tot, 1):.0%})")
 
 
+def _fmt_dur(sec: float) -> str:
+    sec = int(sec)
+    return f"{sec // 3600}h{sec % 3600 // 60:02d}m" if sec >= 3600 else f"{sec // 60}m{sec % 60:02d}s"
+
+
+def _gpu_peak_gib() -> float | None:
+    """Peak GPU memory since the last call (then reset), or None without CUDA."""
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            return None
+        peak = torch.cuda.max_memory_allocated() / 2**30
+        torch.cuda.reset_peak_memory_stats()
+        return peak
+    except ImportError:
+        return None
+
+
+class _Progress:
+    """Timestamped progress lines for the log (the tqdm bar only shows in the terminal), plus the
+    stop-the-line format check from PLAN.md section 11 (yn_mass < 0.9) and empty open answers."""
+
+    def __init__(self, total: int, every_sec: float, min_yn_mass: float = 0.9):
+        self.total, self.every, self.min_yn_mass = total, every_sec, min_yn_mass
+        self.t0 = self.t_last = time.perf_counter()
+        self.done = self.done_last = 0
+        self.win_yn_min, self.win_empty, self.win_jobs = 1.0, 0, 0
+        self.low_mass_total = self.empty_total = 0
+
+    def add(self, batch: list[Job], outs) -> None:
+        self.done += len(batch)
+        for j, o in zip(batch, outs):
+            self.win_jobs += 1
+            if o.yn_mass is not None:
+                self.win_yn_min = min(self.win_yn_min, o.yn_mass)
+                if o.yn_mass < self.min_yn_mass:
+                    self.low_mass_total += 1
+                    tqdm.write(f"[warn] {j.key}: yn_mass {o.yn_mass:.3f} < {self.min_yn_mass} "
+                          f"(model not answering yes/no); answer {o.text!r}")
+            elif not (o.text or "").strip():
+                self.win_empty += 1
+                self.empty_total += 1
+        now = time.perf_counter()
+        if now - self.t_last >= self.every or self.done == len(batch) or self.done == self.total:
+            self.report(now)
+
+    def report(self, now: float) -> None:
+        el = now - self.t0
+        rate = el / max(self.done, 1)
+        recent = (now - self.t_last) / max(self.done - self.done_last, 1)
+        left = (self.total - self.done) * recent
+        peak = _gpu_peak_gib()
+        tqdm.write(f"[progress] {self.done}/{self.total} ({self.done / max(self.total, 1):.1%}) | "
+              f"{recent:.2f} s/job now, {rate:.2f} avg | elapsed {_fmt_dur(el)}, ETA {_fmt_dur(left)} "
+              f"(~{time.strftime('%H:%M', time.localtime(time.time() + left))})"
+              + (f" | GPU peak {peak:.1f} GiB" if peak is not None else "")
+              + f" | yn_mass min {self.win_yn_min:.3f}, empty open {self.win_empty}/{self.win_jobs}")
+        self.t_last, self.done_last = now, self.done
+        self.win_yn_min, self.win_empty, self.win_jobs = 1.0, 0, 0
+
+    def summary(self) -> None:
+        el = time.perf_counter() - self.t0
+        print(f"[run] finished {self.done} jobs in {_fmt_dur(el)} ({el / max(self.done, 1):.2f} s/job); "
+              f"yn_mass < {self.min_yn_mass}: {self.low_mass_total}, empty open answers: {self.empty_total}")
+
+
 def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard: tuple[int, int] | None = None,
-        chunk: int | None = None, max_minutes: float | None = None) -> int:
+        chunk: int | None = None, max_minutes: float | None = None, log_every_sec: float = 120) -> int:
     profile, mname = cfg["profile"], cfg["model"]["name"]
     chunk = chunk or max(16, 8 * int(cfg["run"]["batch_size"]))
     run_dir = paths.run_dir(mname, profile)
@@ -126,7 +193,15 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
     todo = [j for j in jobs if j.key not in finished]
     if limit:
         todo = todo[:limit]
-    print(f"[run] {mname}/{profile}: {len(jobs)} jobs, {len(finished)} already done, {len(todo)} to run")
+    print(f"[run] {mname}/{profile}" + (f" shard {shard[0]}/{shard[1]}" if shard else "")
+          + f": {len(jobs)} jobs, {sum(j.key in finished for j in jobs)} already done, "
+          f"{len(todo)} to run (batch {cfg['run']['batch_size']}, chunk {chunk})")
+    by_cond: dict[str, int] = {}
+    for j in todo:
+        c = "paraK" if j.condition.startswith("para") else j.condition
+        by_cond[c] = by_cond.get(c, 0) + 1
+    if todo:
+        print(f"[run] to run by condition: {by_cond}")
 
     meta = run_dir / "meta.json"
     if not meta.exists():
@@ -139,10 +214,13 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
     host = re.sub(r"[^A-Za-z0-9_-]", "", socket.gethostname()) or "host"
     out_path = run_dir / f"results.{host}.jsonl"
     score_gold = bool(cfg["run"].get("score_gold_logprob", True))
+    print(f"[run] writing to {out_path}")
     n_done, t_start = 0, time.perf_counter()
     if out_path.exists() and out_path.stat().st_size and not out_path.read_bytes().endswith(b"\n"):
         with open(out_path, "ab") as f:          # previous run died mid-line: close it so records never glue together
             f.write(b"\n")
+        print("[run] repaired a half-written last line from an interrupted run")
+    prog = _Progress(len(todo), log_every_sec)
     with open(out_path, "a", encoding="utf-8", newline="\n") as f, tqdm(total=len(todo), unit="job") as bar:
         for s in range(0, len(todo), chunk):
             if max_minutes and time.perf_counter() - t_start > max_minutes * 60:
@@ -150,9 +228,17 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
                       f"Re-run the same command to continue.")
                 break
             batch = todo[s:s + chunk]
-            queries = [make_query(j, paths, score_gold) for j in batch]
             t0 = time.perf_counter()
-            outs = model.generate(queries)
+            try:
+                queries = [make_query(j, paths, score_gold) for j in batch]
+                outs = model.generate(queries)
+            except BaseException as e:
+                # Everything before this chunk is already on disk; say exactly what was in flight.
+                print(f"\n[run] {type(e).__name__} in chunk {s // chunk + 1} ({len(batch)} jobs, "
+                      f"{batch[0].key} .. {batch[-1].key}); {n_done} jobs saved this session")
+                if "OutOfMemory" in type(e).__name__:
+                    print("[run] GPU out of memory: lower the batch with --set run.batch_size=<smaller>")
+                raise
             sec = (time.perf_counter() - t0) / len(batch)      # mean seconds per job in this chunk
             for j, o in zip(batch, outs):
                 f.write(json.dumps({
@@ -162,6 +248,8 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
             f.flush()
             n_done += len(batch)
             bar.update(len(batch))
+            prog.add(batch, outs)
+    prog.summary()
     return n_done
 
 

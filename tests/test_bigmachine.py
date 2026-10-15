@@ -12,11 +12,11 @@ from medvlm.run import done_keys, regress, run, select_jobs
 from .conftest import make_items
 
 
-def test_hardware_preset_overrides_the_model_default():
+def test_hardware_presets_keep_experiments_at_batch_1():
     base = load_config("main", "medgemma4b")
     assert base["run"]["batch_size"] == 1                                   # safe default
-    assert load_config("main", "medgemma4b", hardware="rtx4090")["run"]["batch_size"] == 8
-    assert load_config("main", "medgemma4b", hardware="rtx4080")["run"]["batch_size"] == 4
+    for hw in ("t4", "rtx4080", "rtx4090", "a100"):                         # PLAN.md section 13, item 10
+        assert load_config("main", "medgemma4b", hardware=hw)["run"]["batch_size"] == 1
     assert load_config("main", "medgemma4b", ["run.batch_size=2"], hardware="rtx4090")["run"]["batch_size"] == 2  # --set wins
     assert load_config("main", "medgemma4b", hardware="a100")["hardware"] == "a100"
 

@@ -31,15 +31,17 @@ medvlm prepare    --profile pilot --model medgemma4b                # fetch + ha
 medvlm prepare    --profile main  --model medgemma4b
 MEDVLM_TEST_MODEL=medgemma4b pytest -m slow                         # real batching / bf16 on the real GPU
 medvlm bench      --model medgemma4b --hardware rtx4090 --profile pilot   # fastest batch size + s/job
-medvlm regress    --profile pilot --model medgemma4b --hardware rtx4090 --set run.batch_size=8 -n 100   # must PASS
+medvlm regress    --profile pilot --model medgemma4b --hardware rtx4090 -n 200   # must PASS
 medvlm estimate   --profile main --model medgemma4b --sec-per-job <from bench>
-medvlm pipeline   --profile main --model medgemma4b --hardware rtx4090 --set run.batch_size=8 --parts 2
+medvlm pipeline   --profile main --model medgemma4b --hardware rtx4090 --parts 2
 ```
 
 `pipeline` runs prepare -> paraphrases -> MedGemma (loaded once) -> part 1 -> checkpoint analysis -> part 2
 -> analysis. Re-running the same command resumes (finished jobs skipped, torn last lines repaired).
 `--part 0|1` runs one part; `--max-minutes M` stops cleanly; `medvlm status --shards 2` shows progress.
-Hardware presets (`--hardware t4|rtx4080|rtx4090|a100`) set a starting batch size; `bench` finds the real one.
+Hardware presets (`--hardware t4|rtx4080|rtx4090|a100`) all run at batch 1, because batching shifts the
+bf16 gold log-probs; `bench` reports faster sizes for throwaway runs only.
+Every long command also writes a timestamped `logs/<time>_<command>_<model>_<profile>.log`.
 
 ## Commands
 

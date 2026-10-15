@@ -38,7 +38,8 @@ a modality (reported as exploratory only), training anything, clinical claims.
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
-- Next: pre-flight on the big machine (section 9), then `main` for both models.
+- Big machine (RTX 4080 SUPER 16 GB): pre-flight 1-7 done 2026-10-15 (section 9 results). Batch 1 for all runs
+  (section 13, item 10). Next: `main` paraphrases + audit, then `main` for both models.
 
 ## 2. Prior work and our delta
 
@@ -172,7 +173,8 @@ estimates was premature); probe agreement kappa between -0.18 and 0.24.
 `main` = 3,365 questions: 10,095 image-condition jobs + ~8.7k paraphrase jobs (if ~52% of 5 candidates validate)
 = **~19k jobs per model**; Gemma-3 repeats them. `medvlm estimate` prints wall-clock for a given s/job (its pilot
 prediction, 1,504 jobs, matched 1,510). At 4.5 s/job (T4) that is ~24 h; at 1 s/job ~5 h; at 0.5 s/job ~2.6 h.
-Speed on the big machine is measured by `medvlm bench`, not assumed.
+Speed on the big machine is measured by `medvlm bench`, not assumed. **Measured (RTX 4080 SUPER):** 0.31 s/job at
+batch 1, 0.21 at batch 8-16, so ~1.6 h per model at batch 1, the setting used.
 
 Applied speed-ups, each with an equivalence test and re-checked by `regress` on the real model:
 `logits_to_keep` (LM head on the last positions only; 262k-token vocabulary), batched gold scoring,
@@ -195,6 +197,11 @@ share an image, a vLLM backend; both need a `regress` pass first.
 | 8 | Paraphrases | `medvlm paraphrase --profile main`, then the audit (4.5) | >= 80% of questions with >= 2 valid; acceptance >= 90% |
 | 9 | Runtime | `medvlm estimate --profile main --model medgemma4b --sec-per-job <bench>` | fits the schedule |
 
+**Results, RTX 4080 SUPER, 2026-10-15:** 1 OK; 2 81 passed; 3 six of seven passed, the batched-gold test
+failed (see section 13, item 10) and was reframed as a misalignment guard; 4 OK; 5 PASS at batch 1 (98.5% same
+answer, mean |dP(yes)| 0.004, mean |d gold_logp| 0.14 over 200); 6 batch 1: 0.31 s/job, batch 16: 0.21 s/job;
+7 not needed (runs stay at batch 1).
+
 Step 5 compares against results from a different GPU (T4), so tiny bf16 differences are expected; the
 thresholds allow for them. If step 5 fails but 3 passes, rerun 200 pilot jobs at batch 1 on the big machine
 under another name (`--set model.name=medgemma4b_ref --limit 200`) and use that as the reference for step 7.
@@ -202,8 +209,8 @@ under another name (`--set model.name=medgemma4b_ref --limit 200`) and use that 
 ## 10. Runs
 
 ```bash
-medvlm pipeline --profile main --model medgemma4b --hardware <preset> --set run.batch_size=<best> --parts 2
-medvlm pipeline --profile main --model gemma3_4b  --hardware <preset> --set run.batch_size=<best> --parts 2
+medvlm pipeline --profile main --model medgemma4b --hardware <preset> --parts 2     # presets run at batch 1
+medvlm pipeline --profile main --model gemma3_4b  --hardware <preset> --parts 2
 medvlm analyze  --profile main --model medgemma4b     # also run for gemma3_4b
 medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b
 ```
@@ -247,7 +254,12 @@ All from the pilot, before `main`: (1) scoring normalisation + opposite-term gua
 (16% / 0% accuracy); (5) validator: "any" no longer protected, edit threshold 0.15 -> 0.10 (~52% yield);
 (6) quadrants under both probes (pilot kappa near 0); (7) SLAKE validation added for modality power; (8)
 `blank` postponed; (9) clustered CIs + paired tests for selective prediction (pilot point estimates were
-over-read).
+over-read). From the big-machine pre-flight: (10) **batch size 1 for all runs.** On MedGemma in bf16 (RTX
+4080), teacher-forced gold log-probs depend on the batch size even with no padding (identical queries
+batched: up to 0.99 nats; real pilot questions, batch 8 vs 1: median 0.17, max 1.09), and an fp32 LM head
+does not remove it (it is in the network, not the output rounding). Yes/no P(yes) was unaffected (max 0.008,
+no flips). Batch 1 costs ~1.5x speed, matches the pilot's settings, and makes every job's numbers
+independent of which questions it was batched with.
 
 ## 14. Verified facts
 

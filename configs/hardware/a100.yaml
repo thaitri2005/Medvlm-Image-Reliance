@@ -1,2 +1,4 @@
-# 40/80 GB. Starting point only: run `medvlm bench`. (MedGemma-27B needs the 80 GB card in bf16.)
-run: {batch_size: 16}
+# Experiments run at batch 1 on every GPU: in bf16, batching shifts teacher-forced gold log-probs
+# (open PMI) by up to ~1 nat (RTX 4080, 2026-10-15: median 0.17). Batch 1 cost only ~1.5x speed there.
+# `medvlm bench` still reports faster sizes; use them only for throwaway runs.
+run: {batch_size: 1}

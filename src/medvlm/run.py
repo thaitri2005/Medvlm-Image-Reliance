@@ -84,22 +84,45 @@ def _git_commit() -> str:
         return ""
 
 
-def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard: tuple[int, int] | None = None,
-        chunk: int = 16) -> int:
-    profile, mname = cfg["profile"], cfg["model"]["name"]
-    run_dir = paths.run_dir(mname, profile)
-    run_dir.mkdir(parents=True, exist_ok=True)
-    items = load_items(paths.manifest_dir(profile) / "items.jsonl")
+def select_jobs(cfg: dict, paths: Paths, shard: tuple[int, int] | None) -> list[Job]:
+    """All jobs of this profile (optionally one shard), in a fixed pseudo-random order by question.
+    Whole questions stay together, so any prefix of the work is an unbiased, complete subset."""
+    items = load_items(paths.manifest_dir(cfg["profile"]) / "items.jsonl")
     if shard:
         i, n = shard
         items = [it for it in items if stable_int(it.sample_id) % n == i]
-    paras = load_valid(paths.manifest_dir(profile) / "paraphrases.jsonl", cfg["paraphrase"]["n"])
+    para_file = paths.manifest_dir(cfg["profile"]) / "paraphrases.jsonl"
+    if not para_file.exists():
+        print(f"[warn] {para_file} not found: paraphrase jobs are NOT included "
+              f"(run `medvlm paraphrase` or `git pull` first)")
+    paras = load_valid(para_file, cfg["paraphrase"]["n"])
     jobs = build_jobs(items, paras, list(cfg["conditions"]))
+    return sorted(jobs, key=lambda j: (stable_int("order|" + j.item.sample_id), j.condition))
 
+
+def status(cfg: dict, paths: Paths, n_shards: int) -> None:
+    """Progress per shard, so back-to-back sessions know what is left."""
+    finished = done_keys(paths.run_dir(cfg["model"]["name"], cfg["profile"]))
+    print(f"[status] {cfg['model']['name']}/{cfg['profile']}, split into {n_shards} shards")
+    tot_done = tot = 0
+    for i in range(n_shards):
+        jobs = select_jobs(cfg, paths, (i, n_shards))
+        d = sum(j.key in finished for j in jobs)
+        tot_done, tot = tot_done + d, tot + len(jobs)
+        print(f"   shard {i}/{n_shards}: {d}/{len(jobs)} jobs ({d / max(len(jobs), 1):.0%})"
+              + ("  <- done" if d == len(jobs) else ""))
+    print(f"   total: {tot_done}/{tot} ({tot_done / max(tot, 1):.0%})")
+
+
+def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard: tuple[int, int] | None = None,
+        chunk: int | None = None, max_minutes: float | None = None) -> int:
+    profile, mname = cfg["profile"], cfg["model"]["name"]
+    chunk = chunk or max(16, 8 * int(cfg["run"]["batch_size"]))
+    run_dir = paths.run_dir(mname, profile)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    jobs = select_jobs(cfg, paths, shard)
     finished = done_keys(run_dir)
     todo = [j for j in jobs if j.key not in finished]
-    # Group by (has image?, answer kind) so batches are full; stable order keeps runs reproducible.
-    todo.sort(key=lambda j: (j.condition == "noimg", j.item.answer_type, j.item.sample_id, j.condition))
     if limit:
         todo = todo[:limit]
     print(f"[run] {mname}/{profile}: {len(jobs)} jobs, {len(finished)} already done, {len(todo)} to run")
@@ -115,9 +138,13 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
     host = re.sub(r"[^A-Za-z0-9_-]", "", socket.gethostname()) or "host"
     out_path = run_dir / f"results.{host}.jsonl"
     score_gold = bool(cfg["run"].get("score_gold_logprob", True))
-    n_done = 0
+    n_done, t_start = 0, time.perf_counter()
     with open(out_path, "a", encoding="utf-8", newline="\n") as f, tqdm(total=len(todo), unit="job") as bar:
         for s in range(0, len(todo), chunk):
+            if max_minutes and time.perf_counter() - t_start > max_minutes * 60:
+                print(f"[run] stopped after {max_minutes:g} min budget; {len(todo) - n_done} jobs left. "
+                      f"Re-run the same command to continue.")
+                break
             batch = todo[s:s + chunk]
             queries = [make_query(j, paths, score_gold) for j in batch]
             t0 = time.perf_counter()

@@ -172,6 +172,8 @@ medvlm run --profile main --model medgemma4b               # resumes; add --shar
 medvlm analyze --profile main --model medgemma4b
 ```
 
+**Long runs in pieces.** `--shard i/N` takes a fixed pseudo-random slice of the *questions* (all their conditions together), so shards can run in separate sessions, one after another or in parallel, in any order; finished jobs are always skipped. `--max-minutes M` stops cleanly between chunks, then re-run the same command to continue. `medvlm status --shards N` shows what is done. Jobs are ordered by question (not by condition), so an interrupted shard leaves complete questions and any prefix of the work is an unbiased subset: you can `analyze` after shard 0. Suggested for `main` on a free T4: `--shards 8` (~2 h each), `--max-minutes 170`.
+
 Per-machine settings (batch size, dtype, 4-bit) go in `configs/local.yaml` (gitignored) or `--set run.batch_size=16`. Set `MEDVLM_OUTPUTS_DIR` to a Drive path on Colab so outputs survive disconnects. To merge runs from several machines, drop their `results.*.jsonl` into one `outputs/<model>/<profile>/` folder.
 
 ## 9. Team split (up to 3)

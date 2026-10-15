@@ -6,6 +6,7 @@
   paraphrase    generate + validate paraphrases into manifests/<profile>/paraphrases.jsonl
   audit-sheet   export a CSV of paraphrases for human spot-checking
   run           run the model on every (sample, condition); resumable
+  status        progress per shard (use with --shards N)
   estimate      job count and wall-clock for a profile at given seconds/job
   analyze       aggregate a run into results/<model>/<profile>/*.csv
 """
@@ -112,7 +113,13 @@ def _run(cfg, paths, args):
     from .run import run
 
     shard = tuple(int(x) for x in args.shard.split("/")) if args.shard else None
-    run(cfg, paths, load_model(cfg), limit=args.limit, shard=shard)
+    run(cfg, paths, load_model(cfg), limit=args.limit, shard=shard, max_minutes=args.max_minutes)
+
+
+def _status(cfg, paths, args):
+    from .run import status
+
+    status(cfg, paths, args.shards)
 
 
 def _estimate(cfg, paths, args):
@@ -128,7 +135,7 @@ def _analyze(cfg, paths, args):
 
 
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
-            "audit-sheet": _audit, "run": _run, "estimate": _estimate, "analyze": _analyze}
+            "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -140,6 +147,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--rebuild", action="store_true", help="prepare: re-sample and overwrite the manifest")
     ap.add_argument("--limit", type=int, help="run: stop after N jobs (smoke tests)")
     ap.add_argument("--shard", help="run: 'i/n' to split samples across machines/sessions")
+    ap.add_argument("--max-minutes", type=float, help="run: stop cleanly between chunks after this many minutes")
+    ap.add_argument("--shards", type=int, default=8, help="status: number of shards to report")
     ap.add_argument("--sec-per-job", type=float, action="append", help="estimate: seconds per job (repeatable)")
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
     args = ap.parse_args(argv)

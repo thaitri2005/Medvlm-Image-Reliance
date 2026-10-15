@@ -30,12 +30,12 @@ def compare(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
         tabs[m] = _derive(build_sample_table(items, res, **kw)).set_index("sample_id")
     a, b = tabs[model_a], tabs[model_b]
     common = a.index.intersection(b.index)
-    meta = a.loc[common, ["dataset", "answer_type", "image_id"]]
+    meta = a.loc[common, ["dataset", "split", "answer_type", "image_id"]]
     B, seed = an["bootstrap_B"], cfg["seed"]
 
     rows = []
-    for (ds, at), g in meta.groupby(["dataset", "answer_type"]):
-        row = {"dataset": ds, "answer_type": at, "n": len(g), "n_images": g["image_id"].nunique()}
+    for (ds, sp, at), g in meta.groupby(["dataset", "split", "answer_type"]):
+        row = {"dataset": ds, "split": sp, "answer_type": at, "n": len(g), "n_images": g["image_id"].nunique()}
         row["exploratory"] = row["n_images"] < MIN_IMAGES
         for col in PAIRED:
             if col not in a or col not in b:
@@ -49,7 +49,8 @@ def compare(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
         rows.append(row)
     by_cell = pd.DataFrame(rows)
 
-    yn = meta[meta["answer_type"] == "yesno"].index
+    # P3 uses the pre-registered primary analysis set: official TEST splits only (PLAN.md section 5)
+    yn = meta[(meta["answer_type"] == "yesno") & (meta["split"] == "test")].index
     d = pd.DataFrame({"d": a.loc[yn, "q_dangerous"] - b.loc[yn, "q_dangerous"],
                       "image_id": meta.loc[yn, "image_id"]}).dropna()
     r = cluster_bootstrap(d, lambda x: float(x["d"].mean()), B=B, seed=seed)

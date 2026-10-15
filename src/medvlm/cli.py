@@ -9,6 +9,7 @@
   regress       re-run stored jobs and check the numbers did not change (-n jobs)
   pipeline      prepare -> paraphrase -> run in --parts N back-to-back -> analyze, one process
   compare       paired comparison of --model and --model-b on the same questions
+  posthoc       analyses added after the main run (abstention, label-free PMI, probe confounds) + figures
   audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet
   run           run the model on every (sample, condition); resumable
   status        progress per shard (use with --shards N)
@@ -164,6 +165,14 @@ def _compare(cfg, paths, args):
     compare(cfg, paths, cfg["model"]["name"], args.model_b)
 
 
+def _posthoc(cfg, paths, args):
+    from .analysis.posthoc import posthoc
+
+    if not args.model_b:
+        raise SystemExit("posthoc needs --model-b (e.g. --model medgemma4b --model-b gemma3_4b)")
+    posthoc(cfg, paths, cfg["model"]["name"], args.model_b)
+
+
 def _audit_score(cfg, paths, args):
     import json
 
@@ -181,9 +190,9 @@ def _pipeline(cfg, paths, args):
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
             "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
-            "audit-score": _audit_score}
+            "audit-score": _audit_score, "posthoc": _posthoc}
 # Long or GPU commands get a logs/*.log file; quick ones only print.
-LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare"}
+LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc"}
 
 
 def main(argv: list[str] | None = None) -> int:

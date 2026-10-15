@@ -41,7 +41,8 @@ a modality (reported as exploratory only), training anything, clinical claims.
   (section 13), **not** to estimate effects.
 - Big machine (RTX 4080 SUPER 16 GB): pre-flight 1-7 done 2026-10-15 (section 9 results). Batch 1 for all runs
   (section 13, item 10). Paraphrases + full LLM-judge screen done (4.5): 84% of the primary set covered.
-  Next: `main` for both models.
+  Main runs done 2026-10-16 (18,896 calls per model, both complete). Results: [RESULTS.md](RESULTS.md).
+  Post-run deviations and post-hoc analyses: section 13, items 12-15.
 
 ## 2. Prior work and our delta
 
@@ -58,6 +59,10 @@ a same-architecture control for medical tuning. **Novelty search still to do** (
 "image reliance" / "text-only baseline" / "paraphrase consistency" x SLAKE / VQA-RAD / PathVQA / MedGemma.
 
 ## 3. Hypotheses (directional guesses; nulls are reported as findings)
+
+*Outcomes after the main run: [RESULTS.md section 7](RESULTS.md). H1 supported (MedGemma, PathVQA); H2
+probe-dependent; H3 not supported (P2 confounded by label leakage); H4 supported under the pre-registered
+probe only; H5 supported.*
 
 - H1: blind accuracy exceeds the majority prior somewhere (most likely PathVQA, whose questions name the entity). *Pilot hint: it did not (SLAKE -0.12).*
 - H2: the Dangerous share differs by modality.
@@ -294,3 +299,18 @@ PathVQA fields and splits; MedGemma model card (v1.0.1; SLAKE in training list; 
 tokenized F1 VQA-RAD 49.9 / SLAKE 72.3 vs Gemma-3-4B 33.6 / 40.2); reference-paper definitions; `logits_to_keep`
 in the installed Gemma 3 forward signature. **Unverified:** novelty of the cross-modality angle;
 `medgemma-1.5-4b-it`; big-machine throughput.
+
+**After the main run (2026-10-16), reported in RESULTS.md, none changes a pre-registered estimate:**
+(12) **Stop-the-line rule triggered by model behaviour, not a bug.** yn_mass < 0.9 occurred only in the
+image-removed condition (MedGemma 37-67%, Gemma-3 18-76% of yes/no questions; >= 99.8% elsewhere). Free
+generation showed abstentions ("please provide the image"). The runs were complete and the inputs correct, so
+instead of halting: forced-choice P(yes) stays the pre-registered definition, abstention (mass < 0.5) is
+reported as an outcome, and P1/P3 are re-estimated without abstaining questions (`medvlm posthoc`).
+(13) **P2 is confounded by label leakage.** It scored image PMI on the gold answer; for yes/no, log p(gold |
+image) alone predicts correctness perfectly (AUROC 1.0). The pre-registered number is reported but not
+interpreted; the label-free version (PMI of the model's own answer) is reported next to it. Design error, caught
+after unblinding.
+(14) **Bug fix in `compare`: P3 had pooled the SLAKE validation split** into the primary test set (+14.1, n =
+1,315); fixed to the test split as pre-registered (+13.7, n = 1,012) with a unit test.
+(15) **Wrong-image confound check**: where the partner image carries the same question, compare gold answers
+(112 swaps; exploratory).

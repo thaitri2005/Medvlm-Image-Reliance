@@ -25,7 +25,10 @@ def load_results(run_dir: Path) -> pd.DataFrame:
 
 
 def build_sample_table(items: list[Item], results: pd.DataFrame, *, open_correct_f1: float = 0.5,
-                       same_f1: float = 0.5, reliance_cond: str = "noimg") -> pd.DataFrame:
+                       same_f1: float = 0.5, reliance_cond: str = "noimg", min_paraphrases: int = 2) -> pd.DataFrame:
+    """`consistent` uses the FIRST `min_paraphrases` valid paraphrases of every sample, so all samples
+    face the same number of chances to flip; samples with fewer get NaN and leave the quadrant
+    analysis (they are counted in `n` vs `consistent_n`). `flip_frac` uses all valid paraphrases."""
     by = {(r.sample_id, r.condition): r for r in results.itertuples(index=False)}
     recs = []
     for it in items:
@@ -46,10 +49,12 @@ def build_sample_table(items: list[Item], results: pd.DataFrame, *, open_correct
                 rec[f"pmi_{c}"] = orig.gold_logp - r.gold_logp      # log p(gold|img) - log p(gold|no/other img)
         paras = [by[(it.sample_id, f"para{k}")] for k in range(1, 20) if (it.sample_id, f"para{k}") in by]
         rec["n_para"] = len(paras)
+        rec["consistent"] = np.nan
         if paras:
             flips = [not same_answer(kind, orig.text, p.text, same_f1) for p in paras]
             rec["flip_frac"] = float(np.mean(flips))
-            rec["consistent"] = not any(flips)                       # strict: all K must agree
+            if len(paras) >= min_paraphrases:
+                rec["consistent"] = float(not any(flips[:min_paraphrases]))   # strict: all must agree
         # baseline confidence in the original answer
         if kind == "yesno" and orig.p_yes is not None:
             rec["conf_orig"] = max(orig.p_yes, 1 - orig.p_yes)
@@ -60,7 +65,7 @@ def build_sample_table(items: list[Item], results: pd.DataFrame, *, open_correct
         recs.append(rec)
     df = pd.DataFrame(recs)
     rc = f"reliant_{reliance_cond}"
-    if len(df) and "consistent" in df and rc in df:
+    if len(df) and rc in df:
         ok = df["consistent"].notna() & df[rc].notna()
         df["quadrant"] = None
         df.loc[ok, "quadrant"] = [QUADRANT[(bool(c), bool(r))] for c, r in zip(df.loc[ok, "consistent"], df.loc[ok, rc])]

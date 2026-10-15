@@ -5,6 +5,15 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from ..scoring import normalize
+
+
+def majority_prior(answers: pd.Series) -> float:
+    """Accuracy of always giving the most common gold answer: the chance baseline a blind model
+    can reach from answer frequencies alone (50-60% for yes/no)."""
+    a = answers.map(normalize)
+    return float(a.value_counts(normalize=True).iloc[0]) if len(a) else float("nan")
+
 
 def cluster_mean_ci(df: pd.DataFrame, col: str, cluster_col: str = "image_id", B: int = 2000,
                     seed: int = 0, alpha: float = 0.05) -> tuple[float, float, float, int]:
@@ -33,6 +42,8 @@ def summarize(df: pd.DataFrame, by: list[str], cols: list[str], cluster_col: str
         row = dict(zip(by, key))
         row["n"] = len(g)
         row["n_images"] = g[cluster_col].nunique()
+        if "answer" in g and "answer_type" in by:        # only meaningful within one answer type
+            row["prior_acc"] = majority_prior(g["answer"])
         for c in cols:
             if c in g:
                 m, lo, hi, k = cluster_mean_ci(g.assign(**{c: g[c].astype(float)}), c, cluster_col, B, seed)

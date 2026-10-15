@@ -119,13 +119,34 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
     with open(out_path, "a", encoding="utf-8", newline="\n") as f, tqdm(total=len(todo), unit="job") as bar:
         for s in range(0, len(todo), chunk):
             batch = todo[s:s + chunk]
-            outs = model.generate([make_query(j, paths, score_gold) for j in batch])
+            queries = [make_query(j, paths, score_gold) for j in batch]
+            t0 = time.perf_counter()
+            outs = model.generate(queries)
+            sec = (time.perf_counter() - t0) / len(batch)      # mean seconds per job in this chunk
             for j, o in zip(batch, outs):
                 f.write(json.dumps({
                     "key": j.key, "sample_id": j.item.sample_id, "condition": j.condition, "text": o.text,
                     "p_yes": o.p_yes, "yn_mass": o.yn_mass, "entropy": o.entropy, "mean_logprob": o.mean_logprob,
-                    "gold_logp": o.gold_logp}) + "\n")
+                    "gold_logp": o.gold_logp, "sec": round(sec, 3)}) + "\n")
             f.flush()
             n_done += len(batch)
             bar.update(len(batch))
     return n_done
+
+
+def estimate(cfg: dict, paths: Paths, sec_per_job: list[float], valid_frac: float = 0.52) -> None:
+    """Job counts for a profile and wall-clock at given seconds/job. Uses the real paraphrase file if
+    present, otherwise assumes `valid_frac` of the candidates survive validation (pilot: 52%)."""
+    profile = cfg["profile"]
+    items = load_items(paths.manifest_dir(profile) / "items.jsonl")
+    conds = list(cfg["conditions"])
+    base = sum(1 for it in items for c in conds if not (c == "shuf" and not it.shuffle_image_file))
+    para_file = paths.manifest_dir(profile) / "paraphrases.jsonl"
+    if para_file.exists():
+        n_para, how = sum(len(v) for v in load_valid(para_file, cfg["paraphrase"]["n"]).values()), "actual"
+    else:
+        n_para, how = int(len(items) * cfg["paraphrase"]["n"] * valid_frac), f"assumed {valid_frac:.0%} valid"
+    print(f"[estimate] {profile}: {len(items)} questions, {base} image-condition jobs + {n_para} paraphrase jobs ({how})")
+    total = base + n_para
+    for s in sec_per_job:
+        print(f"   at {s:g} s/job: {total * s / 3600:.1f} h  ({total * s / 3600 / 24:.1f} days)")

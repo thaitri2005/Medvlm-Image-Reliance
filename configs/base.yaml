@@ -39,3 +39,4 @@ run:
 analysis:
   bootstrap_B: 2000
   cluster_col: image_id      # questions on one image are correlated -> bootstrap over images
+  min_paraphrases: 2         # consistency uses the first N valid paraphrases of every sample (same N for all)

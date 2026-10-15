@@ -24,6 +24,7 @@ medvlm prepare --profile pilot                         # fetch images for the co
 MEDVLM_TEST_MODEL=medgemma4b pytest -m slow            # real-model integration tests (run this first on a GPU)
 medvlm paraphrase --profile pilot                      # LLM paraphrases + automatic validation
 medvlm audit-sheet --profile pilot -n 100              # CSV for two humans to check paraphrases
+medvlm estimate --profile main --model medgemma4b --sec-per-job 4.5   # job count + wall-clock
 medvlm run     --profile pilot --model medgemma4b --limit 200   # measure throughput, then drop --limit
 medvlm analyze --profile pilot --model medgemma4b      # tables in results/medgemma4b/pilot/
 ```

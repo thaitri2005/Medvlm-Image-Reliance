@@ -33,3 +33,27 @@ def test_same_answer():
     assert not same_answer("yesno", "yes", "no")
     assert same_answer("open", "left lung", "lung", f1_thresh=0.5)
     assert not same_answer("open", "liver", "lung")
+
+
+@pytest.mark.parametrize("pred,gold", [
+    ("Two", "2"), ("One", "1"), ("None", "0"), ("Lungs", "Lung"), ("Axial", "Transverse Plane"),
+    ("X-ray", "X-Ray"), ("Chest X-ray", "X-Ray"), ("kidneys", "Kidney")])
+def test_equivalent_surface_forms_are_correct(pred, gold):
+    assert is_correct("open", pred, gold)
+
+
+@pytest.mark.parametrize("pred,gold", [
+    ("Liver", "Lung"), ("3", "2"), ("Pneumonia", "Pneumothorax"),
+    ("Right lung", "Left lung"), ("Lower left lung", "Lower right lung"), ("Upper lobe", "Lower lobe")])
+def test_different_answers_and_laterality_errors_stay_wrong(pred, gold):
+    assert not is_correct("open", pred, gold)
+
+
+def test_laterality_guard_does_not_block_matching_or_one_sided_terms():
+    assert is_correct("open", "Right lung", "Right Lung, Left")     # gold lists both sides
+    assert is_correct("open", "Left lung", "Lower Left Lung")
+    assert not same_answer("open", "left lung", "right lung")
+
+
+def test_yesno_parsing_unaffected_by_canonicalisation():
+    assert parse_yesno("Yes") == "yes" and parse_yesno("No.") == "no" and parse_yesno("none") is None

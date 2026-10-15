@@ -6,4 +6,6 @@ datasets:
   - {name: vqa_rad, split: test, n: null, stratify: [answer_type]}             # all 451
   - {name: pathvqa, split: test, n: 1000, stratify: [answer_type]}             # sampled from 6,719
 paraphrase: {n: 5}
-conditions: [orig, noimg, shuf, blank]
+# `blank` is an optional extra control: add it later with --set conditions='[orig,noimg,shuf,blank]';
+# the runner only runs the missing jobs, so postponing it costs nothing and saves ~25% of image jobs now.
+conditions: [orig, noimg, shuf]

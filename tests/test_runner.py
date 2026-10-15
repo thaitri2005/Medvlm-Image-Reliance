@@ -53,3 +53,29 @@ def test_end_to_end_analysis_produces_quadrants_and_tables(paths, cfg):
     assert set(df["quadrant"].dropna()) <= {"ideal", "fragile", "dangerous", "worst"}
     assert {"by_dataset", "by_modality", "by_qgroup", "selective"} <= set(out)
     assert (paths.result_dir("mock", "smoke") / "per_sample.csv").exists()
+
+
+def test_runner_records_seconds_per_job_and_analyze_reports_timing(paths, cfg):
+    _setup(paths, cfg)
+    run(cfg, paths, MockVLM())
+    analyze(cfg, paths)
+    timing = paths.result_dir("mock", "smoke") / "timing.csv"
+    assert timing.exists() and "orig" in timing.read_text()
+
+
+def test_estimate_uses_real_paraphrase_counts(paths, cfg, capsys):
+    from medvlm.run import estimate
+
+    _setup(paths, cfg)
+    estimate(cfg, paths, [2.0])
+    out = capsys.readouterr().out
+    assert "actual" in out and "at 2 s/job" in out
+
+
+def test_paraphrase_summary_reports_yield(paths, cfg, capsys):
+    from medvlm.cli import _paraphrase_summary
+
+    _setup(paths, cfg)
+    _paraphrase_summary(paths.manifest_dir("smoke") / "paraphrases.jsonl", cfg)
+    out = capsys.readouterr().out
+    assert "valid" in out and "rejected for" in out and "valid by style" in out

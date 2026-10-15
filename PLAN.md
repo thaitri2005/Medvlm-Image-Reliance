@@ -59,6 +59,7 @@ Directions are guesses; a null or reversed result is still a finding for an audi
 
 - **Contamination.** The MedGemma model card lists SLAKE among its training sources and says "there is a risk of data contamination". So headline results use **test splits only**; train/val splits are reserved for an explicit seen-vs-unseen analysis (profile `full`). SLAKE's training exposure is a confound when comparing datasets; say so in the report.
 - **Unit of analysis.** The image, not the question. SLAKE test has only 96 images, so every confidence interval is a **cluster bootstrap over images**; per-modality x question-type cells with fewer than ~30 images are labelled exploratory.
+- **PathVQA open questions are nearly unanswerable** (pilot: *"what is present?"* -> gold *"endocrine"*; *"what does this image show?"* -> *"fixed tissue close-up excellent except for color"*). Treat PathVQA-open as exploratory and never pool it into headline accuracy; PathVQA yes/no (where the entity is named in the question) is the informative part.
 - **Unified schema.** Answers that are not yes/no are `open` even when the dataset says CLOSED. `qgroup` is a coarse mapping of each dataset's native types (VQA-RAD "PRES" also contains open questions), so always cross it with `answer_type`.
 
 ### 4.2 Model and prompts
@@ -80,9 +81,11 @@ Directions are guesses; a null or reversed result is still a finding for an audi
 
 ### 4.4 Definitions (implemented in `analysis/table.py`, unit-tested)
 
+- Answer normalisation (`scoring.py`, applied to prediction and gold alike): lower-case, strip punctuation/articles, number words -> digits ("Two" = "2", "None" = "0"), plural stripping ("Lungs" = "lung"), "x-ray"/"xray" unified, "axial" = "transverse" (SLAKE's gold wording). **Opposite-term guard**: if prediction and gold hold different members of left/right, upper/lower, anterior/posterior, superior/inferior, medial/lateral, proximal/distal, F1 is 0 (plain F1 gave "right lung" vs "left lung" a passing 0.5).
 - `same_answer(a, b)`: yes/no -> same parsed label; open -> normalised exact match **or** token-F1 >= 0.5 (swept 0.3-0.8 as sensitivity).
 - `correct`: yes/no -> label equals gold; open -> token-F1(pred, gold) >= 0.5.
-- `consistent`: `same_answer(orig, para_k)` for **every** valid paraphrase (strict, as in the reference paper). Computed over the valid paraphrases that survived validation; samples with none are excluded and counted.
+- `consistent`: `same_answer(orig, para_k)` for **each of the first `analysis.min_paraphrases` (=2) valid paraphrases** (strict, as in the reference paper). Every sample faces the same number of chances to flip; samples with fewer valid paraphrases get no quadrant and are reported (`consistent_n` vs `n`). An earlier version used "all valid paraphrases", which made samples with 3 paraphrases look less consistent than samples with 1.
+- `prior_acc` (in `by_dataset_type`, `by_modality`, `by_qgroup`): accuracy of always answering the most common gold answer. Blind accuracy only means something next to it (yes/no priors are 51-58%).
 - `reliant_noimg = not same_answer(orig, noimg)`; `reliant_shuf` likewise.
 - **Quadrant** = (consistent, reliant): Ideal (T,T), Fragile (F,T), **Dangerous (T,F)**, Worst (F,F).
 - `PMI_noimg = log p(gold | img, q) - log p(gold | no img, q)`; same for `shuf`. Yes/no uses the binary-renormalised `P(yes)`, open uses the teacher-forced token log-prob of the gold string. **The two scales differ; never pool yes/no with open.**
@@ -132,9 +135,24 @@ valid stopping point** (this resolves the earlier "which variant?" question).
 
 **Cut rule:** if Phase 3 has not started by week 4, drop to Tier 1 and finish; do not start Tier 2 work on unfinished Tier 1 numbers.
 
+## 6b. Pilot findings (330 questions, MedGemma-4B, free Colab T4; read as direction only)
+
+Run 2026-10-15; 1,510 jobs took ~2 h (7.8 s/job for the first 200, 4.5 s/job afterwards). After the scoring fixes:
+
+- Format is fine: `yn_mass` = 1.0 on every dataset; open answers are 1-2 words.
+- Yes/no majority-answer priors are 51-58%. MedGemma without the image gets 43-60%, i.e. mostly prior; with the image 69-92%.
+- "Dangerous" (consistent but unchanged without the image) is 45-58% of defined yes/no cases (n=26-35 per cell, wide intervals).
+- PathVQA open accuracy is 16% (0% blind): a dataset problem, see section 4.1.
+- Image log-prob (PMI) predicted yes/no correctness better than the model's confidence (AUROC 0.85 vs 0.74, n=165); for open answers confidence won. Needs the full run before believing it.
+- Consistency was defined for only 179/330 pilot questions (3 candidates, ~52% validated). `main` generates 5 candidates; check the printed yield before running.
+
 ## 7. Compute budget (counts, not guesses about speed)
 
-`main` profile: 1,061 + 451 + 1,000 = **2,512 questions**. With 4 image conditions + up to 5 paraphrases that is about **23k generation jobs**, plus about **6k teacher-forced scoring passes** for open questions (4 per open question; ~1,400 open) => **~29k forward passes**. `pilot` is ~330 questions, ~2k jobs. Seconds per pass on a T4 / L4 is **unmeasured**: measure in Phase 1 with `--limit 200`, then extrapolate. Runs are resumable and shardable (`--shard i/n`), so Colab disconnects only cost the current chunk.
+`main` profile: 1,061 + 451 + 1,000 = **2,512 questions**; conditions orig/noimg/shuf (7,536 jobs) + paraphrases (~6.5k if ~52% of 5 candidates validate) => **~14k jobs**. `blank` is postponed (add it later; only the missing jobs run). Open questions cost extra (generation + a teacher-forced scoring pass inside the same job). `medvlm estimate --profile main --model medgemma4b --sec-per-job 4.5` prints the numbers; its pilot prediction (1,504 jobs) matched reality (1,510).
+
+Measured: **4.5 s/job** on a free Colab T4 at batch size 1 => ~18 h for `main`. The runner now records `sec` per job; `medvlm analyze` writes `timing.csv` per condition.
+
+Other GPUs are **not measured**; what is known: the T4 has no native bf16 and runs the vision tower with an unfused attention kernel (that is why it needs batch size 1). An RTX 4090 (24 GB) or A100 (40/80 GB) has native bf16 and fused attention kernels, so batches of 8-16 should fit and be several times faster; the 4090 and A100 should be in the same ballpark for this 4B model, with the A100 mainly buying memory (MedGemma-27B needs ~54 GB in bf16, so an 80 GB A100, or 4-bit on a 4090). Run `--limit 200` there, read `s/job`, and plug it into `estimate`.
 
 Hardware ladder: laptop (CPU, mock + SmolVLM, development and tests) -> Colab / Kaggle GPU (pilot, main) -> stronger machine (bigger models, `full`). Moving up = change `--model` / `--profile` and `run.batch_size`; nothing else.
 

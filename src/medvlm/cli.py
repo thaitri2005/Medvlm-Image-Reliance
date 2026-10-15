@@ -6,6 +6,7 @@
   paraphrase    generate + validate paraphrases into manifests/<profile>/paraphrases.jsonl
   audit-sheet   export a CSV of paraphrases for human spot-checking
   run           run the model on every (sample, condition); resumable
+  estimate      job count and wall-clock for a profile at given seconds/job
   analyze       aggregate a run into results/<model>/<profile>/*.csv
 """
 from __future__ import annotations
@@ -72,6 +73,28 @@ def _paraphrase(cfg, paths, args):
     items = load_items(paths.manifest_dir(cfg["profile"]) / "items.jsonl")
     n = generate(items, cfg, paths.manifest_dir(cfg["profile"]) / "paraphrases.jsonl")
     print(f"[paraphrase] wrote {n} rows")
+    _paraphrase_summary(paths.manifest_dir(cfg["profile"]) / "paraphrases.jsonl", cfg)
+
+
+def _paraphrase_summary(path, cfg):
+    """Check this BEFORE the long run: low yield means consistency is measured on too few samples."""
+    import collections
+
+    from .schema import read_jsonl
+
+    rows = list(read_jsonl(path))
+    per = collections.Counter(r["sample_id"] for r in rows if r["valid"])
+    ids = {r["sample_id"] for r in rows}
+    need = cfg["analysis"]["min_paraphrases"]
+    ok = sum(1 for i in ids if per[i] >= need)
+    print(f"[paraphrase] valid {sum(r['valid'] for r in rows)}/{len(rows)}; "
+          f"{ok}/{len(ids)} questions ({ok / max(len(ids), 1):.0%}) have >= {need} valid paraphrases")
+    print("   rejected for:", dict(collections.Counter(x for r in rows for x in r["reasons"]).most_common()))
+    by = collections.defaultdict(lambda: [0, 0])
+    for r in rows:
+        by[r["style"]][0] += r["valid"]
+        by[r["style"]][1] += 1
+    print("   valid by style:", {k: f"{v[0]}/{v[1]}" for k, v in by.items()})
 
 
 def _audit(cfg, paths, args):
@@ -92,6 +115,12 @@ def _run(cfg, paths, args):
     run(cfg, paths, load_model(cfg), limit=args.limit, shard=shard)
 
 
+def _estimate(cfg, paths, args):
+    from .run import estimate
+
+    estimate(cfg, paths, args.sec_per_job or [4.5, 1.5, 0.5])
+
+
 def _analyze(cfg, paths, args):
     from .analysis.report import analyze
 
@@ -99,7 +128,7 @@ def _analyze(cfg, paths, args):
 
 
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
-            "audit-sheet": _audit, "run": _run, "analyze": _analyze}
+            "audit-sheet": _audit, "run": _run, "estimate": _estimate, "analyze": _analyze}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -111,6 +140,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--rebuild", action="store_true", help="prepare: re-sample and overwrite the manifest")
     ap.add_argument("--limit", type=int, help="run: stop after N jobs (smoke tests)")
     ap.add_argument("--shard", help="run: 'i/n' to split samples across machines/sessions")
+    ap.add_argument("--sec-per-job", type=float, action="append", help="estimate: seconds per job (repeatable)")
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
     args = ap.parse_args(argv)
     cfg = load_config(args.profile, args.model, args.set)

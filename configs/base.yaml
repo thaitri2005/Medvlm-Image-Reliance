@@ -23,10 +23,11 @@ prompt:                      # identical text for every condition; only the imag
 conditions: [orig, noimg, shuf]
 
 paraphrase:
-  n: 5                       # K per sample; strict consistency = all K agree with orig
+  n: 8                       # candidate styles per sample (STYLES[:n]); consistency uses the first 2 valid
   backend: hf                # hf | template | file
   hf_model: Qwen/Qwen2.5-3B-Instruct
   batch_size: 16             # paraphrase LM batch (left-padded greedy)
+  exclude_styles: [plain]    # audit round 1: 18/28 accepted; lay wording swaps the medical term by design
   min_edit_ratio: 0.10       # paraphrase must differ from the original by at least this much (pilot: 0.15 rejected good syntactic rewrites)
 
 scoring:

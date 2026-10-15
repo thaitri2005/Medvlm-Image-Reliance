@@ -9,6 +9,6 @@ datasets:
   - {name: vqa_rad, split: train,      n: 800,  stratify: [answer_type]}
   - {name: pathvqa, split: test,       n: 2000, stratify: [answer_type]}
   - {name: pathvqa, split: validation, n: 1000, stratify: [answer_type]}
-paraphrase: {n: 5}
+paraphrase: {n: 8}
 conditions: [orig, noimg, shuf, blank]
 run: {batch_size: 16}

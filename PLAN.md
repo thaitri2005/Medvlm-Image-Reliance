@@ -39,7 +39,8 @@ a modality (reported as exploratory only), training anything, clinical claims.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
 - Big machine (RTX 4080 SUPER 16 GB): pre-flight 1-7 done 2026-10-15 (section 9 results). Batch 1 for all runs
-  (section 13, item 10). Next: `main` paraphrases + audit, then `main` for both models.
+  (section 13, item 10). Paraphrases + full LLM-judge screen done (4.5): 84% of the primary set covered.
+  Next: `main` for both models.
 
 ## 2. Prior work and our delta
 
@@ -114,6 +115,26 @@ change length >3x; or stop being yes/no questions. Rejections are kept with reas
 column A), then rated again **at least 48 h later with column A hidden** (column B): intra-rater agreement,
 since there is no second person. `medvlm audit-score` gives acceptance and kappa. **Gate: acceptance >= 90%**;
 below 85%, tighten the validator and regenerate before running.
+
+**What actually happened (main, 2026-10-15; the rater was an LLM, Claude, at the author's request).**
+Round 1 (100 rows): 81% accepted, below the 85% line, so the validator was tightened as pre-specified
+(absence words, side/extent words counted as a multiset, open->yes/no form loss, foreign characters; the
+`plain` style excluded, 18/28). Round 2 (300 fresh rows, none seen before): 82.7%; `lexical` 70% and a new
+`frame` style 74%, PathVQA and VQA-RAD yes/no 72% / 68%. Rules had reached their ceiling (remaining errors
+were semantic: carcinoma->cancer, artery->vessel, fact->possibility, "does A show B"->"is A associated with B"),
+so the audit became a **full screen**: every unique rule-valid (question, paraphrase) pair was judged against a
+written rubric (below), and `manifests/main/paraphrase_judgments.csv` (4,890 pairs: 3,682 y, 1,208 n, each
+rejection with a reason) is part of validation: a rule-valid paraphrase must also be judged `y`; an unjudged one
+is rejected (fail closed). Two deterministic styles (`template_a/b`: "Is there X?" -> "Is X present?" / "Can X
+be seen?", "does A show B?" -> "Is B shown in A?", ...) were added to recover coverage; they copy every content
+word, so meaning cannot drift by construction (still judged). The judge pass also found a validator bug
+(`normalize` turned "does" into "doe", so yes/no form loss was never detected for "Does ..." questions), fixed
+and tested. **Result: 84% of test yes/no questions (primary set) have >= 2 valid paraphrases** (PathVQA 92%,
+SLAKE 83%, VQA-RAD 67%); open questions 32-59% (secondary). Rubric: `y` = asks exactly the same thing, so the
+correct answer cannot differ (perception framing "can X be seen" and exact synonyms allowed); `n` = fact turned
+into possibility/capability, broadened or narrowed term (mass->lesion, organs->structures), changed scope or
+presupposition, added qualifier/finding/modality, inverted or changed relation, antonym, two questions, or
+malformed text. A human spot-check of 50 accepted pairs (human-LLM agreement) is planned and reported.
 
 ## 5. Pre-registered analysis
 
@@ -194,7 +215,7 @@ share an image, a vLLM backend; both need a `regress` pass first.
 | 5 | Same numbers as the pilot | `medvlm regress --profile pilot --model medgemma4b --hardware <preset> --set run.batch_size=1 -n 200` | PASS (>= 97% same answer, mean abs dP(yes) <= 0.03) |
 | 6 | Speed | `medvlm bench --profile main --model medgemma4b --hardware <preset>` | prints the fastest batch that fits |
 | 7 | Same numbers at that batch | step 5 with `--set run.batch_size=<best>` | PASS |
-| 8 | Paraphrases | `medvlm paraphrase --profile main`, then the audit (4.5) | >= 80% of questions with >= 2 valid; acceptance >= 90% |
+| 8 | Paraphrases | `medvlm paraphrase --profile main`, then the audit (4.5) | >= 80% of questions with >= 2 valid; acceptance >= 90% (done: full judge screen replaces sampling; primary set 84%) |
 | 9 | Runtime | `medvlm estimate --profile main --model medgemma4b --sec-per-job <bench>` | fits the schedule |
 
 **Results, RTX 4080 SUPER, 2026-10-15:** 1 OK; 2 81 passed; 3 six of seven passed, the batched-gold test
@@ -240,7 +261,9 @@ halts the run until fixed. If day 4 slips, drop Gemma-3 (Q4) and keep Q1-Q3.
 
 - One primary model; Gemma-3 is a control, not a population of models.
 - SLAKE is in MedGemma's training data (split unspecified); dataset comparisons are confounded.
-- Single annotator for the paraphrase audit (intra-rater, not inter-rater, agreement).
+- Paraphrase equivalence was judged by one LLM (Claude), not by humans; a 50-pair human spot-check bounds its
+  error. Quadrant results apply to questions with >= 2 judged-valid paraphrases (84% of the primary set);
+  compare their accuracy with the excluded questions before generalising.
 - Image removal is out-of-distribution input; the wrong-image probe addresses this but does not settle it.
 - Yes/no and open answers use different scales and are never pooled; open-ended correctness depends on a
   token-F1 threshold (sensitivity-tested).
@@ -254,7 +277,9 @@ All from the pilot, before `main`: (1) scoring normalisation + opposite-term gua
 (16% / 0% accuracy); (5) validator: "any" no longer protected, edit threshold 0.15 -> 0.10 (~52% yield);
 (6) quadrants under both probes (pilot kappa near 0); (7) SLAKE validation added for modality power; (8)
 `blank` postponed; (9) clustered CIs + paired tests for selective prediction (pilot point estimates were
-over-read). From the big-machine pre-flight: (10) **batch size 1 for all runs.** On MedGemma in bf16 (RTX
+over-read). From the paraphrase audit (section 4.5): (11) validator v2/v3 rules, `plain` excluded, LLM
+judgments as a validation step, `template_a/b` styles added as k=7, 8 (an LM attempt at k=7, 8 failed and was
+discarded before any run), `paraphrase.n` 5 -> 8. From the big-machine pre-flight: (10) **batch size 1 for all runs.** On MedGemma in bf16 (RTX
 4080), teacher-forced gold log-probs depend on the batch size even with no padding (identical queries
 batched: up to 0.99 nats; real pilot questions, batch 8 vs 1: median 0.17, max 1.09), and an fp32 LM head
 does not remove it (it is in the network, not the output rounding). Yes/no P(yes) was unaffected (max 0.008,

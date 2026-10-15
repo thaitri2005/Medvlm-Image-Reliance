@@ -1,108 +1,191 @@
-# Medvlm-Image-Reliance
+<h1 align="center">Consistent but Blind?</h1>
+<p align="center"><b>A modality-by-modality audit of image reliance in a small medical vision-language model</b></p>
+<p align="center">
+MedGemma-4B &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; pre-registered analysis
+</p>
 
-**Does a medical vision-language model actually use the image?** An audit of MedGemma-4B on SLAKE,
-VQA-RAD and PathVQA. Every question is asked with the image, without it, with a *different* image and in
-several validated paraphrases; crossing **stability under paraphrase** with **image reliance** sorts each
-answer into Ideal / Fragile / **Dangerous** (consistent but identical without the image) / Worst. A
-continuous reliance score and selective-prediction tests ask whether this can flag untrustworthy answers.
+---
 
-Objective, target tiers, hypotheses, design and risks: **[PLAN.md](PLAN.md)**.
+## Abstract
 
-## Quick start (any machine)
+Medical VQA benchmarks score a model on whether its answer is right, not on whether it **looked at the
+image** to get there. A model can be accurate *and* stable under rewording while answering from language
+priors alone, the failure mode recently called *consistent but dangerous* for chest X-rays. We ask whether
+this holds beyond chest X-rays. We audit **MedGemma-4B**, an open medical VLM, on **3,365 questions over
+907 images** spanning CT, MRI, X-ray and pathology. Every question is asked four ways: with its image,
+with **no image** (image tokens removed), with a **different image** of the same modality, and in
+**independently validated paraphrases**. Crossing *stable under paraphrase* with *changes when the image
+changes* places every answer in one of four quadrants. A continuous reliance score (image PMI) asks whether
+image reliance can **flag wrong answers better than the model's own confidence**, and an architecture-matched
+control (**Gemma-3-4B**, no medical post-training) asks whether medical tuning makes this better or worse.
+Hypotheses, endpoints, tests and exclusions were [pre-registered](PLAN.md) before the main run.
 
-```bash
-git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-Image-Reliance
-python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -e ".[model,dev]"                          # add ,gpu for 4-bit loading on Linux/Colab
-pytest                                                 # 78 fast tests, no GPU / network needed
+> **Status.** Pipeline built and validated; pilot done; main runs in progress. Results will be added here
+> when they exist. Nothing below is a finding yet.
+
+---
+
+## 1. Why this question
+
+A yes/no medical VQA set with 55% "yes" answers rewards a model that never opens the image. Accuracy alone
+cannot tell *seeing* from *guessing well*, and paraphrase consistency cannot either: a model that ignores
+the image is often *more* consistent, because nothing visual perturbs it. The two have to be measured
+**together and per sample**:
+
+|  | **Answer changes without the image** (image-reliant) | **Answer stays the same without the image** (not reliant) |
+|---|---|---|
+| **Stable under paraphrase** | **Ideal**: grounded and robust | **Dangerous**: looks trustworthy, ignores the image |
+| **Flips under paraphrase** | **Fragile**: looks, but wording-sensitive | **Worst**: neither |
+
+*Dangerous* answers are the ones a clinician would trust and should not. The reference work
+([arXiv 2603.20985](https://arxiv.org/abs/2603.20985), CVPR-W 2026) introduced this taxonomy on chest X-rays,
+for yes/no questions, with one binary probe. This audit extends it along four axes:
+
+1. **Modalities:** CT, MRI, X-ray *and* pathology, compared with image-level uncertainty.
+2. **Two probes of reliance:** *image removed* and *wrong image*, which fail differently. Removing image
+   tokens is out-of-distribution input; a mismatched image is not. We measure how much the two agree.
+3. **A continuous signal:** image PMI, $\log p(\text{gold}\mid \text{image}, q) - \log p(\text{gold}\mid \varnothing, q)$,
+   instead of a binary flip. It also exists for open-ended answers.
+4. **A causal-ish control:** Gemma-3-4B shares MedGemma's architecture without the medical post-training,
+   so differences between them are attributable to that tuning rather than to the architecture.
+
+## 2. Research questions
+
+| | Question | Test |
+|---|---|---|
+| **Q1** | Does MedGemma answer *without the image* better than answer frequencies alone would allow? | **P1**: blind accuracy minus majority prior, per dataset (yes/no) |
+| **Q2** | How large is the *Dangerous* share per modality, and does it depend on how reliance is probed? | Descriptive with CIs; probe agreement (Cohen's κ) |
+| **Q3** | Does image reliance flag wrong answers better than the model's own confidence? | **P2**: ΔAUROC (PMI vs confidence) for predicting correctness |
+| **Q4** | Does medical post-training change the Dangerous share? | **P3**: paired MedGemma − Gemma-3 difference |
+
+Directional hypotheses (H1–H5) and the pilot's hints are in [PLAN.md §3](PLAN.md). Null results are
+reported as findings.
+
+## 3. Method
+
+```mermaid
+flowchart LR
+    Q[Question + image] --> O[orig: with image]
+    Q --> N[noimg: image tokens removed]
+    Q --> S[shuf: different image,<br/>same dataset + modality]
+    Q --> P[para1..K: validated<br/>paraphrases, original image]
+    O & N & S & P --> M[MedGemma-4B / Gemma-3-4B<br/>bf16, greedy, batch 1]
+    M --> A["answers, P(yes), log p(gold)"]
+    A --> C[consistent?<br/>first 2 paraphrases agree with orig]
+    A --> R[reliant?<br/>answer changes under noimg / shuf]
+    A --> PMI[image PMI<br/>continuous reliance]
+    C & R --> QD[quadrant per sample]
+    PMI --> SP[selective prediction<br/>vs confidence]
 ```
 
-No GPU (laptop): everything except real MedGemma runs; use `--model mock` or `--model smolvlm` (CPU).
-`pytest -m slow` runs the real-model equivalence tests on SmolVLM / Qwen-0.5B (downloads ~1.5 GB).
+**Prompts and decoding.** One prompt template for every condition ("Answer with only 'yes' or 'no'." /
+"Answer with a single word or short phrase."), greedy decoding. Yes/no answers come from a single forward
+pass: $P(\text{yes}) = \sigma(\text{logsumexp}(\text{yes tokens}) - \text{logsumexp}(\text{no tokens}))$, and the raw
+yes+no probability mass is logged as a format check. Open answers are scored by token-F1 after
+normalisation, with an **opposite-term guard** (left/right, upper/lower, anterior/posterior, ... mismatches
+score 0, so "right lung" never matches "left lung").
 
-## The big run: `main` in 2 parts
+**Paraphrases.** Paraphrase consistency is only meaningful if a paraphrase cannot change the correct answer.
+Candidates come from Qwen2.5-3B-Instruct (five styles) and from deterministic templates that copy every
+content word ("Is there X?" → "Is X present?"). They pass a rule validator (laterality, negation, absence
+words, quantities, antonyms, imaging planes, question form, answer leakage, near-copies), and then **every
+unique (question, paraphrase) pair, 4,890 in total, was judged for semantic equivalence** against a written
+rubric. 1,208 pairs were rejected, each with a recorded reason (e.g. *mass → lesion*, *is enlarged → can
+be enlarged*, *does A show B → is A associated with B*). The judgments are committed and enforced
+fail-closed: an unjudged paraphrase is never used. 84% of the primary-set questions keep at least two
+valid paraphrases. The full audit trail, including two failed rounds and a validator bug it uncovered, is in
+[PLAN.md §4.5](PLAN.md).
 
-MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages, then `huggingface-cli login`.
-If pip gave you CPU-only torch, install the CUDA build first (`medvlm doctor` must show `cuda=True`).
+**Statistics.** The unit of resampling is the **image** (cluster bootstrap, B = 2,000), because several
+questions share one image and naive intervals are too narrow. A simulation in the test suite shows the
+clustered intervals reach nominal coverage where naive ones do not. Four primary tests (P1 ×3, P2) are
+Holm-corrected. P3 is a separate family. Everything else is descriptive with 95% CIs. A finding is called
+**robust** only if its sign survives the pre-specified sensitivity grid (F1 threshold 0.3 / 0.5 / 0.8 ×
+1 / 2 / 3 paraphrases × strong flips only).
 
-```bash
-medvlm doctor     --model medgemma4b                                # GPU, versions, HF access, suggested preset
-medvlm prepare    --profile pilot --model medgemma4b                # fetch + hash-check images (bench/regress use them)
-medvlm prepare    --profile main  --model medgemma4b
-MEDVLM_TEST_MODEL=medgemma4b pytest -m slow                         # real batching / bf16 on the real GPU
-medvlm bench      --model medgemma4b --hardware rtx4090 --profile pilot   # fastest batch size + s/job
-medvlm regress    --profile pilot --model medgemma4b --hardware rtx4090 -n 200   # must PASS
-medvlm estimate   --profile main --model medgemma4b --sec-per-job <from bench>
-medvlm pipeline   --profile main --model medgemma4b --hardware rtx4090 --parts 2
-```
+## 4. Why these models
 
-`pipeline` runs prepare -> paraphrases -> MedGemma (loaded once) -> part 1 -> checkpoint analysis -> part 2
--> analysis. Re-running the same command resumes (finished jobs skipped, torn last lines repaired).
-`--part 0|1` runs one part; `--max-minutes M` stops cleanly; `medvlm status --shards 2` shows progress.
-Hardware presets (`--hardware t4|rtx4080|rtx4090|a100`) all run at batch 1, because batching shifts the
-bf16 gold log-probs; `bench` reports faster sizes for throwaway runs only.
-Every long command also writes a timestamped `logs/<time>_<command>_<model>_<profile>.log`.
+| | Choice | Reason |
+|---|---|---|
+| **Audited model** | `google/medgemma-4b-it` | A leading openly available medical VLM, at a size one consumer GPU runs **unquantized** (bf16, 8.6 GB). Quantizing would perturb exactly the probabilities being audited. It is also a realistic deployment candidate: small, open, and marketed for medical use, which is where an audit matters. Its model card reports SLAKE and VQA-RAD scores, which serve as an external sanity check on our pipeline. |
+| **Control** | `google/gemma-3-4b-it` | The same architecture and size with no medical post-training. A Dangerous-share difference between the two is attributable to medical tuning, not to architecture or scale, which comparing two unrelated VLMs could not show. |
+| **Paraphraser** | `Qwen/Qwen2.5-3B-Instruct` + templates | A different model family from the audited one, so paraphrases are not written in MedGemma's own style. Small enough to run alongside the audit; its errors are caught by the rules and the judge pass. |
 
-## Commands
+## 5. Data
 
-| Command | What it does |
-|---|---|
-| `doctor` | Python / torch / GPU / HF access; suggests a hardware preset |
-| `prepare` | Sample questions into `manifests/<profile>` (first time only) and fetch + hash-verify images |
-| `paraphrase` | Batched LLM paraphrases + validation; prints yield and rejection reasons |
-| `audit-sheet -n 100` | CSV for two humans to check paraphrases |
-| `bench` | Time batch sizes 1..16 on this GPU (2-3 min) |
-| `regress -n 100` | Re-run stored jobs; PASS if answers/probabilities did not change |
-| `estimate` | Job count and wall-clock at given seconds/job |
-| `run --shard i/n` | Inference only; resumable, shardable, `--limit`, `--max-minutes` |
-| `pipeline` | The whole thing in N back-to-back parts, one process |
-| `status`, `analyze` | Progress; tables in `results/<model>/<profile>/` (primary tests, CIs, sensitivity) |
-| `compare --model-b` | Paired comparison of two models on the same questions |
-| `audit-score` | Paraphrase-audit acceptance and kappa |
+| Dataset | Modality | Questions used | Notes |
+|---|---|---|---|
+| [SLAKE](https://www.med-vqa.com/slake/) (EN) | CT · MRI · X-ray | 2,114 (test + validation) | Only dataset with modality labels; validation added so each modality has enough images (53–82). Listed in MedGemma's training data, which we state as a confound. |
+| [VQA-RAD](https://osf.io/89kps/) | radiology | 451 (test) | Clinician-written questions; loaded from the original OSF release. |
+| [PathVQA](https://github.com/UCSD-AI4H/PathVQA) | pathology | 800 (600 yes/no + 200 open, seeded) | Questions generated from textbook captions; open questions exploratory. |
 
-## Profiles, models, hardware
+The primary analysis set is the 1,206 yes/no test questions on 670 images. Sampling, wrong-image partners
+and image hashes are fixed in `manifests/main/` and SHA-1-seeded, so every run uses identical inputs.
 
-| Profile | Purpose |
-|---|---|
-| `smoke` | ~40 questions, laptop pipeline checks only |
-| `pilot` | 330 questions, first MedGemma run (done) |
-| `main` | 3,365 questions: SLAKE test + validation (2,114), VQA-RAD test (451), PathVQA test 600 yes/no + 200 open |
-| `full` | adds train/val splits (contamination analysis), for a stronger machine |
+## 6. Making the measurement trustworthy
 
-Models (`--model`): `medgemma4b` (primary), `gemma3_4b` (same architecture, no medical tuning),
-`smolvlm` (CPU stand-in), `mock`. Config layering: `base` -> profile -> model -> hardware -> `configs/local.yaml`
-(gitignored) -> `--set a.b=c`.
+An audit is only as credible as its instrument. Before any main-run number existed:
 
-## Colab
+- **Pre-registration.** Endpoints, tests, exclusions and the robustness rule were frozen. Every later change
+  is logged with its reason ([PLAN.md §13](PLAN.md)).
+- **Pilot used for design only.** 330 questions on a Colab T4 tuned the scoring and validator. None of its
+  numbers are reported as results.
+- **Numerical determinism.** We found that bf16 batching shifts teacher-forced log-probabilities by up to
+  ~1 nat even with no padding, while yes/no probabilities are unaffected. An fp32 LM head did not help, so
+  the cause is inside the network. All runs therefore use batch size 1, and a regression check confirms a
+  different GPU reproduces the pilot (98.5% same answers, mean |ΔP(yes)| = 0.004).
+- **Paraphrase validity.** Every pair was screened, not sampled (above), and the result is enforced in code.
+- **Engineering.** 88 unit tests plus real-model equivalence tests; resumable, crash-safe runs; a
+  timestamped log for every command.
 
-[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb) wraps the same commands: set a Colab secret
-`HF_TOKEN`, use a GPU runtime, run top to bottom. A free T4 needs `--hardware t4` (batch 1, ~4.5 s/job),
-so split into more parts there (`--shards 8`, `--max-minutes 170`). The last cell pushes results to GitHub
-(needs a `GH_TOKEN` secret).
-
-## What is in git
-
-Code, configs, **manifests** (the exact sampled questions, gold answers, shuffle partners, image hashes,
-validated paraphrases), small result tables, and the raw outputs of finished runs (`git add -f outputs/...`).
-Not in git: images (re-fetched and hash-checked by `prepare`), model weights.
+## 7. Repository
 
 ```
-configs/    base.yaml, profiles/, models/, hardware/
-manifests/  <profile>/items.jsonl, paraphrases.jsonl
-results/    <model>/<profile>/*.csv
-src/medvlm/ data/  models/ (hf, mock)  paraphrase.py  run.py  bench.py  pipeline.py  analysis/
-tests/      fast unit tests + `-m slow` real-model tests
+PLAN.md            pre-registration, design decisions and lab notebook (the source of truth)
+docs/REPRODUCE.md  how to run everything, from a fresh clone
+configs/           base -> profile -> model -> hardware layering
+manifests/         exact questions, image hashes, paraphrases, judgments, audit sheets
+src/medvlm/        data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, analysis/ (stats, tables)
+tests/             fast unit tests + -m slow real-model tests
+results/           analysis tables per model and profile
 ```
 
-## Reproducibility
+Quick start: see **[docs/REPRODUCE.md](docs/REPRODUCE.md)**. The short version is
+`pip install -e ".[model,dev]"`, then `medvlm pipeline --profile main --model medgemma4b`.
 
-Sampling and shuffle partners use SHA-1, never `hash()` (tested across processes). `prepare` never
-re-samples an existing manifest (`--rebuild` is deliberate). Every run writes `meta.json` (config, git
-commit, versions). Every speed-up is covered by an equivalence test, and `regress` compares a new
-build/batch size against stored results.
+## 8. Limitations
 
-## Data and licences
+- One audited model; Gemma-3 is a control, not a population of models.
+- SLAKE appears in MedGemma's training data (split unspecified), so dataset comparisons are confounded by
+  possible contamination.
+- Removing image tokens is out-of-distribution input. The wrong-image probe addresses this but does not
+  settle it, which is why both are reported along with their agreement.
+- Paraphrase equivalence was judged by an LLM (Claude), not by clinicians. A human spot-check bounds its
+  error. Quadrant results cover questions with at least two valid paraphrases (84% of the primary set).
+- PathVQA questions are auto-generated from captions and often ungrammatical.
+- Benchmark VQA is not clinical use. Nothing here is a clinical claim.
 
-SLAKE (CC-BY-4.0), VQA-RAD (CC0 1.0), PathVQA (MIT); MedGemma / Gemma-3 under their Google terms. Cite the
-original dataset papers in any write-up. VQA-RAD is loaded from its original OSF release, PathVQA from the
-`flaviagiammarino/path-vqa` Hugging Face mirror.
+## 9. Related work
+
+- *Consistent but Dangerous*, [arXiv 2603.20985](https://arxiv.org/abs/2603.20985): the four-quadrant
+  taxonomy on chest X-rays (MIMIC-CXR, PadChest), yes/no, image-removal probe.
+- *PSF-Med*, [arXiv 2602.21428](https://arxiv.org/abs/2602.21428): paraphrase sensitivity on chest X-rays.
+  A low flip rate does not imply visual grounding.
+- *Why Does Grounding Hurt Medical VQA?*, [arXiv 2604.27720](https://arxiv.org/abs/2604.27720):
+  MedGemma-4B and Lingshu-7B on SLAKE with grounding inputs.
+- *HEAL-MedVQA*, [arXiv 2505.00744](https://arxiv.org/abs/2505.00744), and *MedHEval*,
+  [arXiv 2503.02157](https://arxiv.org/abs/2503.02157): shortcut-learning and hallucination benchmarks.
+
+## 10. Licences and citation
+
+SLAKE (CC-BY-4.0), VQA-RAD (CC0 1.0), PathVQA (MIT); MedGemma and Gemma-3 under Google's terms. Cite the
+original dataset papers in any use of this work. Term project for a computer vision course, 2026.
+
+```bibtex
+@misc{consistentbutblind2026,
+  title  = {Consistent but Blind? A Modality-by-Modality Audit of Image Reliance in a Small Medical VLM},
+  author = {Thái, Hữu Trí},
+  year   = {2026},
+  url    = {https://github.com/thaitri2005/Medvlm-Image-Reliance}
+}
+```

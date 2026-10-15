@@ -1,7 +1,8 @@
-# Consistent but blind? An image-reliance audit of a medical VLM across imaging modalities
+# Consistent but Blind? Pre-registration and lab notebook
 
-Solo course project, ~2 weeks, all runs on one big GPU machine. This file is the single source of truth
-for *what we claim and how we test it*; `README.md` is the how-to-run. Last updated 2026-10-15.
+A modality-by-modality audit of image reliance in a small medical VLM. Solo course project, ~2 weeks, all
+runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
+[README.md](README.md) is the paper-style overview and [docs/REPRODUCE.md](docs/REPRODUCE.md) the how-to-run. Last updated 2026-10-15.
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is
 listed in section 13 with its reason.
 
@@ -34,7 +35,7 @@ a modality (reported as exploratory only), training anything, clinical claims.
 
 - Built: loaders + deterministic sampler + image hashing, batched paraphrasing + validation, resumable
   runner, scoring, statistics (cluster bootstrap, Holm, kappa), `analyze`, `compare`, `bench`, `regress`,
-  `pipeline`, hardware presets. **78 fast tests + 7 real-model tests pass** (laptop, CPU stand-ins), including
+  `pipeline`, hardware presets. **88 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.

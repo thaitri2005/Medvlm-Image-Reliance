@@ -127,3 +127,20 @@ def test_status_reports_progress(paths, cfg, capsys):
     status(cfg, paths, 2)
     out = capsys.readouterr().out
     assert "shard 0/2" in out and "<- done" in out and "total:" in out
+
+
+def test_resume_survives_a_run_killed_mid_write(paths, cfg):
+    """Simulate a crash: last results line cut in half. Resume must not crash or corrupt records."""
+    _setup(paths, cfg)
+    run(cfg, paths, MockVLM(), limit=10, chunk=4)
+    f = next(paths.run_dir("mock", "smoke").glob("results*.jsonl"))
+    lines = f.read_text().splitlines()
+    f.write_text("\n".join(lines[:-1]) + "\n" + lines[-1][:25])        # truncated, no trailing newline
+    assert len(done_keys(paths.run_dir("mock", "smoke"))) == 9          # damaged record is simply redone
+    run(cfg, paths, MockVLM())
+    assert run(cfg, paths, MockVLM()) == 0
+    out = analyze(cfg, paths)                                           # analysis also tolerates it
+    assert len(out["per_sample"]) > 0
+    import json
+    good = [json.loads(l) for l in f.read_text().splitlines() if l.strip().endswith("}")]
+    assert len({r["key"] for r in good}) == len(good)

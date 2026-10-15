@@ -50,7 +50,7 @@ def build_jobs(items: list[Item], paras: dict[str, list[dict]], conditions: list
 def done_keys(run_dir: Path) -> set[str]:
     keys: set[str] = set()
     for f in run_dir.glob("results*.jsonl"):
-        keys.update(r["key"] for r in read_jsonl(f))
+        keys.update(r["key"] for r in read_jsonl(f, tolerant=True))
     return keys
 
 
@@ -139,6 +139,9 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
     out_path = run_dir / f"results.{host}.jsonl"
     score_gold = bool(cfg["run"].get("score_gold_logprob", True))
     n_done, t_start = 0, time.perf_counter()
+    if out_path.exists() and out_path.stat().st_size and not out_path.read_bytes().endswith(b"\n"):
+        with open(out_path, "ab") as f:          # previous run died mid-line: close it so records never glue together
+            f.write(b"\n")
     with open(out_path, "a", encoding="utf-8", newline="\n") as f, tqdm(total=len(todo), unit="job") as bar:
         for s in range(0, len(todo), chunk):
             if max_minutes and time.perf_counter() - t_start > max_minutes * 60:

@@ -56,12 +56,18 @@ def write_jsonl(path: Path, rows: Iterable[dict]) -> int:
     return n
 
 
-def read_jsonl(path: Path) -> Iterator[dict]:
+def read_jsonl(path: Path, *, tolerant: bool = False) -> Iterator[dict]:
+    """tolerant=True skips unparsable lines: a run killed mid-write leaves a half line at the end."""
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
-            if line:
+            if not line:
+                continue
+            try:
                 yield json.loads(line)
+            except json.JSONDecodeError:
+                if not tolerant:
+                    raise
 
 
 def load_items(path: Path) -> list[Item]:

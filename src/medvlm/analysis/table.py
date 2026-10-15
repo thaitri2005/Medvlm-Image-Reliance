@@ -18,7 +18,7 @@ IMG_CONDS = ("noimg", "shuf", "blank")
 
 
 def load_results(run_dir: Path) -> pd.DataFrame:
-    rows = [r for f in sorted(run_dir.glob("results*.jsonl")) for r in read_jsonl(f)]
+    rows = [r for f in sorted(run_dir.glob("results*.jsonl")) for r in read_jsonl(f, tolerant=True)]
     if not rows:
         return pd.DataFrame(columns=["key", "sample_id", "condition", "text"])
     return pd.DataFrame(rows).drop_duplicates("key", keep="last")

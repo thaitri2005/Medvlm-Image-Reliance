@@ -13,7 +13,7 @@ from .config import Paths
 from .data.prepare import prepare, verify
 from .models import load_model
 from .paraphrase import STYLES, generate, load_valid
-from .run import run
+from .run import done_keys, run, select_jobs
 from .schema import load_items
 
 
@@ -59,4 +59,10 @@ def pipeline(cfg: dict, paths: Paths, *, parts: int = 2, part: int | None = None
         run(cfg, paths, model, shard=(i, parts), max_minutes=max_minutes)
         print("[pipeline] checkpoint analysis", flush=True)
         analyze(cfg, paths)                       # checkpoint tables from whatever is finished so far
-    print("[pipeline] done" if part is None else f"[pipeline] part {part} done")
+    jobs = select_jobs(cfg, paths, None)
+    finished = done_keys(paths.run_dir(cfg["model"]["name"], profile))
+    left = sum(j.key not in finished for j in jobs)
+    if left:
+        print(f"[pipeline] stopped with {left}/{len(jobs)} jobs left; re-run the same command to continue")
+    else:
+        print(f"[pipeline] done: all {len(jobs)} jobs finished; tables in results/{cfg['model']['name']}/{profile}")

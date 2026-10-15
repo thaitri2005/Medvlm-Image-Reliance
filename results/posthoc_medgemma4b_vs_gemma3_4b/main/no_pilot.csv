@@ -1,0 +1,23 @@
+model,endpoint,dataset,est,lo,hi,p_holm,n
+medgemma4b,P1 blind accuracy - majority prior (yes/no),pathvqa,0.06306306306306297,0.0243087407791928,0.10589173244040495,0.003,555
+medgemma4b,P1 blind accuracy - majority prior (yes/no),slake,-0.032142857142857195,-0.08726826844320176,0.021977639837094356,0.237,280
+medgemma4b,P1 blind accuracy - majority prior (yes/no),vqa_rad,0.06796116504854366,-0.0100465999927836,0.14319929873570164,0.166,206
+medgemma4b,"P2 AUROC(image PMI) - AUROC(confidence), yes/no",pooled,0.2295744619963369,0.18244916067586353,0.2754962909899525,0.0,1041
+gemma3_4b,P1 blind accuracy - majority prior (yes/no),pathvqa,0.027027027027026973,-0.015377881795934117,0.06910365889916795,0.612,555
+gemma3_4b,P1 blind accuracy - majority prior (yes/no),slake,-0.021428571428571463,-0.07739361792963538,0.03914630867826996,0.838,280
+gemma3_4b,P1 blind accuracy - majority prior (yes/no),vqa_rad,0.029126213592232997,-0.04152795289931213,0.1005923962594253,0.838,206
+gemma3_4b,"P2 AUROC(image PMI) - AUROC(confidence), yes/no",pooled,0.2747296740233386,0.23034329511767548,0.32475798579370607,0.0,1041
+medgemma4b - gemma3_4b,P3,pre-registered (image-removed probe),0.1285551763367463,0.0893245584791627,0.17120833945088823,,879
+medgemma4b - gemma3_4b,P3,both models answer without image (mass >= 0.9),0.06905370843989769,0.015267175572519083,0.12129899194582663,,391
+medgemma4b - gemma3_4b,P3,neither model abstains (mass >= 0.5),0.10862619808306709,0.060060815848045464,0.15408332606525763,,626
+medgemma4b - gemma3_4b,P3,wrong-image probe instead,-0.0034129692832764505,-0.04298673714248654,0.037376845148597494,,879
+medgemma4b,AUROC,confidence (baseline),0.7009500915750915,0.6651652601961122,0.7328804804673534,,1041
+medgemma4b,AUROC,log p(gold | image)  [leaks label],1.0,0.9999999999999999,1.0,,1041
+medgemma4b,AUROC,"image PMI, gold answer  [pre-registered P2, leaks label]",0.9306652548840049,0.9044763528642508,0.955073481896002,,1041
+medgemma4b,AUROC,"image PMI, predicted answer  [label-free]",0.4944864163614163,0.45424935155535223,0.5313650850934468,,1041
+medgemma4b,AUROC,"wrong-image PMI, predicted answer  [label-free]",0.5169676243894994,0.4712408343276302,0.5595579512879395,,1041
+gemma3_4b,AUROC,confidence (baseline),0.5982309899797058,0.5673071718337338,0.6266410949938043,,1041
+gemma3_4b,AUROC,log p(gold | image)  [leaks label],1.0,0.9999999999999999,1.0,,1041
+gemma3_4b,AUROC,"image PMI, gold answer  [pre-registered P2, leaks label]",0.8968956113647896,0.873989404663542,0.9188977920940588,,1041
+gemma3_4b,AUROC,"image PMI, predicted answer  [label-free]",0.5221770357686453,0.4867730453963198,0.5588266334565096,,1041
+gemma3_4b,AUROC,"wrong-image PMI, predicted answer  [label-free]",0.5377405980466767,0.5007339592271592,0.5719181563201536,,1041

@@ -15,8 +15,11 @@ and its reason is logged in [PLAN.md §13](PLAN.md) (items 12–15). Tables: `re
    74% of the time (Gemma-3: 17%)**.
 2. **Yet MedGemma is the one that is *consistent but blind* more often:** under the pre-registered
    image-removed probe its Dangerous share is **+13.7 points** higher than Gemma-3's (P3; CI [10.0, 17.5]).
-   The reason is not that it ignores images. **Medical tuning taught it to keep answering when the image is
-   missing:** Gemma-3 replies "please provide the image" on 41–50% of SLAKE/VQA-RAD questions, MedGemma on
+   Caveat from our own audit (§9): on yes/no questions, a large part of any Dangerous share is **chance
+   agreement**: MedGemma's chance floor is 41.5%, Gemma-3's 35.8%. Corrected for chance, the gap remains
+   (beyond-chance agreement between with- and without-image answers, κ = 0.19 vs 0.07; Δκ = +0.11
+   [0.04, 0.18]), but it is smaller than +13.7 suggests. The reason is not that MedGemma ignores images.
+   **Medical tuning taught it to keep answering when the image is missing:** Gemma-3 replies "please provide the image" on 41–50% of SLAKE/VQA-RAD questions, MedGemma on
    26–27%. And MedGemma's blind answers beat the answer-frequency prior (PathVQA +5.0 points, P1).
 3. **"Dangerous" is a property of the probe, not only of the model.** With a wrong image instead of no
    image, the MedGemma–Gemma gap vanishes (−0.7 points, CI [−4.4, 3.2]); the two probes agree poorly
@@ -62,12 +65,16 @@ on PathVQA and VQA-RAD, which is the subject of Q1.
 same direction but not after correction; SLAKE is not. Gemma-3 is never above the prior. Post hoc, among
 questions where MedGemma *does* answer without the image (format mass ≥ 0.9), the margin grows to **+11.9**
 [7.1, 16.6] on PathVQA and **+15.7** [5.1, 25.3] on VQA-RAD: its blind answers are informative, i.e. it has
-learned dataset-specific priors (PathVQA questions name the entity; SLAKE is in its training data, VQA-RAD
-may be).
+learned useful language priors. Memorising the test set is unlikely to be the reason: the margin appears on
+PathVQA and VQA-RAD, which MedGemma's model card does not list as training data, and **not** on SLAKE, which
+it does list. PathVQA questions often name the entity they ask about, which is a plausible source of prior.
 
 ## 4. Quadrants, modalities and probes (Q2)
 
 ![Fig. 1](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png)
+
+Raw shares, as the taxonomy defines them. On yes/no questions they include chance agreement (§6, §9), so a
+share near 50% is not "half the answers ignore the image".
 
 | Dangerous share, test yes/no | PathVQA | SLAKE | VQA-RAD |
 |---|---|---|---|
@@ -128,6 +135,16 @@ mass ≥ 0.5; n = 699). It stays positive in every cell of the pre-registered se
 number of paraphrases × strong flips), and in every dataset: PathVQA +7.5 [2.6, 12.3], SLAKE +18.6
 [12.2, 24.9], VQA-RAD +25.6 [14.7, 36.5]. Under the wrong-image probe it is **−0.7** [−4.4, 3.2].
 
+**How much of the gap is chance?** "Dangerous" counts an answer as image-independent whenever the
+no-image answer happens to equal the with-image answer. On yes/no questions that happens often by chance.
+On the P3 set, MedGemma's answers are unchanged without the image 58.6% of the time against 49.1% expected
+by chance from its yes-rates (Gemma-3: 49.7% vs 45.7%). Multiplying by each model's consistency gives a
+**chance-only Dangerous floor of 41.5% (MedGemma) and 35.8% (Gemma-3)**, against observed 50.5% and 36.8%.
+Gemma-3 is at its floor; MedGemma is 9 points above it. Of the +13.7-point gap, about 6 points are the
+difference in floors. That difference is partly because MedGemma is **more consistent** (84.5% vs 78.4% of
+questions stable under paraphrase), a desirable property the quadrant metric counts against it. The
+chance-corrected effect is Δκ = +0.11 [0.04, 0.18], p = 0.002 (`results/posthoc_*/chance.csv`).
+
 **Answer to Q4.** Medical post-training makes the model more accurate, more consistent, more willing to
 answer without an image, and better than the prior when it does. That combination produces more answers
 that look trustworthy and are unchanged by removing the image: the *consistent but dangerous* pattern the
@@ -151,7 +168,31 @@ probe shows the same model does use the image when one is present. The risk is i
 - Abstention is inferred from first-token probability mass, confirmed by free generation on a sample, not
   annotated for every question.
 - The partner-gold analysis covers only the 112 swaps where the partner image carries the same question.
-- SLAKE is in MedGemma's training data; P1's margin may partly be memorisation.
+- SLAKE is in MedGemma's training data (split unstated); VQA-RAD and PathVQA are not listed. SLAKE results
+  may be contaminated; the cross-dataset pattern argues against contamination driving P1.
+- The Dangerous share, as defined by the reference taxonomy, is not chance-corrected (§6, §9).
 - Paraphrase equivalence was judged by an LLM (PLAN.md §4.5); a 50-pair human spot-check is pending.
 - Post-hoc analyses (§5 label-free PMI, §6 abstention, partner check) were motivated by the data. They
   qualify the pre-registered results and are reported as such, not as confirmatory tests.
+
+## 9. Audit: leaks, confounds and wrong assumptions
+
+No model is trained in this study; both are frozen and only queried. After the run we checked every path
+by which the answer, or something correlated with it, could reach a model or a score, and every assumption
+the conclusions rest on. Checks against the code and the committed data:
+
+| Check | Finding | Effect on conclusions |
+|---|---|---|
+| Gold answer in the model input | None. The prompt is the question plus a fixed instruction; gold answers are used only *after* generation (scoring, teacher-forced log-prob in a separate forward pass) | none |
+| Answer type (yes/no vs open) is derived from the gold answer and picks the instruction ("Answer with only 'yes' or 'no'") | Reveals the answer *format*, not the value. It disagrees with the question's own phrasing for 4 of 3,365 questions (0.1%, all dataset label errors such as "What do the two small hyperintensities indicate?" → "Yes") | negligible |
+| Conditions differ only by the image | Verified on the rendered prompts: identical text for both models; with-image adds exactly 256 image tokens | none |
+| Wrong-image partner | Never the same image, never another dataset or modality, chosen by a hash of the question ID (not by answer) | none; content confound in §4 |
+| Paraphrase screening saw model outputs | No. Paraphrases were judged before the main run, from question text only | none |
+| **Pre-registered P2 uses the gold answer** | **Label leak**: log p(gold \| image) alone has AUROC 1.000 | P2 not interpretable; label-free version at chance (§5) |
+| **Dangerous share is not chance-corrected** | On yes/no, 49% (MedGemma) / 46% (Gemma-3) of answers would be "unchanged without the image" by chance alone | Absolute shares mostly chance; P3 survives correction at a smaller size (§6) |
+| Pilot questions (design tuned on them) are part of `main` | All 330 pilot questions are in `main` (9.8%). Without them: P1 PathVQA +6.3 [2.4, 10.6], p_Holm = 0.003; P3 +12.9 [8.9, 17.1]; wrong-image P3 −0.3; label-free PMI 0.49 | none (`no_pilot.csv`) |
+| Training-data contamination | Model card lists SLAKE, not VQA-RAD or PathVQA, and warns of contamination generally | SLAKE caveat; P1 pattern argues against it |
+| Answer capitalisation ("Yes" vs "yes") | Scoring and the majority prior normalise case (VQA-RAD prior 133/251 = 53.0%, as reported) | none |
+| Duplicate questions | 5 (image, question) pairs appear twice with conflicting gold answers (dataset noise) | negligible |
+| Majority prior is computed on the test labels | Gives the strongest constant baseline, which makes P1 conservative | none |
+| `compare` pooled the validation split into P3 | Bug, fixed before reporting (+14.1 → +13.7) | fixed |

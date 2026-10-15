@@ -32,7 +32,9 @@ write-up with every number and CI: **[RESULTS.md](RESULTS.md)**.*
 1. **Medical tuning creates the *consistent but blind* pattern, across modalities.** Under the
    pre-registered image-removed probe, MedGemma has **+13.7 points** more Dangerous answers than its
    architecture twin Gemma-3 (95% CI [10.0, 17.5]), in every dataset (pathology +7.5, SLAKE +18.6,
-   VQA-RAD +25.6) and across the whole sensitivity grid.
+   VQA-RAD +25.6) and across the whole sensitivity grid. On yes/no questions much of any Dangerous share is
+   chance agreement (floor ~36–42%); corrected for chance the gap holds (Δκ = +0.11 [0.04, 0.18]) but is
+   smaller. See the [audit of every leak and assumption](RESULTS.md#9-audit-leaks-confounds-and-wrong-assumptions).
 2. **It is not ignoring images; it is answering without them.** When an image is swapped for one with a
    different correct answer, MedGemma changes its answer 74% of the time (Gemma-3: 17%). But when the image
    is *missing*, Gemma-3 asks for it ("please provide the image") on up to 50% of questions and MedGemma

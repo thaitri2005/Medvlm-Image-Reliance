@@ -9,6 +9,9 @@ qualifies them.
   partner         how often the wrong-image partner has the same gold answer for the same question
                   (only where that pair exists in the data), and whether the model follows real changes.
   p3_sensitivity  P3 with abstaining questions removed, and with the wrong-image probe.
+  chance          the quadrant metric counts "unchanged without the image" raw; on yes/no ~half of that is
+                  chance. Chance agreement, the chance-only Dangerous floor, Cohen's kappa and paired d(kappa).
+  no_pilot        key endpoints re-estimated without the 330 pilot questions the design was tuned on.
   figures         fig1-fig5 PNGs for the report and poster.
 """
 from __future__ import annotations
@@ -175,6 +178,62 @@ def p1_sensitivity(samples, raws, B, seed) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _kappa(o: pd.Series, n: pd.Series) -> float:
+    o, n = o.astype(bool), n.astype(bool)
+    po, pn = o.mean(), n.mean()
+    exp = po * pn + (1 - po) * (1 - pn)
+    return float(((o == n).mean() - exp) / (1 - exp)) if exp < 1 else float("nan")
+
+
+def chance(samples, raws, model_a, model_b, B, seed) -> pd.DataFrame:
+    """On the P3 set: how much of 'unchanged without the image' (and so of Dangerous) is chance agreement."""
+    a, b = samples[model_a], samples[model_b]
+    idx = a.index[(a.answer_type == "yesno") & (a.split == "test")]
+    idx = idx[a.loc[idx, "consistent"].notna() & b.loc[idx, "consistent"].notna()]
+    cols = {}
+    for tag, m in (("a", model_a), ("b", model_b)):
+        w = _wide(raws[m], "p_yes").loc[idx]
+        cols.update({f"o{tag}": w["orig"] >= .5, f"n{tag}": w["noimg"] >= .5,
+                     f"c{tag}": samples[m].loc[idx, "consistent"].astype(float),
+                     f"d{tag}": samples[m].loc[idx, "q_dangerous"].astype(float)})
+    D = pd.DataFrame({**cols, "image_id": a.loc[idx, "image_id"]})
+    rows = []
+    for tag, m in (("a", model_a), ("b", model_b)):
+        o, n = D[f"o{tag}"], D[f"n{tag}"]
+        exp = o.mean() * n.mean() + (1 - o.mean()) * (1 - n.mean())
+        k = _ci(D, lambda x, t=tag: _kappa(x[f"o{t}"], x[f"n{t}"]), B, seed)
+        rows.append({"model": m, "n": len(D), "consistent": D[f"c{tag}"].mean(), "unchanged_noimg": float((o == n).mean()),
+                     "unchanged_by_chance": float(exp), "dangerous": D[f"d{tag}"].mean(),
+                     "dangerous_chance_floor": float(D[f"c{tag}"].mean() * exp),
+                     "kappa_orig_noimg": k["est"], "kappa_lo": k["lo"], "kappa_hi": k["hi"]})
+    dk = _ci(D, lambda x: _kappa(x.oa, x.na) - _kappa(x.ob, x.nb), B, seed)
+    rows.append({"model": f"{model_a} - {model_b}", "n": len(D), "kappa_orig_noimg": dk["est"], "kappa_lo": dk["lo"],
+                 "kappa_hi": dk["hi"], "p": dk["p"]})
+    return pd.DataFrame(rows)
+
+
+def no_pilot(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> pd.DataFrame:
+    from .report import primary_endpoints
+
+    pfile = paths.manifest_dir("pilot") / "items.jsonl"
+    if not pfile.exists():
+        return pd.DataFrame()
+    pilot = {it.sample_id for it in load_items(pfile)}
+    S = {m: t[~t.index.isin(pilot)] for m, t in samples.items()}
+    R = {m: r[~r.sample_id.isin(pilot)] for m, r in raws.items()}
+    out = []
+    for m in S:
+        p = primary_endpoints(S[m][S[m].split == "test"].reset_index(), B, seed)
+        out.append(p.assign(model=m)[["model", "endpoint", "dataset", "est", "lo", "hi", "p_holm", "n"]])
+    p3 = p3_sensitivity(S, R, model_a, model_b, B, seed)
+    out.append(p3.rename(columns={"variant": "dataset"}).assign(model=f"{model_a} - {model_b}", endpoint="P3")
+               [["model", "endpoint", "dataset", "est", "lo", "hi", "n"]])
+    sel = selective(S, R, [i for i in items if i.sample_id not in pilot], B, seed)
+    out.append(sel.rename(columns={"score": "dataset", "auroc": "est"}).assign(endpoint="AUROC")
+               [["model", "endpoint", "dataset", "est", "lo", "hi", "n"]])
+    return pd.concat(out, ignore_index=True)
+
+
 # ------------------------------------------------------------------ figures
 
 def _style(ax, title: str | None = None):
@@ -328,7 +387,9 @@ def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
            "selective_labelfree": selective(samples, raws, items, B, seed),
            "partner_confound": partner(samples, raws, items),
            "p3_sensitivity": p3_sensitivity(samples, raws, model_a, model_b, B, seed),
-           "p1_sensitivity": p1_sensitivity(samples, raws, B, seed)}
+           "p1_sensitivity": p1_sensitivity(samples, raws, B, seed),
+           "chance": chance(samples, raws, model_a, model_b, B, seed),
+           "no_pilot": no_pilot(cfg, paths, samples, raws, items, model_a, model_b, B, seed)}
     out_dir = paths.results / f"posthoc_{model_a}_vs_{model_b}" / profile
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, df in out.items():
@@ -337,4 +398,5 @@ def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
                    out["p3_sensitivity"], paths.results, profile)
     print(f"[posthoc] {len(out)} tables + {len(figs)} figures -> {out_dir}")
     print(out["p3_sensitivity"][["variant", "est", "lo", "hi", "n"]].round(3).to_string(index=False))
+    print(out["chance"].round(3).to_string(index=False))
     return out

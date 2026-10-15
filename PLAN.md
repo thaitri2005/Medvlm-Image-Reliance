@@ -314,3 +314,8 @@ after unblinding.
 1,315); fixed to the test split as pre-registered (+13.7, n = 1,012) with a unit test.
 (15) **Wrong-image confound check**: where the partner image carries the same question, compare gold answers
 (112 swaps; exploratory).
+(16) **Post-run audit** (RESULTS.md section 9): no answer reaches a model's input; prompts verified
+identical across models; the answer-type instruction is gold-derived but disagrees with question phrasing
+for 4/3,365; **the Dangerous share has a large chance floor on yes/no** (41.5% / 35.8%), so P3 is
+additionally reported chance-corrected (d-kappa +0.11 [0.04, 0.18]); results unchanged without the pilot
+questions; model card lists SLAKE (not VQA-RAD/PathVQA) as training data.

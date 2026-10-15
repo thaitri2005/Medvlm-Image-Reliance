@@ -35,3 +35,13 @@ def test_p3_uses_the_test_split_only():
     b.loc[b.index[:100], "split"] = "validation"
     out = p3_sensitivity({"A": a, "B": b}, {"A": raws, "B": raws}, "A", "B", B=50, seed=1)
     assert out.loc[0, "n"] == 300
+
+
+def test_kappa_is_zero_for_independent_answers_even_when_raw_agreement_is_high():
+    from medvlm.analysis.posthoc import _kappa
+
+    rng = np.random.default_rng(0)
+    o = pd.Series(rng.random(20000) < 0.8)          # mostly "yes" with the image
+    n = pd.Series(rng.random(20000) < 0.8)          # independent default "yes" without it
+    assert (o == n).mean() > 0.6                    # 68% "unchanged" -> would look like image-blind answers
+    assert abs(_kappa(o, n)) < 0.03                 # but none of it is beyond chance

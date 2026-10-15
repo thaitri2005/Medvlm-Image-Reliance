@@ -107,7 +107,7 @@ row(H - 1.62, f"(b)  “{B['question']}”   (SLAKE CT, gold: {B['gold'].lower()
     {"MedGemma-4B": {"orig": ans(mb, "orig"), "para": "yes, yes", "noimg": ans(mb, "noimg"), "shuf": ans(mb, "shuf")},
      "Gemma-3-4B": {"orig": ans(gb, "orig"), "para": "yes, yes", "noimg": ans(gb, "noimg"), "shuf": ans(gb, "shuf")}},
     {"MedGemma-4B": {"q_noimg": "Dangerous", "q_shuf": "Ideal"}, "Gemma-3-4B": {"q_noimg": "Ideal", "q_shuf": "Dangerous"}},
-    f"* only {gb['noimg']['mass']:.0%} of the first-token probability is on yes/no (Gemma-3 half-declines).  "
+    f"* only {gb['noimg']['mass']:.0%} of first-token probability on yes/no.   "
     "Same question, opposite verdicts from the two probes.")
 
 out = ROOT / "report" / "figures" / "fig0_teaser.png"

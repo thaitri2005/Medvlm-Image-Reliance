@@ -12,7 +12,10 @@ qualifies them.
   chance          the quadrant metric counts "unchanged without the image" raw; on yes/no ~half of that is
                   chance. Chance agreement, the chance-only Dangerous floor, Cohen's kappa and paired d(kappa).
   no_pilot        key endpoints re-estimated without the 330 pilot questions the design was tuned on.
-  figures         fig1-fig5 PNGs for the report and poster.
+  harm            Dangerous split into correct and wrong answers; share of each model's errors that are Dangerous.
+  probe_*         the robustness probes registered in PLAN.md section 15 (blank, abstain, opp) and their
+                  Holm-adjusted tests H6-H8, when `medvlm probes` outputs exist.
+  figures         fig1-fig6, twice: titled (results/, README) and paper-sized without titles (report/figures/).
 """
 from __future__ import annotations
 
@@ -234,150 +237,334 @@ def no_pilot(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> pd.
     return pd.concat(out, ignore_index=True)
 
 
-# ------------------------------------------------------------------ figures
+def harm(samples, model_a, model_b, B, seed) -> pd.DataFrame:
+    """Is Dangerous dangerous? Split Dangerous answers into correct and wrong (the harmful cell), and give the
+    share of each model's errors that are Dangerous (stable and unchanged without the image: hard to catch)."""
+    a, b = samples[model_a], samples[model_b]
+    idx = a.index[(a.answer_type == "yesno") & (a.split == "test") & a.quadrant.notna()]
+    idx = idx[b.loc[idx, "quadrant"].notna()]
+    D = pd.DataFrame({"image_id": a.loc[idx, "image_id"]})
+    for tag, t in (("a", a.loc[idx]), ("b", b.loc[idx])):
+        dang, ok = t.quadrant == "dangerous", t.correct_orig.astype(float) == 1
+        D[f"ok{tag}"], D[f"bad{tag}"], D[f"err{tag}"] = (dang & ok).astype(float), (dang & ~ok).astype(float), (~ok).astype(float)
 
-def _style(ax, title: str | None = None):
+    def share(x, t):
+        return float(x[f"bad{t}"].sum() / max(x[f"err{t}"].sum(), 1))
+
+    rows = []
+    for tag, m in (("a", model_a), ("b", model_b)):
+        r = {k: _ci(D, f, B, seed) for k, f in {"dangerous_correct": lambda x, t=tag: float(x[f"ok{t}"].mean()),
+                                                  "dangerous_wrong": lambda x, t=tag: float(x[f"bad{t}"].mean()),
+                                                  "errors_that_are_dangerous": lambda x, t=tag: share(x, t),
+                                                  "error_rate": lambda x, t=tag: float(x[f"err{t}"].mean())}.items()}
+        for k, v in r.items():
+            rows.append({"model": m, "measure": k, "est": v["est"], "lo": v["lo"], "hi": v["hi"], "n": len(D)})
+    for k, f in {"dangerous_correct": lambda x: float((x.oka - x.okb).mean()),
+                 "dangerous_wrong": lambda x: float((x.bada - x.badb).mean()),
+                 "errors_that_are_dangerous": lambda x: share(x, "a") - share(x, "b"),
+                 "error_rate": lambda x: float((x.erra - x.errb).mean())}.items():
+        v = _ci(D, f, B, seed)
+        rows.append({"model": f"{model_a} - {model_b}", "measure": k, "est": v["est"], "lo": v["lo"], "hi": v["hi"],
+                     "p": v["p"], "n": len(D)})
+    return pd.DataFrame(rows)
+
+
+def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> dict[str, pd.DataFrame]:
+    """The registered robustness probes (PLAN.md section 15), if their outputs exist."""
+    from ..probes import opposite_partners
+    from .stats import holm
+
+    def load(m, p):
+        return load_results(paths.run_dir(f"{m}__{p}", cfg["profile"]))
+
+    have = {p: all(not load(m, p).empty for m in (model_a, model_b)) for p in ("blank", "abstain", "opp")}
+    out, tests = {}, []
+    a = samples[model_a]
+    test_yn = a.index[(a.answer_type == "yesno") & (a.split == "test")]
+
+    if have["blank"]:                                  # R1 / H6
+        cols = {}
+        for tag, m in (("a", model_a), ("b", model_b)):
+            pb = _wide(load(m, "blank"), "p_yes")["blank"]
+            cols.update({f"o{tag}": _wide(raws[m], "p_yes")["orig"].reindex(test_yn) >= .5,
+                         f"k{tag}": pb.reindex(test_yn) >= .5,
+                         f"c{tag}": samples[m].loc[test_yn, "consistent"],
+                         f"m{tag}": _wide(load(m, "blank"), "yn_mass")["blank"].reindex(test_yn)})
+        D = pd.DataFrame({**cols, "image_id": a.loc[test_yn, "image_id"]}).dropna(subset=["ma", "mb"])
+        both = D.ca.notna() & D.cb.notna()
+        rows = []
+        for tag, m in (("a", model_a), ("b", model_b)):
+            o, k = D[f"o{tag}"], D[f"k{tag}"]
+            kap = _ci(D, lambda x, t=tag: _kappa(x[f"o{t}"], x[f"k{t}"]), B, seed)
+            dang = ((D.loc[both, f"c{tag}"] == 1) & (o[both] == k[both])).astype(float)
+            exp = o.mean() * k.mean() + (1 - o.mean()) * (1 - k.mean())
+            rows.append({"model": m, "n": len(D), "unchanged_blank": float((o == k).mean()), "unchanged_by_chance": float(exp),
+                         "kappa_orig_blank": kap["est"], "kappa_lo": kap["lo"], "kappa_hi": kap["hi"],
+                         "dangerous_blank": float(dang.mean()), "abstain_blank": float((D[f"m{tag}"] < ABSTAIN_MASS).mean())})
+        dk = _ci(D, lambda x: _kappa(x.oa, x.ka) - _kappa(x.ob, x.kb), B, seed)
+        Db = D[both].assign(da=lambda x: ((x.ca == 1) & (x.oa == x.ka)).astype(float),
+                            db=lambda x: ((x.cb == 1) & (x.ob == x.kb)).astype(float))
+        dd = _ci(Db, lambda x: float((x.da - x.db).mean()), B, seed)
+        rows.append({"model": f"{model_a} - {model_b}", "n": len(D), "kappa_orig_blank": dk["est"], "kappa_lo": dk["lo"],
+                     "kappa_hi": dk["hi"], "p": dk["p"], "dangerous_blank": dd["est"], "dangerous_lo": dd["lo"],
+                     "dangerous_hi": dd["hi"], "dangerous_p": dd["p"], "dangerous_n": len(Db)})
+        out["probe_blank"] = pd.DataFrame(rows)
+        tests.append(("H6: kappa(orig, blank), MedGemma - Gemma-3 (> 0 predicted)", dk, len(D)))
+
+    if have["abstain"]:                                # R2 / H7
+        rows, cols = [], {}
+        for tag, m in (("a", model_a), ("b", model_b)):
+            cols[f"x{tag}"] = (_wide(load(m, "abstain"), "yn_mass")["noimg"].reindex(test_yn) < ABSTAIN_MASS).astype(float)
+            cols[f"f{tag}"] = (_wide(raws[m], "yn_mass")["noimg"].reindex(test_yn) < ABSTAIN_MASS).astype(float)
+        D = pd.DataFrame({**cols, "image_id": a.loc[test_yn, "image_id"], "dataset": a.loc[test_yn, "dataset"]})
+        for tag, m in (("a", model_a), ("b", model_b)):
+            for ds, g in [("all", D)] + list(D.groupby("dataset")):
+                r = _ci(g, lambda x, t=tag: float(x[f"x{t}"].mean()), B, seed)
+                rows.append({"model": m, "dataset": ds, "abstain_allowed": r["est"], "lo": r["lo"], "hi": r["hi"],
+                             "abstain_forced_main_run": float(g[f"f{tag}"].mean()), "n": len(g)})
+        d = _ci(D, lambda x: float((x.xa - x.xb).mean()), B, seed)
+        rows.append({"model": f"{model_a} - {model_b}", "dataset": "all", "abstain_allowed": d["est"], "lo": d["lo"],
+                     "hi": d["hi"], "p": d["p"], "n": len(D)})
+        out["probe_abstain"] = pd.DataFrame(rows)
+        tests.append(("H7: abstention with 'unknown' allowed, MedGemma - Gemma-3 (< 0 predicted)", d, len(D)))
+
+    if have["opp"]:                                    # R3 / H8
+        partners = opposite_partners(items)
+        by_id = {it.sample_id: it for it in items}
+        cols = {}
+        for tag, m in (("a", model_a), ("b", model_b)):
+            po = _wide(raws[m], "p_yes")["orig"]
+            pp = _wide(load(m, "opp"), "p_yes")["opp"].dropna()
+            cols[f"o{tag}"], cols[f"p{tag}"] = po.reindex(pp.index) >= .5, pp >= .5
+        idx = cols["pa"].index.intersection(cols["pb"].index)
+        D = pd.DataFrame({k: v.reindex(idx) for k, v in cols.items()})
+        D["image_id"] = [by_id[s].image_id for s in idx]
+        D["modality"] = [by_id[s].modality for s in idx]
+        D["partner_yes"] = [partners[s].answer.strip().lower() == "yes" for s in idx]
+        rows = []
+        for tag, m in (("a", model_a), ("b", model_b)):
+            for mod, g in [("all", D)] + list(D.groupby("modality")):
+                f = _ci(g, lambda x, t=tag: float((x[f"o{t}"] != x[f"p{t}"]).mean()), B, seed)
+                acc = float((g[f"p{tag}"] == g.partner_yes).mean())
+                rows.append({"model": m, "modality": mod, "follow_rate": f["est"], "lo": f["lo"], "hi": f["hi"],
+                             "accuracy_on_partner_image": acc, "n": len(g), "n_images": g.image_id.nunique()})
+        d = _ci(D, lambda x: float(((x.oa != x.pa).astype(float) - (x.ob != x.pb).astype(float)).mean()), B, seed)
+        rows.append({"model": f"{model_a} - {model_b}", "modality": "all", "follow_rate": d["est"], "lo": d["lo"],
+                     "hi": d["hi"], "p": d["p"], "n": len(D)})
+        out["probe_opp"] = pd.DataFrame(rows)
+        tests.append(("H8: follow rate on opposite-answer images, MedGemma - Gemma-3 (> 0 predicted)", d, len(D)))
+
+    if tests:
+        ph = holm([t[1]["p"] for t in tests])
+        out["probe_tests"] = pd.DataFrame([{"hypothesis": h, "est": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"],
+                                            "p_holm": p, "n": n} for (h, r, n), p in zip(tests, ph)])
+    return out
+
+
+# ------------------------------------------------------------------ figures
+# Each figure is drawn twice: "web" (titled, for README/RESULTS/poster) and "paper" (no title, sized for the
+# CVPR column: 3.25 in single column, 6.9 in full width; the caption lives in LaTeX).
+LABEL = {"medgemma4b": "MedGemma-4B", "gemma3_4b": "Gemma-3-4B"}
+
+
+def _style(ax, title: str | None = None, fs: float = 9):
     ax.set_facecolor(SURFACE)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
     for s in ("left", "bottom"):
         ax.spines[s].set_color(GRID)
-    ax.tick_params(colors=INK2, labelsize=9)
+    ax.tick_params(colors=INK2, labelsize=fs)
     if title:
-        ax.set_title(title, loc="left", fontsize=10.5, color=INK, pad=8)
+        ax.set_title(title, loc="left", fontsize=fs + 1.5, color=INK, pad=6)
 
 
-def figures(out_dir, samples, models, abst, sel, p3, results_dir, profile):
+def _bars(ax, groups, series, color, label, fs, pct=True, fmt="{:.0%}", ylim=None, hline=None):
+    """Grouped bars with CIs: series = {model: (est[], lo[], hi[])}; value labels above the CI."""
+    import matplotlib
+
+    n = len(series)
+    w = 0.8 / n
+    for k, (m, (est, lo, hi)) in enumerate(series.items()):
+        x = np.arange(len(groups)) + (k - (n - 1) / 2) * w
+        ax.bar(x, est, width=w * 0.92, color=color[m], label=label[m], linewidth=0)
+        ax.errorbar(x, est, yerr=[np.array(est) - np.array(lo), np.array(hi) - np.array(est)], fmt="none",
+                    ecolor=INK2, elinewidth=0.9)
+        for xi, v, h in zip(x, est, hi):
+            ax.text(xi, h + (0.012 if pct else 0.01), fmt.format(v), ha="center", va="bottom", fontsize=fs - 1.2, color=INK)
+    ax.set_xticks(range(len(groups)), groups)
+    if pct:
+        ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+    if ylim:
+        ax.set_ylim(*ylim)
+    if hline is not None:
+        ax.axhline(hline, color=INK2, lw=0.9, ls=(0, (3, 3)))
+    ax.grid(axis="y", color=GRID, lw=0.6)
+    ax.set_axisbelow(True)
+
+
+def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None):
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    plt.rcParams.update({"font.family": "DejaVu Sans", "figure.facecolor": SURFACE, "savefig.facecolor": SURFACE})
-    color = {models[0]: BLUE, models[1]: ORANGE}
-    label = {"medgemma4b": "MedGemma-4B", "gemma3_4b": "Gemma-3-4B"}
-    paths = []
-
-    # fig1: quadrant composition, test yes/no, both probes (small multiples, 100% stacked bars)
-    fig, axes = plt.subplots(1, 2, figsize=(11, 3.9), sharey=True)
-    for ax, (probe, col) in zip(axes, [("image removed", "quadrant"), ("wrong image", "quadrant_shuf")]):
-        ylabels, y = [], 0
-        for ds in ("pathvqa", "slake", "vqa_rad"):
-            for m in models:
-                t = samples[m]
-                g = t[(t.answer_type == "yesno") & (t.split == "test") & (t.dataset == ds)][col].dropna()
-                share = g.value_counts(normalize=True)
-                left = 0.0
-                for q in ("ideal", "fragile", "dangerous", "worst"):
-                    w = float(share.get(q, 0.0))
-                    ax.barh(y, w - 0.004 if w > 0.004 else w, left=left, height=0.72, color=QUAD_COLORS[q], linewidth=0)
-                    if w >= 0.08:
-                        ax.text(left + w / 2, y, f"{w:.0%}", ha="center", va="center", fontsize=8,
-                                color="white" if q in ("fragile", "dangerous") else INK)
-                    left += w
-                ylabels.append(f"{DS_LABEL[ds]} · {label[m]}")
-                y += 1
-            y += 0.4
-        ax.set_yticks([0, 1, 2.4, 3.4, 4.8, 5.8])
-        ax.tick_params(axis="y", length=0)
-        ax.set_xlim(0, 1)
-        ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-        _style(ax, f"Probe: {probe}")
-    axes[0].set_yticklabels(ylabels)
-    axes[0].invert_yaxis()
-    axes[1].tick_params(axis="y", labelleft=False)
-    handles = [plt.Rectangle((0, 0), 1, 1, color=QUAD_COLORS[q]) for q in QUAD_COLORS]
-    fig.legend(handles, ["Ideal (stable, image-reliant)", "Fragile (flips, reliant)", "Dangerous (stable, not reliant)",
-                         "Worst (flips, not reliant)"], loc="lower center", ncol=4, frameon=False, fontsize=9)
-    fig.suptitle("Fig. 1  Quadrant composition of yes/no answers (test split)", x=0.01, ha="left", fontsize=12, color=INK)
-    fig.tight_layout(rect=(0, 0.08, 1, 0.95))
-    paths.append(out_dir / "fig1_quadrants.png"); fig.savefig(paths[-1], dpi=200); plt.close(fig)
-
-    # fig2: Dangerous share by SLAKE modality (test+val pooled, pre-specified), both probes, CIs
-    fig, axes = plt.subplots(1, 2, figsize=(9.5, 3.4), sharey=True)
-    mods = ["ct", "mri", "xray"]
-    for ax, (probe, col) in zip(axes, [("image removed", "q_dangerous"), ("wrong image", "q_dangerous_shuf")]):
-        for k, m in enumerate(models):
-            tb = pd.read_csv(results_dir / m / profile / "by_modality_pooled.csv")
-            tb = tb[(tb.dataset == "slake") & (tb.answer_type == "yesno")].set_index("modality")
-            x = np.arange(len(mods)) + (k - 0.5) * 0.22
-            est = tb.loc[mods, col].to_numpy()
-            lo, hi = tb.loc[mods, f"{col}_lo"].to_numpy(), tb.loc[mods, f"{col}_hi"].to_numpy()
-            ax.errorbar(x, est, yerr=[est - lo, hi - est], fmt="o", ms=7, color=color[m], ecolor=color[m],
-                        elinewidth=2, capsize=0, label=label[m], mec=SURFACE, mew=1.5)
-        ax.set_xticks(range(len(mods)), ["CT", "MRI", "X-ray"])
-        ax.set_ylim(0, 1)
-        ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-        ax.grid(axis="y", color=GRID, linewidth=0.8)
-        ax.set_axisbelow(True)
-        _style(ax, f"Probe: {probe}")
-    axes[0].set_ylabel("Dangerous share", color=INK2)
     from matplotlib.lines import Line2D
-    axes[0].legend([Line2D([], [], marker="o", ls="", ms=7, color=color[m]) for m in models], [label[m] for m in models],
-                   frameon=False, fontsize=9, loc="upper left")
-    fig.suptitle("Fig. 2  Dangerous share by modality (SLAKE yes/no, test+val, 95% CI by image)", x=0.01, ha="left",
-                 fontsize=12, color=INK)
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
-    paths.append(out_dir / "fig2_modality.png"); fig.savefig(paths[-1], dpi=200); plt.close(fig)
 
-    # fig3: label leakage in the pre-registered P2
-    order = ["confidence (baseline)", "log p(gold | image)  [leaks label]",
-             "image PMI, gold answer  [pre-registered P2, leaks label]", "image PMI, predicted answer  [label-free]",
-             "wrong-image PMI, predicted answer  [label-free]"]
-    short = ["Confidence\n(baseline)", "log p(gold|image)\n[leaks label]", "Image PMI, gold\n[pre-reg. P2, leaks]",
-             "Image PMI, predicted\n[label-free]", "Wrong-image PMI,\npredicted [label-free]"]
-    fig, ax = plt.subplots(figsize=(10, 3.8))
-    for k, m in enumerate(models):
-        s = sel[sel.model == m].set_index("score").loc[order]
-        x = np.arange(len(order)) + (k - 0.5) * 0.36
-        ax.bar(x, s.auroc - 0.5, bottom=0.5, width=0.34, color=color[m], label=label[m], linewidth=0)
-        ax.errorbar(x, s.auroc, yerr=[s.auroc - s.lo, s.hi - s.auroc], fmt="none", ecolor=INK2, elinewidth=1)
-        for xi, v, h in zip(x, s.auroc, s.hi):
-            ax.text(xi, max(v, h) + 0.015, f"{v:.2f}", ha="center", fontsize=8, color=INK)
-    ax.axhline(0.5, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
-    ax.text(-0.62, 0.508, "chance", fontsize=8, color=INK2, ha="left")
-    ax.set_xticks(range(len(order)), short, fontsize=8.5)
-    ax.set_ylim(0.4, 1.08)
-    ax.set_ylabel("AUROC for a correct answer", color=INK2)
-    ax.legend(frameon=False, fontsize=9, loc="upper right")
-    _style(ax, "Fig. 3  Does image reliance flag wrong answers? Only when the score is allowed to see the answer key")
-    fig.tight_layout()
-    paths.append(out_dir / "fig3_leakage.png"); fig.savefig(paths[-1], dpi=200); plt.close(fig)
+    color = {models[0]: BLUE, models[1]: ORANGE}
+    written = []
+    for mode, target in (("web", out_dir), ("paper", paper_dir)):
+        if target is None:
+            continue
+        target.mkdir(parents=True, exist_ok=True)
+        paper = mode == "paper"
+        fs = 7.2 if paper else 9
+        plt.rcParams.update({"font.family": "DejaVu Sans", "figure.facecolor": SURFACE, "savefig.facecolor": SURFACE,
+                             "font.size": fs})
+        col, full = 3.25, 6.9
 
-    # fig4: abstention without the image
-    fig, ax = plt.subplots(figsize=(7.5, 3.3))
-    dss = ["pathvqa", "slake", "vqa_rad"]
-    for k, m in enumerate(models):
-        s = abst[abst.model == m].set_index("dataset").loc[dss]
-        x = np.arange(len(dss)) + (k - 0.5) * 0.36
-        ax.bar(x, s.abstain_noimg, width=0.34, color=color[m], label=label[m], linewidth=0)
-        ax.errorbar(x, s.abstain_noimg, yerr=[s.abstain_noimg - s.lo, s.hi - s.abstain_noimg], fmt="none",
-                    ecolor=INK2, elinewidth=1)
-        for xi, v, h in zip(x, s.abstain_noimg, s.hi):
-            ax.text(xi, h + 0.015, f"{v:.0%}", ha="center", fontsize=8.5, color=INK)
-    ax.set_xticks(range(len(dss)), [DS_LABEL[d] for d in dss])
-    ax.set_ylim(0, 0.75)
-    ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-    ax.grid(axis="y", color=GRID, linewidth=0.8); ax.set_axisbelow(True)
-    ax.legend(frameon=False, fontsize=9, loc="upper left")
-    _style(ax, 'Fig. 4  Abstains when the image is removed ("please provide the image")')
-    fig.tight_layout()
-    paths.append(out_dir / "fig4_abstention.png"); fig.savefig(paths[-1], dpi=200); plt.close(fig)
+        def save(fig, name, title=None):
+            if title and not paper:
+                fig.suptitle(title, x=0.01, ha="left", fontsize=fs + 3, color=INK)
+            fig.savefig(target / name, dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+            plt.close(fig)
+            written.append(target / name)
 
-    # fig5: P3 under each variant (forest plot)
-    fig, ax = plt.subplots(figsize=(8.5, 2.9))
-    y = np.arange(len(p3))[::-1]
-    ax.errorbar(p3.est, y, xerr=[p3.est - p3.lo, p3.hi - p3.est], fmt="o", ms=7, color=BLUE, ecolor=BLUE, elinewidth=2,
-                mec=SURFACE, mew=1.5)
-    ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
-    ax.set_yticks(y, [f"{v}  (n={n})" for v, n in zip(p3.variant, p3.n)], fontsize=8.5)
-    ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-    ax.set_xlabel("Dangerous share, MedGemma-4B minus Gemma-3-4B (paired, 95% CI by image)", color=INK2, fontsize=9)
-    _style(ax)
-    fig.suptitle("Fig. 5  The MedGemma - Gemma-3 gap (P3) depends on the probe", x=0.01, ha="left", fontsize=12, color=INK)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
-    paths.append(out_dir / "fig5_p3.png"); fig.savefig(paths[-1], dpi=200); plt.close(fig)
-    return paths
+        # 1: quadrant composition (full width)
+        fig, axes = plt.subplots(1, 2, figsize=(full, 2.35) if paper else (11, 3.9), sharey=True)
+        ylabels = []
+        for ax, (probe, c) in zip(axes, [("image removed", "quadrant"), ("wrong image", "quadrant_shuf")]):
+            ylabels, y = [], 0
+            for ds in ("pathvqa", "slake", "vqa_rad"):
+                for m in models:
+                    t = samples[m]
+                    share = t[(t.answer_type == "yesno") & (t.split == "test") & (t.dataset == ds)][c].dropna() \
+                        .value_counts(normalize=True)
+                    left = 0.0
+                    for q in ("ideal", "fragile", "dangerous", "worst"):
+                        w = float(share.get(q, 0.0))
+                        ax.barh(y, max(w - 0.004, 0), left=left, height=0.72, color=QUAD_COLORS[q], linewidth=0)
+                        if w >= 0.08:
+                            ax.text(left + w / 2, y, f"{w:.0%}", ha="center", va="center", fontsize=fs - 1,
+                                    color="white" if q in ("fragile", "dangerous") else INK)
+                        left += w
+                    ylabels.append(f"{DS_LABEL[ds]} · {LABEL[m]}")
+                    y += 1
+                y += 0.4
+            ax.set_yticks([0, 1, 2.4, 3.4, 4.8, 5.8])
+            ax.tick_params(axis="y", length=0)
+            ax.set_xlim(0, 1)
+            ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+            _style(ax, f"Probe: {probe}", fs)
+        axes[0].set_yticklabels(ylabels)
+        axes[0].invert_yaxis()
+        axes[1].tick_params(axis="y", labelleft=False)
+        fig.legend([plt.Rectangle((0, 0), 1, 1, color=QUAD_COLORS[q]) for q in QUAD_COLORS],
+                   ["Ideal (stable, image-reliant)", "Fragile (flips, reliant)", "Dangerous (stable, not reliant)",
+                    "Worst (flips, not reliant)"], loc="lower center", ncol=4, frameon=False, fontsize=fs,
+                   bbox_to_anchor=(0.5, -0.06 if paper else -0.02))
+        fig.tight_layout()
+        save(fig, "fig1_quadrants.png", "Fig. 1  Quadrant composition of yes/no answers (test split)")
+
+        # 2: Dangerous share by SLAKE modality, both probes (single column in the paper)
+        fig, axes = plt.subplots(1, 2, figsize=(col, 1.85) if paper else (9.5, 3.4), sharey=True)
+        mods = ["ct", "mri", "xray"]
+        for ax, (probe, c) in zip(axes, [("image removed", "q_dangerous"), ("wrong image", "q_dangerous_shuf")]):
+            for k, m in enumerate(models):
+                tb = pd.read_csv(results_dir / m / profile / "by_modality_pooled.csv")
+                tb = tb[(tb.dataset == "slake") & (tb.answer_type == "yesno")].set_index("modality")
+                x = np.arange(len(mods)) + (k - 0.5) * 0.26
+                est, lo, hi = (tb.loc[mods, s].to_numpy() for s in (c, f"{c}_lo", f"{c}_hi"))
+                ax.errorbar(x, est, yerr=[est - lo, hi - est], fmt="o", ms=4.5 if paper else 7, color=color[m],
+                            ecolor=color[m], elinewidth=1.4 if paper else 2, capsize=0, mec=SURFACE, mew=1)
+            ax.set_xticks(range(len(mods)), ["CT", "MRI", "X-ray"])
+            ax.set_ylim(0, 1)
+            ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+            ax.grid(axis="y", color=GRID, lw=0.6)
+            ax.set_axisbelow(True)
+            _style(ax, probe, fs)
+        axes[0].set_ylabel("Dangerous share", color=INK2, fontsize=fs)
+        fig.legend([Line2D([], [], marker="o", ls="", ms=4.5 if paper else 7, color=color[m]) for m in models],
+                   [LABEL[m] for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
+                   bbox_to_anchor=(0.55, 0.0))
+        fig.tight_layout()
+        save(fig, "fig2_modality.png", "Fig. 2  Dangerous share by modality (SLAKE yes/no, test+val, 95% CI by image)")
+
+        # 3: does image reliance flag wrong answers? label-free scores only
+        sel = tabs["selective_labelfree"]
+        order = ["confidence (baseline)", "image PMI, predicted answer  [label-free]",
+                 "wrong-image PMI, predicted answer  [label-free]"]
+        groups = ["Confidence", "Image reliance\n(image removed)", "Image reliance\n(wrong image)"]
+        fig, ax = plt.subplots(figsize=(col, 1.95) if paper else (7.5, 3.4))
+        series = {m: tuple(sel[sel.model == m].set_index("score").loc[order, k].to_numpy() for k in ("auroc", "lo", "hi"))
+                  for m in models}
+        _bars(ax, groups, series, color, LABEL, fs, pct=False, fmt="{:.2f}", ylim=(0.4, 0.82), hline=0.5)
+        ax.text(-0.5, 0.505, "chance", fontsize=fs - 1.5, color=INK2, ha="left", va="bottom")
+        ax.set_ylabel("AUROC, correct answer", color=INK2, fontsize=fs)
+        ax.legend(frameon=False, fontsize=fs - 0.5, loc="upper right")
+        _style(ax, None, fs)
+        fig.tight_layout()
+        save(fig, "fig3_selective.png", "Fig. 3  Does image reliance flag wrong answers? (test yes/no)")
+
+        # 4: abstention without the image: forced yes/no (main run) and with 'unknown' allowed (probe R2)
+        abst = tabs["abstention"]
+        dss = ["pathvqa", "slake", "vqa_rad"]
+        pa = tabs.get("probe_abstain")
+        ncols = 2 if pa is not None else 1
+        fig, axes = plt.subplots(1, ncols, figsize=(col, 1.95) if paper else (5.5 * ncols, 3.3), sharey=True, squeeze=False)
+        series = {m: tuple(abst[abst.model == m].set_index("dataset").loc[dss, k].to_numpy()
+                           for k in ("abstain_noimg", "lo", "hi")) for m in models}
+        _bars(axes[0, 0], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
+        _style(axes[0, 0], "Answer yes/no (main run)", fs)
+        axes[0, 0].legend(frameon=False, fontsize=fs - 0.5, loc="upper left")
+        if pa is not None:
+            series = {m: tuple(pa[(pa.model == m)].set_index("dataset").loc[dss, k].to_numpy()
+                               for k in ("abstain_allowed", "lo", "hi")) for m in models}
+            _bars(axes[0, 1], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
+            _style(axes[0, 1], "'unknown' allowed (probe)", fs)
+        fig.tight_layout()
+        save(fig, "fig4_abstention.png", "Fig. 4  Declines to answer when the image is removed")
+
+        # 5: the MedGemma - Gemma-3 Dangerous gap under every variant (forest plot, one axis: share difference)
+        p3 = tabs["p3_sensitivity"].copy()
+        names = {"pre-registered (image-removed probe)": "Image removed (pre-registered)",
+                 f"both models answer without image (mass >= {ANSWER_MASS})": "  only questions both answer",
+                 f"neither model abstains (mass >= {ABSTAIN_MASS})": "  excluding abstentions",
+                 "wrong-image probe instead": "Wrong image"}
+        rows = [(names[v], e, lo, hi, n) for v, e, lo, hi, n in p3[["variant", "est", "lo", "hi", "n"]].itertuples(index=False)]
+        pb = tabs.get("probe_blank")
+        if pb is not None:
+            r = pb.iloc[-1]
+            rows.append(("Black image (probe)", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
+        hm = tabs["harm"]
+        hm = hm[hm.model.str.contains(" - ")].set_index("measure")
+        for meas, nm in (("dangerous_correct", "Dangerous and correct"), ("dangerous_wrong", "Dangerous and wrong")):
+            rows.append((nm, hm.loc[meas, "est"], hm.loc[meas, "lo"], hm.loc[meas, "hi"], int(hm.loc[meas, "n"])))
+        fig, ax = plt.subplots(figsize=(col, 0.32 * len(rows) + 0.5) if paper else (8.5, 0.45 * len(rows) + 1))
+        y = np.arange(len(rows))[::-1]
+        for yi, (nm, e, lo, hi, n) in zip(y, rows):
+            ax.errorbar(e, yi, xerr=[[e - lo], [hi - e]], fmt="o", ms=4 if paper else 7, color=BLUE, ecolor=BLUE,
+                        elinewidth=1.3 if paper else 2, mec=SURFACE, mew=1)
+        ax.axvline(0, color=INK2, lw=0.9, ls=(0, (3, 3)))
+        ax.set_yticks(y, [f"{nm} (n={n})" for nm, *_, n in rows], fontsize=fs - 0.5)
+        ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+        ax.set_xlabel("MedGemma minus Gemma-3, share of questions (95% CI)", color=INK2, fontsize=fs)
+        _style(ax, None, fs)
+        fig.tight_layout()
+        save(fig, "fig5_p3.png", "Fig. 5  The Dangerous gap, by probe and by correctness")
+
+        # 6: opposite-answer images (probe R3): follow rate by modality
+        po = tabs.get("probe_opp")
+        if po is not None:
+            mods = ["all", "ct", "mri", "xray"]
+            fig, ax = plt.subplots(figsize=(col, 1.85) if paper else (6.5, 3.2))
+            series = {m: tuple(po[po.model == m].set_index("modality").reindex(mods)[k].to_numpy()
+                               for k in ("follow_rate", "lo", "hi")) for m in models}
+            _bars(ax, ["All", "CT", "MRI", "X-ray"], series, color, LABEL, fs, ylim=(0, 1.1))
+            ax.set_ylabel("answer changes", color=INK2, fontsize=fs)
+            ax.legend(frameon=False, fontsize=fs - 0.5, loc="upper left", ncol=2)
+            _style(ax, None, fs)
+            fig.tight_layout()
+            save(fig, "fig6_opposite.png", "Fig. 6  Image swapped for one whose correct answer is opposite (SLAKE)")
+    return written
 
 
 def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd.DataFrame]:
@@ -389,14 +576,17 @@ def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
            "p3_sensitivity": p3_sensitivity(samples, raws, model_a, model_b, B, seed),
            "p1_sensitivity": p1_sensitivity(samples, raws, B, seed),
            "chance": chance(samples, raws, model_a, model_b, B, seed),
+           "harm": harm(samples, model_a, model_b, B, seed),
            "no_pilot": no_pilot(cfg, paths, samples, raws, items, model_a, model_b, B, seed)}
+    out.update(probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed))
     out_dir = paths.results / f"posthoc_{model_a}_vs_{model_b}" / profile
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, df in out.items():
         df.to_csv(out_dir / f"{name}.csv", index=False)
-    figs = figures(out_dir, samples, [model_a, model_b], out["abstention"], out["selective_labelfree"],
-                   out["p3_sensitivity"], paths.results, profile)
-    print(f"[posthoc] {len(out)} tables + {len(figs)} figures -> {out_dir}")
-    print(out["p3_sensitivity"][["variant", "est", "lo", "hi", "n"]].round(3).to_string(index=False))
-    print(out["chance"].round(3).to_string(index=False))
+    paper_dir = paths.root / "report" / "figures"
+    figs = figures(out_dir, samples, [model_a, model_b], out, paths.results, profile, paper_dir=paper_dir)
+    print(f"[posthoc] {len(out)} tables + {len(figs)} figures -> {out_dir} (paper versions -> {paper_dir})")
+    for k in ("p3_sensitivity", "harm", "probe_tests"):
+        if k in out:
+            print(out[k].round(3).to_string(index=False))
     return out

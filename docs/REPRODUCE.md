@@ -10,7 +10,7 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 88 fast tests, no GPU / network needed
+pytest                                                  # 95 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
@@ -37,7 +37,15 @@ in bf16, batching shifts teacher-forced log-probabilities by up to ~1 nat (PLAN.
 medvlm pipeline --profile main --model medgemma4b --hardware rtx4080 --parts 2
 medvlm pipeline --profile main --model gemma3_4b  --hardware rtx4080 --parts 2
 medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b
+medvlm probes   --profile main --model medgemma4b --hardware rtx4080    # robustness probes, ~7 min per model
+medvlm probes   --profile main --model gemma3_4b  --hardware rtx4080
+medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # all post-hoc tables + figures
 ```
+
+`probes` runs the three robustness probes registered in PLAN.md section 15 (black image, "unknown" allowed,
+opposite-answer image) into separate folders (`outputs/<model>__<probe>/main`). `posthoc` writes tables to
+`results/posthoc_*/main/` and figures twice: titled versions there, paper versions to `report/figures/`.
+The teaser figure is built by `python report/make_teaser.py`.
 
 `pipeline` = verify images -> validate paraphrases (no LM needed: they are committed) -> load the model once
 -> part 1 -> checkpoint analysis -> part 2 -> analysis. Every command writes a timestamped
@@ -60,6 +68,8 @@ medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b
 | `run --shard i/n` | Inference only; resumable, `--limit`, `--max-minutes` |
 | `pipeline` | The whole study for one model, in N back-to-back parts |
 | `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison |
+| `probes --probe blank\|abstain\|opp\|all` | Registered robustness probes (PLAN.md section 15) |
+| `posthoc --model-b B` | Post-hoc analyses, probe tests and all figures (web + paper versions) |
 
 Config layering: `configs/base.yaml` -> profile -> model -> hardware -> `configs/local.yaml` (gitignored) ->
 `--set a.b=c`.

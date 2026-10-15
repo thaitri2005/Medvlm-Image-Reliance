@@ -61,7 +61,7 @@ a same-architecture control for medical tuning. **Novelty search still to do** (
 ## 3. Hypotheses (directional guesses; nulls are reported as findings)
 
 *Outcomes after the main run: [RESULTS.md section 7](RESULTS.md). H1 supported (MedGemma, PathVQA); H2
-probe-dependent; H3 not supported (P2 confounded by label leakage); H4 supported under the pre-registered
+probe-dependent; H3 not supported (image reliance at chance for flagging errors); H4 supported under the pre-registered
 probe only; H5 supported.*
 
 - H1: blind accuracy exceeds the majority prior somewhere (most likely PathVQA, whose questions name the entity). *Pilot hint: it did not (SLAKE -0.12).*

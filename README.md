@@ -19,32 +19,35 @@ changes* places every answer in one of four quadrants. A continuous reliance sco
 image reliance can **flag wrong answers better than the model's own confidence**, and an architecture-matched
 control (**Gemma-3-4B**, no medical post-training) asks whether medical tuning makes this better or worse.
 Hypotheses, endpoints, tests and exclusions were [pre-registered](PLAN.md) before the main run, and
-every post-hoc analysis is labelled as such. Medical tuning makes MedGemma far more accurate and consistent,
-**and** far more willing to answer when the image is missing. The result is more answers that look
-trustworthy without the image. The reliance score we pre-registered to catch them turns out to work only
-because it reads the answer key.
+every post-hoc analysis is labelled as such. MedGemma's post-training makes it far more accurate and consistent,
+**and** far more willing to answer when the image is missing. The extra blind answers are mostly right, but
+they hide its remaining errors among answers that look trustworthy and do not depend on the image.
 
 ## Key findings
 
 *18,896 model calls per model, all completed. Primary set: 1,206 yes/no test questions on 670 images. Full
 write-up with every number and CI: **[RESULTS.md](RESULTS.md)**.*
 
-1. **Medical tuning creates the *consistent but blind* pattern, across modalities.** Under the
-   pre-registered image-removed probe, MedGemma has **+13.7 points** more Dangerous answers than its
-   architecture twin Gemma-3 (95% CI [10.0, 17.5]), in every dataset (pathology +7.5, SLAKE +18.6,
-   VQA-RAD +25.6) and across the whole sensitivity grid. On yes/no questions much of any Dangerous share is
-   chance agreement (floor ~36–42%); corrected for chance the gap holds (Δκ = +0.11 [0.04, 0.18]) but is
-   smaller. See the [audit of every leak and assumption](RESULTS.md#9-audit-leaks-confounds-and-wrong-assumptions).
-2. **It is not ignoring images; it is answering without them.** When an image is swapped for one with a
-   different correct answer, MedGemma changes its answer 74% of the time (Gemma-3: 17%). But when the image
-   is *missing*, Gemma-3 asks for it ("please provide the image") on up to 50% of questions and MedGemma
-   keeps answering, beating the answer-frequency prior on PathVQA (+5.0 points, Holm-significant).
-3. **"Dangerous" depends on the probe.** With a wrong image instead of no image, the model gap vanishes
-   (−0.7 points), the two probes agree poorly (κ ≤ 0.23), and wrong-image swaps are confounded wherever the
-   other image has the same answer (all chest X-rays checked).
-4. **A reliance score that looks great is a label leak.** Image PMI on the gold answer flags errors with
-   AUROC 0.92. On the model's own answer, the only deployable version, it is at chance (0.51), below plain
-   confidence (0.71). The pre-registered P2 had this flaw; we report it rather than the flattering number.
+1. **MedGemma uses the image when it has one, and keeps answering when it doesn't.** It is far more
+   accurate than its architecture twin Gemma-3 (SLAKE yes/no 86.5% vs 68.7%) and changes its answer when the
+   image's answer changes. But with the image removed, Gemma-3 asks for it ("please provide the image") on up
+   to 50% of questions while MedGemma keeps answering, and beats the answer-frequency prior doing so
+   (PathVQA +5.0 points, Holm-significant).
+2. **That makes it *consistent but dangerous* more often, but the excess is correct answers.** Under the
+   pre-registered taxonomy MedGemma has +13.7 points more Dangerous answers [10.0, 17.5], in every dataset.
+   Split by correctness, all of it is Dangerous-and-correct (+14.1); stable, image-independent and *wrong*
+   answers are equally common in both models (11.3% vs 11.7%). The catch: MedGemma errs less, so **more of its
+   remaining errors (44% vs 31%) are the kind no consistency or reliance check can catch.**
+3. **The Dangerous share needs three corrections before it means anything:** a chance floor (~36–42% on
+   yes/no; chance-corrected Δκ = +0.11 [0.04, 0.18]), its dependence on the probe (with a wrong image instead
+   of no image the gap is −0.7; the probes agree at κ ≤ 0.23), and the correctness split above.
+4. **Image reliance does not flag wrong answers.** Scored on the model's own answers, image reliance ranks
+   correct above incorrect answers at chance (AUROC 0.51), below plain confidence (0.71).
+
+Robustness probes registered after the main run (black image, "unknown" allowed, opposite-answer image) are in
+[RESULTS.md §7](RESULTS.md), with every leak and assumption we checked in
+[§10](RESULTS.md#10-audit-leaks-confounds-and-wrong-assumptions). Paper (CVPR format):
+[report/main.tex](report/main.tex).
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png" width="95%"></p>
 
@@ -160,7 +163,7 @@ An audit is only as credible as its instrument. Before any main-run number exist
   the cause is inside the network. All runs therefore use batch size 1, and a regression check confirms a
   different GPU reproduces the pilot (98.5% same answers, mean |ΔP(yes)| = 0.004).
 - **Paraphrase validity.** Every pair was screened, not sampled (above), and the result is enforced in code.
-- **Engineering.** 90 unit tests plus real-model equivalence tests; resumable, crash-safe runs; a
+- **Engineering.** 95 unit tests plus real-model equivalence tests; resumable, crash-safe runs; a
   timestamped log for every command.
 
 ## 7. Repository

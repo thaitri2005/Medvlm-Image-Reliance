@@ -1,0 +1,4 @@
+hypothesis,est,lo,hi,p,p_holm,n
+"H6: kappa(orig, blank), MedGemma - Gemma-3 (> 0 predicted)",-0.21940922952825326,-0.2988612805862314,-0.13686435489021548,0.0,0.0,1206
+"H7: abstention with 'unknown' allowed, MedGemma - Gemma-3 (< 0 predicted)",-0.06716417910447761,-0.08245124716553288,-0.05345013647259559,0.0,0.0,1206
+"H8: follow rate on opposite-answer images, MedGemma - Gemma-3 (> 0 predicted)",0.47956403269754766,0.41943778538812787,0.5375084459459458,0.0,0.0,367

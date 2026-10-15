@@ -11,24 +11,26 @@ analysis plan was frozen is logged in [PLAN.md §13](PLAN.md), and the robustnes
 
 ## Summary
 
-1. **MedGemma uses the image when one is present.** It is much more accurate with it (SLAKE yes/no 86.5% vs
-   68.7% for Gemma-3), and when the image is swapped for one with a different correct answer it changes its
-   answer far more often than Gemma-3 (74% vs 17% on the 35 swaps available in the main run; the registered
-   opposite-answer probe tests this at scale, §7).
-2. **When the image is missing, MedGemma keeps answering.** Gemma-3 replies "please provide the image" on
-   41–50% of SLAKE/VQA-RAD questions, MedGemma on 26–27% (paired −11.2 points [−14.0, −8.6]), and MedGemma's
-   blind answers beat the answer-frequency prior (PathVQA +5.0 points, P1a, Holm-significant).
-3. **Under the reference taxonomy this makes MedGemma "consistent but dangerous" more often** (P3: +13.7
-   points [10.0, 17.5]), **but the excess is entirely correct answers.** Dangerous-and-correct: +14.1
-   [11.1, 17.1]; Dangerous-and-wrong (stable, image-independent and wrong, the harmful cell): 11.3% vs 11.7%,
-   −0.4 [−2.7, 2.0]. Because MedGemma makes 12 points fewer errors overall, **a larger share of its remaining
-   errors are of this hard-to-catch kind: 44% vs 31%** (+12.9 [6.0, 19.9]).
-4. **The Dangerous share needs three corrections before it means anything:** it sits on a large chance floor
-   on yes/no questions (41.5% / 35.8%; chance-corrected Δκ = +0.11 [0.04, 0.18]); it depends on the probe
-   (with a wrong image instead of no image the gap is −0.7 [−4.4, 3.2]; the probes agree at κ ≤ 0.23); and it
-   mixes correct and wrong answers (point 3).
-5. **Image reliance does not flag wrong answers.** Label-free image PMI ranks correct above incorrect answers
-   at chance (AUROC 0.51), below the model's own confidence (0.71).
+1. **By the reference test, MedGemma is "consistent but dangerous" more often** than its architecture twin
+   Gemma-3: with the image removed, its Dangerous share is +13.7 points higher [10.0, 17.5] (P3, robust across
+   the pre-registered sensitivity grid and every dataset).
+2. **By every in-format test, MedGemma is the *more* image-reliant model** (robustness probes registered before
+   they were run, PLAN.md §15):
+   - shown an image on which the same question has the **opposite** answer, MedGemma changes its answer
+     **73%** of the time, Gemma-3 **25%** (H8: +48.0 points [41.9, 53.8]);
+   - shown a **black** image, Gemma-3 keeps its real-image answer far more often (κ 0.33 vs 0.11), and under
+     this probe Gemma-3 is the more Dangerous model by 14.0 points (H6 predicted the opposite and **failed**);
+   - MedGemma is 18 points more accurate with the image on SLAKE yes/no (86.5% vs 68.7%).
+3. **What image removal measures is willingness to answer without an image.** Forced to say yes or no,
+   Gemma-3 asks for the image on up to 50% of questions and MedGemma on 26–27%; allowed to say "unknown",
+   **both decline on at least 93%** (MedGemma 93.0%, Gemma-3 99.7%; H7). MedGemma's residual blind answers
+   beat the answer-frequency prior (PathVQA +5.0 points, P1a).
+4. **MedGemma's extra "Dangerous" answers are correct answers.** Dangerous-and-correct: +14.1 [11.1, 17.1];
+   Dangerous-and-wrong: 11.3% vs 11.7%. The residual concern: MedGemma errs less, so more of its remaining
+   errors (44% vs 31%) are the stable, image-independent kind no label-free check can catch.
+5. **The Dangerous share needs correcting before it means anything**: a chance floor on yes/no (41.5% / 35.8%;
+   Δκ = +0.11 [0.04, 0.18]), its probe (it flips sign between image removal and a black image), and the
+   correctness split above. **Image reliance does not flag wrong answers** (AUROC 0.51, confidence 0.71).
 
 ## 1. Sanity checks
 
@@ -155,13 +157,45 @@ may be correct. Split by correctness:
 without an image, with blind answers that beat the prior and are usually right. The extra "Dangerous" answers
 are these correct blind answers; the harmful cell is unchanged. The cost is subtler: MedGemma's remaining errors
 look like its correct answers to every label-free check (stable, unchanged without the image, confident), so
-more of them would go unnoticed. One model pair cannot separate medical data from the rest of the
-post-training recipe.
+more of them would go unnoticed. The robustness probes (§7) confirm that this is a willingness to answer
+without an image, not neglect of an image that is present. One model pair cannot separate medical data from
+the rest of the post-training recipe.
 
 ## 7. Robustness probes (registered, PLAN.md §15)
 
-*Pending: run `medvlm probes` for both models, then `medvlm posthoc`.* R1 black image (H6), R2 "unknown"
-allowed (H7), R3 opposite-answer image (H8), one Holm family.
+Registered after the main run and before running the probes (commit `44131a5`), each with a directional
+prediction; one Holm-adjusted family (`probe_tests.csv`). R1/R2 use the 1,206 yes/no test questions, R3 the
+367 SLAKE yes/no questions (test+validation, 130 images) that have an opposite-answer partner, as registered.
+
+| | Probe | MedGemma | Gemma-3 | Difference | Prediction |
+|---|---|---|---|---|---|
+| R1 | Black image: answer unchanged | 52.6% | 72.9% | | |
+| | κ(real image, black image) | 0.11 [0.06, 0.17] | 0.33 [0.28, 0.39] | **−0.22** [−0.30, −0.14], p_Holm < 0.001 | H6: > 0 → **failed (reversed)** |
+| | Dangerous share under black image | 44.2% | 58.2% | −14.0 [−18.6, −9.4] | |
+| R2 | "unknown" allowed: declines to answer | 93.0% | 99.7% | **−6.7** [−8.2, −5.3], p_Holm < 0.001 | H7: < 0 → **supported** |
+| R3 | Opposite-answer image: answer changes | 72.8% [68.1, 77.0] | 24.8% [20.4, 29.3] | **+48.0** [41.9, 53.8], p_Holm < 0.001 | H8: > 0 → **supported** |
+| | Accuracy on the opposite-answer image | 86.1% | 61.0% | | |
+
+![Fig. 6](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig6_opposite.png)
+
+**R3: MedGemma follows the image.** It changes its answer on 73% of opposite-answer swaps and Gemma-3 on 25%,
+for CT (75 vs 26%), MRI (57 vs 26%) and X-ray (81 vs 8%; exploratory), and with the 40 PathVQA/VQA-RAD swaps
+added (69.8 vs 24.8%).
+
+**R1: with a black image, the ranking reverses.** Gemma-3 keeps the answer it gave with the real image on 73%
+of questions, MedGemma on 53%. The answers explain it: on a black image MedGemma's yes-rate drops from 58% to
+28% (it reads an empty image as absent findings), while Gemma-3's rises from 64% to 84%; its answers track the
+question rather than the image. The registered prediction (H6) was the opposite; it failed, and we report it.
+
+**R2: given the option, both models decline.** Without an image and with "unknown" allowed, MedGemma declines on
+93% (PathVQA 88%, SLAKE 98%, VQA-RAD 97%) and Gemma-3 on 99.7%. H7's direction holds and the registered
+"compliance-only" rule (gap < 3 points) is not met, so MedGemma keeps a small tendency to answer blind, mostly
+on PathVQA. But most of the forced-format gap (11.2 points) disappears: the main run's image-removed Dangerous
+gap largely reflects how each model handles being told to answer about an image it was not given.
+
+**Conclusion of the probes.** Image removal, the probe that defines the consistent-but-dangerous taxonomy,
+ranks the two models opposite to both in-format probes. It measures willingness to answer without an image, not
+reliance on image content.
 
 ## 8. Hypotheses
 
@@ -170,12 +204,17 @@ allowed (H7), R3 opposite-answer image (H8), one Holm family.
 | H1 | Blind accuracy exceeds the prior somewhere, most likely PathVQA | **Supported** for MedGemma on PathVQA (P1a); not for Gemma-3 |
 | H2 | Dangerous share differs by modality | **Probe-dependent:** X-ray is lowest under image removal and highest under wrong image, explained by answer-preserving swaps |
 | H3 | Image PMI flags errors better than confidence | **Not supported:** at chance, below confidence |
-| H4 | MedGemma has a larger Dangerous share than Gemma-3 | **Supported under the pre-registered probe** (robust to the grid and to abstention), **not** under the wrong-image probe; the excess is correct answers |
+| H4 | MedGemma has a larger Dangerous share than Gemma-3 | **Supported only under image removal** (robust to the grid and to abstention); null under a wrong image, **reversed** under a black image; the excess is correct answers |
 | H5 | The two probes agree only weakly | **Supported** (κ −0.11 to 0.23) |
+| H6 | κ(real, black image) higher for MedGemma | **Failed, reversed:** −0.22 [−0.30, −0.14] |
+| H7 | With "unknown" allowed, MedGemma still abstains less | **Supported**, but both decline on ≥ 93% |
+| H8 | MedGemma follows opposite-answer images more often | **Supported:** +48.0 [41.9, 53.8] |
 
 ## 9. Threats to validity
 
 - One model pair; the two differ in their whole post-training, not only in medical data.
+- The probes were registered after the main results were known (before running them); one of three
+  predictions failed.
 - Abstention is inferred from first-token probability mass, confirmed by free generation on a sample, not
   annotated for every question.
 - SLAKE is in MedGemma's training data (split unstated); VQA-RAD and PathVQA are not listed.

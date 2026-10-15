@@ -35,14 +35,16 @@ a modality (reported as exploratory only), training anything, clinical claims.
 
 - Built: loaders + deterministic sampler + image hashing, batched paraphrasing + validation, resumable
   runner, scoring, statistics (cluster bootstrap, Holm, kappa), `analyze`, `compare`, `bench`, `regress`,
-  `pipeline`, hardware presets. **88 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
+  `pipeline`, hardware presets. **95 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
 - Big machine (RTX 4080 SUPER 16 GB): pre-flight 1-7 done 2026-10-15 (section 9 results). Batch 1 for all runs
   (section 13, item 10). Paraphrases + full LLM-judge screen done (4.5): 84% of the primary set covered.
   Main runs done 2026-10-16 (18,896 calls per model, both complete). Results: [RESULTS.md](RESULTS.md).
-  Post-run deviations and post-hoc analyses: section 13, items 12-15.
+  Post-run deviations and post-hoc analyses: section 13, items 12-16.
+- Robustness probes (section 15) registered at commit `44131a5`, then run 2026-10-16 (3,535 calls per model):
+  H6 failed (reversed), H7 and H8 supported. The report is in `report/` (CVPR format).
 
 ## 2. Prior work and our delta
 
@@ -60,9 +62,10 @@ a same-architecture control for medical tuning. **Novelty search still to do** (
 
 ## 3. Hypotheses (directional guesses; nulls are reported as findings)
 
-*Outcomes after the main run: [RESULTS.md section 7](RESULTS.md). H1 supported (MedGemma, PathVQA); H2
-probe-dependent; H3 not supported (image reliance at chance for flagging errors); H4 supported under the pre-registered
-probe only; H5 supported.*
+*Outcomes: [RESULTS.md section 8](RESULTS.md). H1 supported (MedGemma, PathVQA); H2 probe-dependent; H3 not
+supported (image reliance at chance for flagging errors); H4 supported under the pre-registered probe (image
+removed) only: null under a wrong image, reversed under a black image (section 15); H5 supported. Probe
+hypotheses H6-H8: section 15.*
 
 - H1: blind accuracy exceeds the majority prior somewhere (most likely PathVQA, whose questions name the entity). *Pilot hint: it did not (SLAKE -0.12).*
 - H2: the Dangerous share differs by modality.
@@ -240,6 +243,8 @@ medvlm pipeline --profile main --model medgemma4b --hardware <preset> --parts 2 
 medvlm pipeline --profile main --model gemma3_4b  --hardware <preset> --parts 2
 medvlm analyze  --profile main --model medgemma4b     # also run for gemma3_4b
 medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b
+medvlm probes   --profile main --model medgemma4b --hardware <preset>    # section 15; also gemma3_4b
+medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # post-hoc + probe tables, figures
 ```
 
 Each `pipeline` = images (skipped if verified) -> paraphrases (skipped if complete; shared by both models)
@@ -340,3 +345,17 @@ test split; R3 uses SLAKE test+validation (pooled, as for the modality analyses)
 **Already observed, post hoc (reported as such):** the Dangerous gap decomposes into Dangerous-and-correct
 (+14.1 [11.1, 17.1]) and Dangerous-and-wrong (-0.4 [-2.7, 2.0]); a larger share of MedGemma's errors are
 Dangerous (44% vs 31%).
+
+### 15.1 Outcome (run 2026-10-16; `results/posthoc_medgemma4b_vs_gemma3_4b/main/probe_*.csv`)
+
+| | Result (MedGemma vs Gemma-3) | Paired difference [95% CI], p_Holm | Hypothesis |
+|---|---|---|---|
+| R1 | kappa(orig, blank) 0.11 vs 0.33; answer unchanged 52.6% vs 72.9% | -0.22 [-0.30, -0.14], < 0.001 | **H6 failed (reversed)** |
+| R2 | declines with "unknown" allowed: 93.0% vs 99.7% | -6.7 points [-8.2, -5.3], < 0.001 | **H7 supported**; the "format compliance" rule (gap < 3 points) is not met |
+| R3 | follow rate 72.8% vs 24.8% (367 SLAKE questions, 130 images) | +48.0 points [41.9, 53.8], < 0.001 | **H8 supported** |
+
+Notes. R3 is analysed on the registered SLAKE set; the runner also produced 40 opposite-answer swaps on
+PathVQA/VQA-RAD, reported only as an exploratory "all datasets" row (69.8% vs 24.8%). On a black image
+MedGemma's yes-rate falls from 58% to 28% and Gemma-3's rises from 64% to 84%, which is why H6 reversed.
+Reading: image removal (the reference probe) ranks the two models opposite to both in-format probes; it
+measures willingness to answer without an image rather than reliance on image content.

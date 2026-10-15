@@ -341,9 +341,11 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
         D["image_id"] = [by_id[s].image_id for s in idx]
         D["modality"] = [by_id[s].modality for s in idx]
         D["partner_yes"] = [partners[s].answer.strip().lower() == "yes" for s in idx]
+        D["dataset"] = [by_id[s].dataset for s in idx]
+        D_all, D = D, D[D.dataset == "slake"]          # H8 was registered on SLAKE (test+val); others exploratory
         rows = []
         for tag, m in (("a", model_a), ("b", model_b)):
-            for mod, g in [("all", D)] + list(D.groupby("modality")):
+            for mod, g in [("all", D)] + list(D.groupby("modality")) + [("all datasets (exploratory)", D_all)]:
                 f = _ci(g, lambda x, t=tag: float((x[f"o{t}"] != x[f"p{t}"]).mean()), B, seed)
                 acc = float((g[f"p{tag}"] == g.partner_yes).mean())
                 rows.append({"model": m, "modality": mod, "follow_rate": f["est"], "lo": f["lo"], "hi": f["hi"],
@@ -423,7 +425,11 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
 
         def save(fig, name, title=None):
             if title and not paper:
-                fig.suptitle(title, x=0.01, ha="left", fontsize=fs + 3, color=INK)
+                # place the title above everything already drawn (panel titles, top tick labels)
+                fig.canvas.draw()
+                bb = fig.get_tightbbox(fig.canvas.get_renderer())
+                fig.suptitle(title, x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015,
+                             ha="left", va="bottom", fontsize=fs + 3, color=INK)
             fig.savefig(target / name, dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
             plt.close(fig)
             written.append(target / name)
@@ -459,8 +465,8 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         axes[1].tick_params(axis="y", labelleft=False)
         fig.legend([plt.Rectangle((0, 0), 1, 1, color=QUAD_COLORS[q]) for q in QUAD_COLORS],
                    ["Ideal (stable, image-reliant)", "Fragile (flips, reliant)", "Dangerous (stable, not reliant)",
-                    "Worst (flips, not reliant)"], loc="lower center", ncol=4, frameon=False, fontsize=fs,
-                   bbox_to_anchor=(0.5, -0.06 if paper else -0.02))
+                    "Worst (flips, not reliant)"], loc="upper center", ncol=4, frameon=False, fontsize=fs,
+                   bbox_to_anchor=(0.5, 0.0))
         fig.tight_layout()
         save(fig, "fig1_quadrants.png", "Fig. 1  Quadrant composition of yes/no answers (test split)")
 
@@ -508,35 +514,38 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         abst = tabs["abstention"]
         dss = ["pathvqa", "slake", "vqa_rad"]
         pa = tabs.get("probe_abstain")
-        ncols = 2 if pa is not None else 1
-        fig, axes = plt.subplots(1, ncols, figsize=(col, 1.95) if paper else (5.5 * ncols, 3.3), sharey=True, squeeze=False)
+        npan = 2 if pa is not None else 1
+        shape = (npan, 1) if paper else (1, npan)
+        fig, axes = plt.subplots(*shape, figsize=(col, 1.55 * npan + 0.1) if paper else (5.5 * npan, 3.3),
+                                 sharey=True, squeeze=False)
+        axes = axes.reshape(1, -1)
         series = {m: tuple(abst[abst.model == m].set_index("dataset").loc[dss, k].to_numpy()
                            for k in ("abstain_noimg", "lo", "hi")) for m in models}
         _bars(axes[0, 0], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
-        _style(axes[0, 0], "Answer yes/no (main run)", fs)
+        _style(axes[0, 0], "Instruction: answer yes or no (main run)", fs)
         axes[0, 0].legend(frameon=False, fontsize=fs - 0.5, loc="upper left")
         if pa is not None:
             series = {m: tuple(pa[(pa.model == m)].set_index("dataset").loc[dss, k].to_numpy()
                                for k in ("abstain_allowed", "lo", "hi")) for m in models}
             _bars(axes[0, 1], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
-            _style(axes[0, 1], "'unknown' allowed (probe)", fs)
+            _style(axes[0, 1], "Instruction allows 'unknown' (probe R2)", fs)
         fig.tight_layout()
         save(fig, "fig4_abstention.png", "Fig. 4  Declines to answer when the image is removed")
 
         # 5: the MedGemma - Gemma-3 Dangerous gap under every variant (forest plot, one axis: share difference)
         p3 = tabs["p3_sensitivity"].copy()
-        names = {"pre-registered (image-removed probe)": "Image removed (pre-registered)",
-                 f"both models answer without image (mass >= {ANSWER_MASS})": "  only questions both answer",
-                 f"neither model abstains (mass >= {ABSTAIN_MASS})": "  excluding abstentions",
+        names = {"pre-registered (image-removed probe)": "Image removed (registered)",
+                 f"both models answer without image (mass >= {ANSWER_MASS})": "  both answer blind",
+                 f"neither model abstains (mass >= {ABSTAIN_MASS})": "  no abstentions",
                  "wrong-image probe instead": "Wrong image"}
         rows = [(names[v], e, lo, hi, n) for v, e, lo, hi, n in p3[["variant", "est", "lo", "hi", "n"]].itertuples(index=False)]
         pb = tabs.get("probe_blank")
         if pb is not None:
             r = pb.iloc[-1]
-            rows.append(("Black image (probe)", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
+            rows.append(("Black image (R1)", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
         hm = tabs["harm"]
         hm = hm[hm.model.str.contains(" - ")].set_index("measure")
-        for meas, nm in (("dangerous_correct", "Dangerous and correct"), ("dangerous_wrong", "Dangerous and wrong")):
+        for meas, nm in (("dangerous_correct", "Removed: correct only"), ("dangerous_wrong", "Removed: wrong only")):
             rows.append((nm, hm.loc[meas, "est"], hm.loc[meas, "lo"], hm.loc[meas, "hi"], int(hm.loc[meas, "n"])))
         fig, ax = plt.subplots(figsize=(col, 0.32 * len(rows) + 0.5) if paper else (8.5, 0.45 * len(rows) + 1))
         y = np.arange(len(rows))[::-1]
@@ -544,9 +553,11 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
             ax.errorbar(e, yi, xerr=[[e - lo], [hi - e]], fmt="o", ms=4 if paper else 7, color=BLUE, ecolor=BLUE,
                         elinewidth=1.3 if paper else 2, mec=SURFACE, mew=1)
         ax.axvline(0, color=INK2, lw=0.9, ls=(0, (3, 3)))
-        ax.set_yticks(y, [f"{nm} (n={n})" for nm, *_, n in rows], fontsize=fs - 0.5)
-        ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-        ax.set_xlabel("MedGemma minus Gemma-3, share of questions (95% CI)", color=INK2, fontsize=fs)
+        ax.axhline(1.5, color=GRID, lw=0.8)
+        ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
+        ax.set_yticks(y, [f"{nm}  {n}" for nm, *_, n in rows], fontsize=fs - 0.5)
+        ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v * 100:+.0f}" if v else "0"))
+        ax.set_xlabel("Dangerous share, MedGemma − Gemma-3 (points, 95% CI)", color=INK2, fontsize=fs)
         _style(ax, None, fs)
         fig.tight_layout()
         save(fig, "fig5_p3.png", "Fig. 5  The Dangerous gap, by probe and by correctness")
@@ -560,7 +571,8 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                                for k in ("follow_rate", "lo", "hi")) for m in models}
             _bars(ax, ["All", "CT", "MRI", "X-ray"], series, color, LABEL, fs, ylim=(0, 1.1))
             ax.set_ylabel("answer changes", color=INK2, fontsize=fs)
-            ax.legend(frameon=False, fontsize=fs - 0.5, loc="upper left", ncol=2)
+            fig.legend(*ax.get_legend_handles_labels(), frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
+                       bbox_to_anchor=(0.55, 0.0))
             _style(ax, None, fs)
             fig.tight_layout()
             save(fig, "fig6_opposite.png", "Fig. 6  Image swapped for one whose correct answer is opposite (SLAKE)")

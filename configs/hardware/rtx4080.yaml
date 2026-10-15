@@ -1,0 +1,2 @@
+# 16 GB. 8.6 GB of bf16 weights leaves ~7 GB for activations. Starting point only: run `medvlm bench`.
+run: {batch_size: 4}

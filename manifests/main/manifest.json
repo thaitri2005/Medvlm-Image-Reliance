@@ -1,8 +1,8 @@
 {
   "profile": "main",
   "seed": 1234,
-  "n_items": 2512,
-  "n_images": 861,
+  "n_items": 2312,
+  "n_images": 811,
   "datasets": [
     {
       "name": "slake",
@@ -24,7 +24,10 @@
     {
       "name": "pathvqa",
       "split": "test",
-      "n": 1000,
+      "n": {
+        "open": 200,
+        "yesno": 600
+      },
       "stratify": [
         "answer_type"
       ]
@@ -32,8 +35,8 @@
   ],
   "python": "3.12.2",
   "counts": {
-    "pathvqa|test|pathology|open": 500,
-    "pathvqa|test|pathology|yesno": 500,
+    "pathvqa|test|pathology|open": 200,
+    "pathvqa|test|pathology|yesno": 600,
     "slake|test|ct|open": 286,
     "slake|test|ct|yesno": 186,
     "slake|test|mri|open": 155,

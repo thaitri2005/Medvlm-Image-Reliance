@@ -1,213 +1,266 @@
 # Consistent but blind? An image-reliance audit of a medical VLM across imaging modalities
 
 Course project (computer vision, groups of up to 3). This file is the single source of truth for
-*what we are doing and why*. `README.md` covers how to run it. Last updated 2026-10-14.
+*what we are doing and why*; `README.md` is the how-to-run. Last updated 2026-10-15.
 
-## 1. One-paragraph pitch
+## 0. Objective, target, scope
 
-Medical VQA benchmarks report accuracy, but accuracy does not tell you whether the model *looked at
-the image*. Recent work shows that a medical VLM can be perfectly stable under rephrased questions
-and still give the same answer with the image deleted ("consistent but dangerous"). That work covers
-chest X-ray yes/no questions only. We audit **MedGemma-4B across CT, MRI, X-ray and pathology, on
-yes/no and open-ended questions**, and add a **continuous** measure of image reliance (how much the
-image changes the log-probability of the correct answer), a **wrong-image control**, and a test of
-whether these signals can be used to **abstain** on unreliable answers.
+**Objective (one sentence).** Find out, for a medical vision-language model, *when its answers actually
+depend on the image*, across imaging modalities and question types, and whether that can be measured
+cheaply enough to flag answers we should not trust.
+
+**What we are working on.** An audit of **MedGemma-4B** (`google/medgemma-4b-it`) on three public medical
+VQA benchmarks (SLAKE, VQA-RAD, PathVQA; test splits). Every question is asked under controlled
+conditions: with the image, with the image removed, with a *different* image, and in several validated
+paraphrases. Crossing "stable under paraphrase" with "changes when the image is removed" sorts each
+answer into one of four quadrants (Ideal / Fragile / **Dangerous** / Worst); Dangerous = *consistent but
+would be identical without the image*.
+
+**The target (what "done" means).**
+
+| Tier | Deliverable | Status |
+|---|---|---|
+| 1, must ship | Per dataset x modality x question type: how much is answerable blind (vs. the majority-answer prior), and the quadrant mix, with image-clustered confidence intervals | pipeline built; pilot (330 Q) done; `main` pending |
+| 2, the differentiators | A continuous reliance score `log p(gold given image) - log p(gold given no image)` that also works for open answers; a wrong-image control; **does reliance/consistency flag wrong answers better than the model's confidence?** (AUROC, risk-coverage); MedGemma vs Gemma-3-4B (same architecture, no medical tuning); human audit of paraphrases | built, needs `main` |
+| 3, bigger machine | More models (Lingshu-7B, MedGemma-27B, ...), train-vs-test (contamination) analysis, VQA-RAD modality labels | later |
+
+Each tier is a valid stopping point. The report is a research paper (problem, approach, results,
+implementation), plus a poster and the code zip.
+
+**What we might do beyond that.** Workshop / arXiv tech report once Tier 2 is solid; add models;
+prefix/vision-feature caching if runs become the bottleneck (section 8).
+
+**What we are not doing.** Training or fine-tuning anything; chest-X-ray-only work (already covered by prior
+work); claiming clinical validity.
+
+## 1. Status snapshot (2026-10-15)
+
+- Built and tested: data loaders + deterministic sampler + image hashing, paraphrase generation/validation,
+  resumable runner, scoring, analysis, `bench`, `regress`, `pipeline`, hardware presets. **68 fast tests +
+  7 real-model integration tests** pass on the laptop (CPU; SmolVLM-256M and Qwen-0.5B as stand-ins).
+- Done on Colab T4: MedGemma loads and the integration tests pass; **pilot** (330 questions, 1,510 jobs, ~2 h).
+- Next: pre-flight checks (section 9), then `main` in 2 parts on the big machine.
 
 ## 2. What is already known (so we do not claim it) and what we add
 
-Verified by reading the sources on 2026-10-14:
+Verified by reading the sources:
 
 | Prior work | What it did | Limit we address |
 |---|---|---|
-| *Consistent but Dangerous* (arXiv 2603.20985, CVPR-W 2026) | Four quadrants: consistency under K=5 paraphrases (strict: all must match) x image reliance (answer changes when image tokens are omitted). 5 model configs, MIMIC-CXR + PadChest, yes/no logits only. LoRA fine-tuning lowers flip rate but moves samples into "Dangerous". Recommends a text-only baseline pass. | Chest X-ray only; yes/no only; reliance is **binary** (the authors note it misses confidence shifts). |
+| *Consistent but Dangerous* ([arXiv 2603.20985](https://arxiv.org/abs/2603.20985), CVPR-W 2026) | Four quadrants: consistency under K=5 paraphrases (strict: all must match) x image reliance (answer changes when image tokens are omitted). 5 model configs, MIMIC-CXR + PadChest, yes/no logits only. LoRA fine-tuning lowers flip rate but moves samples into "Dangerous". Recommends a text-only baseline pass. | Chest X-ray only; yes/no only; reliance is **binary** (the authors note it misses confidence shifts). |
 | PSF-Med (arXiv 2602.21428) | Paraphrase-sensitivity benchmark on chest X-ray; low flip rate does not imply grounding. | Same single modality. |
-| Why Does Grounding Hurt Medical VQA? (2604.27720) | MedGemma-4B and Lingshu-7B on SLAKE with grounding inputs. | Different question (grounding aids), no reliance audit. |
+| Why Does Grounding Hurt Medical VQA? (2604.27720) | MedGemma-4B and Lingshu-7B on SLAKE with grounding inputs. | Different question (grounding aids). |
 | HEAL-MedVQA (2505.00744), MedHEval (2503.02157) | Shortcut / hallucination benchmarks. | Not a per-sample consistency x reliance taxonomy. |
 
-**Our delta** (each is a separable contribution):
+**Our delta** (separable contributions): (1) cross-modality, cross-dataset audit; (2) open-ended answers,
+not only yes/no; (3) continuous reliance (PMI), fixing the stated limitation of the binary test;
+(4) wrong-image control (`shuf`); (5) selective prediction vs. model confidence; (6) controlled
+MedGemma-vs-Gemma-3 comparison.
 
-1. **Cross-modality, cross-dataset audit**: quadrant distribution per modality (CT / MRI / X-ray from SLAKE, pathology from PathVQA, radiology from VQA-RAD) and per question type.
-2. **Open-ended answers**, not just yes/no (consistency and reliance defined via token-F1 equivalence; sensitivity-tested).
-3. **Continuous reliance**: `PMI = log p(gold | image, q) - log p(gold | no image, q)`. Fixes the stated limitation of the binary test and works for open answers.
-4. **Wrong-image control** (`shuf`: another image of the same dataset+modality). Tests whether "image removed" is a valid probe or just an out-of-distribution input.
-5. **Selective prediction**: do reliance/consistency signals flag wrong answers better than the model's own confidence? (AUROC, risk-coverage.)
-6. **Controlled comparison**: MedGemma-4B vs Gemma-3-4B (same architecture, no medical post-training): does medical tuning change reliance?
+> **Novelty is not yet verified.** Only a handful of searches so far. Week-1 task: search arXiv / Scholar for
+> "image reliance" / "text-only baseline" / "paraphrase consistency" x "SLAKE" / "VQA-RAD" / "PathVQA" /
+> "MedGemma". If items 1-2 exist already, items 3-6 still stand.
 
-> **Novelty is not yet verified.** We have only run a handful of searches. Week-1 task: search arXiv /
-> Google Scholar for "image reliance" / "text-only baseline" / "paraphrase consistency" x "SLAKE" /
-> "VQA-RAD" / "PathVQA" / "MedGemma". If someone already did items 1-2, items 3-6 still stand.
-
-## 3. Hypotheses (written before seeing results)
+## 3. Hypotheses (written before seeing `main`)
 
 Directions are guesses; a null or reversed result is still a finding for an audit.
 
-- **H1 dataset leakage**: a large share of questions is answerable without the image, and this differs by dataset. PathVQA is the likeliest to leak because its questions are auto-generated from captions and name the answer entity (e.g. *"is leiomyosarcoma present?"*).
-- **H2 modality / question type**: the "Dangerous" share differs by modality and question type (priors are strong for organ/modality/plane questions, weaker for location/size/abnormality).
-- **H3 confidence blindness**: the model's confidence does not separate Dangerous from Ideal answers, while reliance and consistency signals give better selective prediction (lower AURC) than confidence.
-- **H4 medical tuning**: MedGemma-4B has a larger Dangerous share than Gemma-3-4B on the same questions (the reference paper reports fine-tuning moves samples into Dangerous).
-- **H5 probe validity**: "image removed" and "wrong image" agree only moderately (Cohen's kappa); removal overstates reliance for some question types.
+- **H1 dataset leakage**: a large share of questions is answerable without the image, differing by dataset; PathVQA is the likeliest (auto-generated questions name the answer entity, e.g. *"is leiomyosarcoma present?"*).
+- **H2 modality / question type**: the Dangerous share differs by modality and question type.
+- **H3 confidence blindness**: confidence does not separate Dangerous from Ideal; reliance and consistency signals give better selective prediction (lower AURC).
+- **H4 medical tuning**: MedGemma-4B has a larger Dangerous share than Gemma-3-4B on the same items.
+- **H5 probe validity**: "image removed" and "wrong image" agree only moderately (Cohen's kappa).
 
 ## 4. Experimental design
 
-### 4.1 Data
+### 4.1 Data (profile `main`: 2,312 questions on 811 images, test splits only)
 
-| Dataset | Source (loader) | Test split used | Metadata we get | Notes |
+| Dataset | Source (loader) | In `main` | Metadata | Notes |
 |---|---|---|---|---|
-| SLAKE | `BoKelvin/SLAKE` (CC-BY-4.0) | English test: 1,061 Q on **96 images**; CT 472, X-ray 361, MRI 228; 645 open / 416 "closed" (355 yes/no, 61 are not yes/no and are treated as open) | modality, body location, content type | **Primary dataset for the modality analysis.** |
-| VQA-RAD | OSF `89kps` original JSON (CC0) | 451 Q (`test_*` entries) | organ (head/chest/abdomen), question type, phrase type | **2,248 QA on 314 images**, not 3,515 (that is the paper's total incl. template questions; an earlier note of ours was wrong). The HF mirror has no metadata, hence OSF. Modality is *not* annotated. |
-| PathVQA | `flaviagiammarino/path-vqa` (MIT) | 6,719 Q / 858 images; we sample 1,000 | none (image ids = sha1 of bytes; types by rule) | Auto-generated from captions; strong text priors expected. |
+| SLAKE | `BoKelvin/SLAKE` (CC-BY-4.0) | all 1,061 English test Q on **96 images**: CT 472 / X-ray 361 / MRI 228 | modality, location, content type | **Primary for the modality analysis.** 61 of 416 "closed" questions are not yes/no and count as open. |
+| VQA-RAD | OSF `89kps` original JSON (CC0) | all 451 test Q (`test_*`) | organ, question type, phrase type | **2,248 QA on 314 images in total** (an earlier note said 3,515: wrong). Modality is not annotated. |
+| PathVQA | `flaviagiammarino/path-vqa` (MIT) | **800 of 6,719**: 600 yes/no + 200 open | none (image id = sha1 of bytes) | Auto-generated from captions. |
 
-- **Contamination.** The MedGemma model card lists SLAKE among its training sources and says "there is a risk of data contamination". So headline results use **test splits only**; train/val splits are reserved for an explicit seen-vs-unseen analysis (profile `full`). SLAKE's training exposure is a confound when comparing datasets; say so in the report.
-- **Unit of analysis.** The image, not the question. SLAKE test has only 96 images, so every confidence interval is a **cluster bootstrap over images**; per-modality x question-type cells with fewer than ~30 images are labelled exploratory.
-- **PathVQA open questions are nearly unanswerable** (pilot: *"what is present?"* -> gold *"endocrine"*; *"what does this image show?"* -> *"fixed tissue close-up excellent except for color"*). Treat PathVQA-open as exploratory and never pool it into headline accuracy; PathVQA yes/no (where the entity is named in the question) is the informative part.
-- **Unified schema.** Answers that are not yes/no are `open` even when the dataset says CLOSED. `qgroup` is a coarse mapping of each dataset's native types (VQA-RAD "PRES" also contains open questions), so always cross it with `answer_type`.
+- **Why PathVQA is capped at 200 open** (pilot-driven tuning): open PathVQA questions were near-unanswerable (*"what is present?"* -> gold *"endocrine"*; 16% accuracy with the image, 0% without), yet they are the most expensive jobs. Kept for coverage, treated as exploratory, never pooled into headline accuracy.
+- **Contamination.** The MedGemma model card lists SLAKE as a training source and warns of "a risk of data contamination". Headline results therefore use test splits only; profile `full` adds train/val splits for a seen-vs-unseen analysis. Datasets are not directly comparable because of this.
+- **Unit of analysis = the image.** SLAKE test has 96 images, so every interval is a **cluster bootstrap over images**; cells with fewer than ~30 images are exploratory.
+- `qgroup` is a coarse mapping of dataset-native types (VQA-RAD "PRES" also contains open questions): always cross with `answer_type`.
 
 ### 4.2 Model and prompts
 
-- Primary: `google/medgemma-4b-it` (gated; model card version 1.0.1). Control: `google/gemma-3-4b-it`. A newer `medgemma-1.5-4b-it` was mentioned earlier but the model card does not mention it: **unverified**.
-- One fixed prompt for every condition (`configs/base.yaml`): the question plus *"Answer with only 'yes' or 'no'."* / *"Answer with a single word or short phrase."* Only the image is added or removed.
-- Prompt changes are allowed **only to fix format failures**, never to raise accuracy. Freeze after Phase 2. The format diagnostic is `yn_mass` (raw P(yes)+P(no) at the first answer token; reported per dataset in `by_*.csv`): if it is low, the model is not answering yes/no and the renormalised `P(yes)` is not trustworthy for that slice.
-- Greedy decoding. Yes/no from one forward pass: `P(yes) = sigmoid(logsumexp(yes tokens) - logsumexp(no tokens))` at the first answer position, as in the reference paper.
+- Primary `google/medgemma-4b-it` (gated; model card v1.0.1). Control `google/gemma-3-4b-it`. A `medgemma-1.5-4b-it` was mentioned earlier but the model card does not mention it: **unverified**.
+- One fixed prompt for every condition: question + *"Answer with only 'yes' or 'no'."* / *"Answer with a single word or short phrase."* Only the image is added or removed. Prompt changes only to fix **format** failures; the diagnostic is `yn_mass` (raw P(yes)+P(no) at the first token; pilot: 1.0 everywhere).
+- Greedy decoding. Yes/no from one forward pass: `P(yes) = sigmoid(logsumexp(yes tokens) - logsumexp(no tokens))`.
 
-### 4.3 Conditions (`configs/base.yaml`)
+### 4.3 Conditions
 
 | Condition | Image | Question | Purpose |
 |---|---|---|---|
 | `orig` | original | original | reference answer |
 | `noimg` | **tokens omitted** (not zeros) | original | text-only baseline (reference paper's probe) |
-| `shuf` | other image, same dataset + modality (fixed partner in manifest) | original | wrong-image control |
-| `blank` | black image, same size | original | optional second control (profile `main`+) |
-| `para1..K` | original | validated paraphrase k | consistency (K=5; pilot 3) |
+| `shuf` | other image, same dataset + modality (partner fixed in manifest) | original | wrong-image control |
+| `blank` | black image | original | optional extra control; **off by default**, add later (only missing jobs run) |
+| `para1..5` | original | validated paraphrase k | consistency |
 
-### 4.4 Definitions (implemented in `analysis/table.py`, unit-tested)
+### 4.4 Definitions (`scoring.py`, `analysis/table.py`; unit-tested)
 
-- Answer normalisation (`scoring.py`, applied to prediction and gold alike): lower-case, strip punctuation/articles, number words -> digits ("Two" = "2", "None" = "0"), plural stripping ("Lungs" = "lung"), "x-ray"/"xray" unified, "axial" = "transverse" (SLAKE's gold wording). **Opposite-term guard**: if prediction and gold hold different members of left/right, upper/lower, anterior/posterior, superior/inferior, medial/lateral, proximal/distal, F1 is 0 (plain F1 gave "right lung" vs "left lung" a passing 0.5).
-- `same_answer(a, b)`: yes/no -> same parsed label; open -> normalised exact match **or** token-F1 >= 0.5 (swept 0.3-0.8 as sensitivity).
-- `correct`: yes/no -> label equals gold; open -> token-F1(pred, gold) >= 0.5.
-- `consistent`: `same_answer(orig, para_k)` for **each of the first `analysis.min_paraphrases` (=2) valid paraphrases** (strict, as in the reference paper). Every sample faces the same number of chances to flip; samples with fewer valid paraphrases get no quadrant and are reported (`consistent_n` vs `n`). An earlier version used "all valid paraphrases", which made samples with 3 paraphrases look less consistent than samples with 1.
-- `prior_acc` (in `by_dataset_type`, `by_modality`, `by_qgroup`): accuracy of always answering the most common gold answer. Blind accuracy only means something next to it (yes/no priors are 51-58%).
-- `reliant_noimg = not same_answer(orig, noimg)`; `reliant_shuf` likewise.
-- **Quadrant** = (consistent, reliant): Ideal (T,T), Fragile (F,T), **Dangerous (T,F)**, Worst (F,F).
-- `PMI_noimg = log p(gold | img, q) - log p(gold | no img, q)`; same for `shuf`. Yes/no uses the binary-renormalised `P(yes)`, open uses the teacher-forced token log-prob of the gold string. **The two scales differ; never pool yes/no with open.**
-- Baseline confidence: yes/no -> `max(P(yes), 1-P(yes))`; open -> `exp(mean token log-prob)`.
+- **Normalisation** (prediction and gold alike): lower-case, strip punctuation/articles, number words -> digits ("Two" = "2", "None" = "0"), plural stripping ("Lungs" = "lung"), x-ray unified, "axial" = "transverse" (SLAKE's gold wording). **Opposite-term guard**: different members of left/right, upper/lower, anterior/posterior, superior/inferior, medial/lateral, proximal/distal -> F1 = 0 (plain F1 gave "right lung" vs "left lung" a passing 0.5).
+- `correct`: yes/no -> label equals gold; open -> token-F1 >= 0.5. `same_answer(a, b)`: yes/no -> same label; open -> normalised match or F1 >= 0.5 (swept 0.3-0.8 as sensitivity).
+- `consistent`: same answer as `orig` for **each of the first `analysis.min_paraphrases` (=2) valid paraphrases**. Same number of chances to flip for every sample (an earlier version used "all valid", which penalised samples with more paraphrases). Samples with fewer get no quadrant and are reported (`*_n` columns).
+- `reliant_noimg = not same_answer(orig, noimg)`; `reliant_shuf` likewise. **Quadrant** = (consistent, reliant): Ideal (T,T), Fragile (F,T), **Dangerous (T,F)**, Worst (F,F).
+- `PMI = log p(gold | image, q) - log p(gold | no/other image, q)`. Yes/no uses the renormalised `P(yes)`, open uses the teacher-forced token log-prob of the gold string. **Scales differ; never pool yes/no with open.**
+- `prior_acc`: accuracy of always giving the most common gold answer (yes/no priors are 51-58%). Blind accuracy only means something next to it.
+- Baseline confidence: yes/no `max(P(yes), 1-P(yes))`; open `exp(mean token log-prob)`.
 
 ### 4.5 Paraphrases
 
-Five styles (lexical, syntactic, formal, plain, concise) from a text-only instruct LM (default `Qwen/Qwen2.5-3B-Instruct`, greedy). Automatic validation rejects a paraphrase that changes/drops laterality, direction, negation, quantity words or numbers; leaks the gold answer; is a near-copy (<15% edit); changes length by >3x; or stops being a yes/no question. Rejected ones are kept with reasons (the rejection rate is reportable). **Human audit**: export 100 with `medvlm audit-sheet`; two teammates label "same meaning?" independently; report acceptance rate and Cohen's kappa. Negation-insertion paraphrases (used by the reference paper) are excluded because they invert the correct answer. VQA-RAD ships ~734 clinician-written `para` entries, but their `qid_linked_id` links are noisy (we found a mismatched pair), so they are an optional extra after validation, not a dependency.
+Five styles (lexical, syntactic, formal, plain, concise) from a text-only instruct LM (`Qwen/Qwen2.5-3B-Instruct`, greedy, batched). Automatic validation rejects a paraphrase that changes/drops laterality, direction, negation, quantity words, normal/abnormal or numbers; leaks the gold answer; repeats an earlier paraphrase; is a near-copy (<10% edit; was 15%); changes length by >3x; or stops being a yes/no question. Rejected ones are kept with reasons (the rejection rate is reportable). **Tuning from the pilot:** "any" no longer counts as meaning-critical and the edit threshold went 0.15 -> 0.10, because the pilot kept only ~52% of candidates and good syntactic rewrites were being rejected. Check the printed yield before running. **Human audit:** `medvlm audit-sheet -n 100`, two teammates label "same meaning?" independently; report acceptance and Cohen's kappa. Negation-insertion paraphrases are excluded (they invert the answer). VQA-RAD's ~734 clinician `para` entries have noisy links (we found a mismatched pair): optional extra, not a dependency.
 
 ## 5. Analyses and outputs
 
-All tables are written to `results/<model>/<profile>/` by `medvlm analyze` with image-clustered 95% CIs.
+`medvlm analyze` writes to `results/<model>/<profile>/` with image-clustered 95% CIs: `by_dataset`, `by_dataset_type`, `by_modality`, `by_qgroup`, `selective`, `timing`, `per_sample`.
 
 | # | Question | Output |
 |---|---|---|
-| A1 | How much is answerable blind? `correct_noimg` vs `correct_orig`, vs the majority-answer prior for yes/no | `by_dataset.csv`, `by_modality.csv` |
-| A2 | Quadrant mix per dataset x modality x answer type x question group | same files, `q_*` columns |
-| A3 | Do Dangerous answers look confident? Confidence/entropy by quadrant | `per_sample.csv` |
-| A4 | Is binary reliance hiding signal? PMI distribution within "not reliant" answers | `pmi_*` columns |
-| A5 | Is image removal a valid probe? kappa(`reliant_noimg`, `reliant_shuf`), by question type | `per_sample.csv` |
-| A6 | Selective prediction: AUROC / AURC of confidence vs PMI vs consistency | `selective.csv` |
-| A7 | MedGemma vs Gemma-3-4B on identical items | second model's results dir |
-| A8 | Qualitative: 30 Dangerous and 30 Ideal cases per dataset, with images | figure (Phase 5) |
-| A9 | (Phase 7) seen vs unseen: SLAKE train vs test | `full` profile |
+| A1 | How much is answerable blind? `correct_noimg` vs `correct_orig` vs `prior_acc` | `by_dataset_type`, `by_modality` |
+| A2 | Quadrant mix per dataset x modality x answer type x question group | same, `q_*` columns |
+| A3 | Do Dangerous answers look confident? | `per_sample` |
+| A4 | Does binary reliance hide signal? PMI inside "not reliant" answers | `pmi_*` |
+| A5 | Is image removal a valid probe? kappa(`reliant_noimg`, `reliant_shuf`) | `per_sample` |
+| A6 | Selective prediction: AUROC / AURC of confidence vs PMI vs consistency | `selective` |
+| A7 | MedGemma vs Gemma-3-4B on identical items | second model's results |
+| A8 | Qualitative: 30 Dangerous + 30 Ideal cases per dataset, with images | figure (Phase 5) |
+| A9 | Seen vs unseen: SLAKE train vs test | `full` profile |
 
-Figures are deliberately deferred to Phase 5, when numbers are stable (use the `dataviz` skill).
+Figures are deferred to Phase 5, when numbers are stable.
 
 ## 6. Execution plan
 
-Deadlines are not announced yet; weeks below assume ~8 weeks and should be scaled. **Every tier is a
-valid stopping point** (this resolves the earlier "which variant?" question).
-
-- **Tier 1 (must ship):** A1 + A2 on MedGemma-4B, three datasets, test splits, K=3 paraphrases.
-- **Tier 2 (the differentiators):** continuous PMI (A4), wrong-image control (A5), selective prediction (A6), Gemma-3 comparison (A7), human paraphrase audit.
-- **Tier 3 (stronger machine):** more models (Lingshu-7B, MedGemma-27B, LLaVA-Med / HuatuoGPT-Vision), A9, VQA-RAD modality labels, K=5 everywhere.
+Deadlines are not announced; weeks assume ~8 and should be scaled. **Cut rule:** if `main` has not started by week 4, finish Tier 1 and stop.
 
 | Phase | Week | Work | Exit gate |
 |---|---|---|---|
-| 0 Setup | 0 | **Done in this repo:** package, configs, loaders, sampler, runner, analysis, 36 unit tests, 4 real-model integration tests (SmolVLM, CPU), manifests reproducible. **You:** request MedGemma + Gemma-3 access on Hugging Face (only step that can make you wait); push the repo. | `pytest` green; `medvlm doctor` OK on Colab |
-| 1 GPU gate | 1 | Colab: `MEDVLM_TEST_MODEL=medgemma4b pytest -m slow`; `prepare --profile pilot`; `run --limit 200` to **measure throughput**. Decide dtype: bf16 -> else 4-bit (a T4 has no native bf16 and Gemma 3 is fp16-fragile: *to be tested, not assumed*). Sanity: orig-condition token-F1 on SLAKE/VQA-RAD should be in the neighbourhood of the model card (72.3 / 49.9; different prompt and split, so a large gap means a bug, not a finding). | integration tests pass on MedGemma; throughput known |
-| 2 Pilot | 1-2 | Generate + validate paraphrases, run human audit (100), run `pilot` (~330 Q), `analyze`, read 30 raw outputs per dataset, fix **format** failures only, **freeze prompt + analysis plan**. Novelty search. Draft 2-page proposal. | parse rate high; audit acceptance rate known; proposal done |
-| 3 Main run | 2-4 | `main` profile (see budget) on MedGemma-4B, sharded across sessions/machines; commit paraphrases + small results. | all keys done; `analyze` clean |
-| 4 Extras | 4-5 | `gemma3_4b` on the same manifest; shuffled/blank controls; threshold sensitivity (F1 0.3-0.8). | A5, A6, A7 tables |
-| 5 Analysis | 5-6 | Figures (quadrant bars per modality, blind-vs-with-image accuracy, risk-coverage), qualitative panel (A8), error analysis. | story fits on one slide |
-| 6 Writing | 6-8 | Report (research-paper format: problem, approach, results, implementation), poster, code `.zip` for Canvas, README polish. | submitted |
-| 7 Stretch | after | Stronger machine: Tier 3. Optional workshop / arXiv tech report once Tier 2 is solid. | - |
+| 0 Setup | 0 | Repo, tests, loaders, manifests. **Done.** You: request Hugging Face access to MedGemma + Gemma-3. | `pytest` green |
+| 1 GPU gate | 1 | MedGemma integration tests; pilot on Colab T4. **Done.** | tests pass; throughput known |
+| 2 Pilot + tuning | 1-2 | Pilot analysed; scoring, consistency definition, PathVQA quota, validator tuned (sections 4.4, 4.5, 7). **Done.** Remaining: human paraphrase audit, novelty search, 2-page proposal. | audit acceptance rate known |
+| 3 Pre-flight | 2 | Section 9 checklist (laptop / Colab T4 / big machine). | all checks green |
+| 4 `main` run | 2-3 | `medvlm pipeline --parts 2` on the big machine (section 10). | all keys done |
+| 5 Extras | 3-4 | `gemma3_4b` on the same manifest; `blank` control; threshold sensitivity. | A5, A6, A7 tables |
+| 6 Analysis | 4-6 | Figures, qualitative panel (A8), error analysis. | story fits one slide |
+| 7 Writing | 6-8 | Report, poster, code zip, README polish. | submitted |
+| 8 Stretch | after | Tier 3 on the big machine; optional workshop / arXiv. | - |
 
-**Cut rule:** if Phase 3 has not started by week 4, drop to Tier 1 and finish; do not start Tier 2 work on unfinished Tier 1 numbers.
+## 7. Pilot findings (330 questions, free Colab T4; direction only, intervals are wide)
 
-## 6b. Pilot findings (330 questions, MedGemma-4B, free Colab T4; read as direction only)
+1,510 jobs in ~2 h (7.8 s/job for the first 200, 4.5 s/job after). Scores below are after the scoring fixes.
 
-Run 2026-10-15; 1,510 jobs took ~2 h (7.8 s/job for the first 200, 4.5 s/job afterwards). After the scoring fixes:
+| | prior | with image | without image | Dangerous share (n) |
+|---|---|---|---|---|
+| SLAKE yes/no | 0.55 | 0.92 | 0.43 | 0.51 (35) |
+| VQA-RAD yes/no | 0.51 | 0.82 | 0.60 | 0.58 (26) |
+| PathVQA yes/no | 0.58 | 0.69 | 0.47 | 0.45 (31) |
+| SLAKE open | - | 0.67 | 0.29 | 0.35 (43) |
+| VQA-RAD open | - | 0.49 | 0.22 | 0.23 (22) |
+| PathVQA open | - | 0.16 | 0.00 | 0.00 (22) |
 
-- Format is fine: `yn_mass` = 1.0 on every dataset; open answers are 1-2 words.
-- Yes/no majority-answer priors are 51-58%. MedGemma without the image gets 43-60%, i.e. mostly prior; with the image 69-92%.
-- "Dangerous" (consistent but unchanged without the image) is 45-58% of defined yes/no cases (n=26-35 per cell, wide intervals).
-- PathVQA open accuracy is 16% (0% blind): a dataset problem, see section 4.1.
-- Image log-prob (PMI) predicted yes/no correctness better than the model's confidence (AUROC 0.85 vs 0.74, n=165); for open answers confidence won. Needs the full run before believing it.
-- Consistency was defined for only 179/330 pilot questions (3 candidates, ~52% validated). `main` generates 5 candidates; check the printed yield before running.
+- Format is fine (`yn_mass` = 1.0; open answers are 1-2 words).
+- Selective prediction (n=165 each): for **yes/no**, image PMI predicts correctness better than confidence (AUROC 0.85 vs 0.74); for **open**, confidence wins (0.78 vs 0.69). Needs `main` before believing it.
+- Consistency was defined for only 179/330 questions (3 candidates, ~52% validated). `main` generates 5 and the yield is printed before the run.
+- What the audit changed: number/plural/synonym normalisation (SLAKE accuracy 0.73 -> 0.79), laterality guard (VQA-RAD 0.67 -> 0.66), fixed-N consistency, `prior_acc`, PathVQA quota, validator relaxation, per-job timing, crash-safe resume.
+- The pilot's `paraphrases.jsonl` is not in the repo (only on Drive); `main` paraphrases will be committed.
 
-## 7. Compute budget (counts, not guesses about speed)
+## 8. Compute and acceleration
 
-`main` profile: 1,061 + 451 + 1,000 = **2,512 questions**; conditions orig/noimg/shuf (7,536 jobs) + paraphrases (~6.5k if ~52% of 5 candidates validate) => **~14k jobs**. `blank` is postponed (add it later; only the missing jobs run). Open questions cost extra (generation + a teacher-forced scoring pass inside the same job). `medvlm estimate --profile main --model medgemma4b --sec-per-job 4.5` prints the numbers; its pilot prediction (1,504 jobs) matched reality (1,510).
+**Size.** `main` = 2,312 questions: 6,936 image-condition jobs (orig/noimg/shuf) + ~6.0k paraphrase jobs (assumed 52% of 5 candidates validate) = **~13k jobs**; open questions cost extra (generation + gold scoring). `medvlm estimate --profile main --model medgemma4b --sec-per-job X` prints the wall-clock (its pilot prediction, 1,504 jobs, matched reality: 1,510).
 
-Measured: **4.5 s/job** on a free Colab T4 at batch size 1 => ~18 h for `main`. The runner now records `sec` per job; `medvlm analyze` writes `timing.csv` per condition.
+| Seconds per job | Whole `main` | Each of 2 parts |
+|---|---|---|
+| 4.5 (measured, free T4, batch 1, old code path) | ~16 h | ~8 h |
+| 1.5 | ~5.4 h | ~2.7 h |
+| 1.0 | ~3.6 h | ~1.8 h |
+| 0.7 | ~2.5 h | ~1.3 h |
 
-Other GPUs are **not measured**; what is known: the T4 has no native bf16 and runs the vision tower with an unfused attention kernel (that is why it needs batch size 1). An RTX 4090 (24 GB) or A100 (40/80 GB) has native bf16 and fused attention kernels, so batches of 8-16 should fit and be several times faster; the 4090 and A100 should be in the same ballpark for this 4B model, with the A100 mainly buying memory (MedGemma-27B needs ~54 GB in bf16, so an 80 GB A100, or 4-bit on a 4090). Run `--limit 200` there, read `s/job`, and plug it into `estimate`.
+Speed on a 4080 / 4090 / A100 is **not measured**; `medvlm bench` measures it in 2-3 minutes. Reasoning only: they have native bf16 and fused attention kernels (the T4 emulates bf16 and needs the slow path, which is why it was stuck at batch 1), so several-fold faster is plausible. 16 GB (4080) holds the 8.6 GB weights with room for small batches; 24 GB (4090) more; the A100's main advantage is memory (MedGemma-27B needs ~54 GB in bf16).
 
-Hardware ladder: laptop (CPU, mock + SmolVLM, development and tests) -> Colab / Kaggle GPU (pilot, main) -> stronger machine (bigger models, `full`). Moving up = change `--model` / `--profile` and `run.batch_size`; nothing else.
+**Applied (each has a test showing results unchanged; `medvlm regress` re-checks on the real model):**
 
-## 8. Moving to another machine (the "git pull and continue" protocol)
+1. `logits_to_keep`: the LM head runs on the last 1..k positions only. The vocabulary is 262k tokens, so logits for ~300 prompt positions were most of the output-layer cost and memory (supported by both Gemma 3 and SmolVLM; falls back automatically).
+2. **Batched teacher-forced gold scoring** (was one forward per question), left-padded.
+3. **Length-sorted sub-batches** (less padding), original order restored.
+4. **Batched paraphrase generation** (was one LM call per paraphrase: ~12k sequential calls for `main`), written to disk per 256 questions.
+5. Fast torchvision image processor when available; whole model loaded straight onto the single GPU (no accelerate dispatch hooks); `inference_mode`; SDPA attention (fused kernels on Ampere/Ada in bf16).
+6. Per-question job ordering and chunk size tied to the batch size, so batches stay full and any prefix of the work is a complete subset.
+7. Hardware presets + `bench`: batch size is measured, not guessed.
 
-What is in git: code, configs, **manifests** (exact sampled questions, gold answers, shuffle partners, image hashes, validated paraphrases), small result tables. What is not: images (re-fetched and hash-checked by `medvlm prepare`), raw per-sample outputs (`outputs/`, copy by hand or via Drive; the runner skips whatever it finds there).
+**Deliberately not applied, and why.** FlashAttention-2: no padded-batch support in the HF implementation ([HF GPU inference guide](https://huggingface.co/docs/transformers/perf_infer_gpu_one)), SDPA already picks fused kernels. `torch.compile`: variable sequence lengths cause recompiles. 4-bit/8-bit on GPUs that fit bf16: changes the very numbers being audited. **Kept as measured options** if `bench` shows `main` is too slow: (a) caching the vision-encoder output across jobs that share an image (orig + paraphrases reuse it; the 4096-patch encoder is a large part of each job), (b) a vLLM backend with prefix caching ([vLLM docs](https://docs.vllm.ai/)). Both change code paths that cannot be tested without a GPU, so they need a `regress` pass first. A reported risk worth remembering: left-padded VLM batches have been seen to shift logits for specific pad lengths ([example report](https://huggingface.co/google/gemma-4-12B-it/discussions/50), unverified) which is why the batching tests force real padding and `regress` compares against the unbatched stored run.
+
+## 9. Pre-flight checklist (what runs where)
+
+| Where | Check | Command | Why |
+|---|---|---|---|
+| **Laptop** (CPU) | Everything not needing MedGemma | `pytest`; `pytest -m slow` | 68 + 7 tests; real-model equivalence (padding, `logits_to_keep`, batched gold, batched paraphrasing) on SmolVLM / Qwen-0.5B. **Re-run after any code change.** |
+| **Colab T4** | MedGemma path | `MEDVLM_TEST_MODEL=medgemma4b pytest -m slow` | Gemma 3 processor, bf16, `logits_to_keep` on the real model (the batched test falls back to batch 2 if 3 does not fit). |
+| **Colab T4** | Optimised code == old numbers | `medvlm regress --profile pilot --model medgemma4b -n 100` | Pilot results are in git. Must print PASS (>=97% same answer, mean abs dP(yes) <= 0.03). ~7 min. |
+| **Colab T4** (or big machine) | Paraphrase yield | `medvlm paraphrase --profile main` | Look at "have >= 2 valid paraphrases" (want >= ~80%) and the rejection reasons; commit the file so the big machine skips this step. |
+| **Big machine** | Environment | `medvlm doctor --model medgemma4b` | CUDA torch (the laptop has CPU torch), HF access, suggested preset. |
+| **Big machine** | Batched numerics on the real GPU | `MEDVLM_TEST_MODEL=medgemma4b pytest -m slow` | Real batching on bf16: this is the check the T4 cannot do. |
+| **Big machine** | Best batch size | `medvlm bench --hardware rtx4090` | Prints s/job and peak memory per batch size; gives the real runtime. |
+| **Big machine** | Still the same numbers at that batch | `medvlm regress --profile pilot --model medgemma4b -n 100 --hardware ... --set run.batch_size=<best>` | Final gate before the long run. |
+
+If any check fails, stop and fix before the long run.
+
+## 10. Running `main` on the big machine (2 parts)
 
 ```bash
 git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-Image-Reliance
-python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -e ".[model,gpu,dev]"
+python -m venv .venv && source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -e ".[model,dev]"                              # install the CUDA build of torch first if pip gave you CPU torch
 huggingface-cli login                                      # token with access to the gated models
 medvlm doctor --model medgemma4b
-medvlm prepare --profile main --model medgemma4b           # manifest exists -> only fetches + verifies images
-pytest && MEDVLM_TEST_MODEL=medgemma4b pytest -m slow
-medvlm run --profile main --model medgemma4b               # resumes; add --shard 0/3 on three sessions
-medvlm analyze --profile main --model medgemma4b
+medvlm prepare --profile pilot --model medgemma4b          # images for bench/regress; manifests are already in git
+medvlm prepare --profile main  --model medgemma4b
+# ... then the checks from section 9 ...
+medvlm pipeline --profile main --model medgemma4b --hardware rtx4090 --set run.batch_size=<best> --parts 2
 ```
 
-**Long runs in pieces.** `--shard i/N` takes a fixed pseudo-random slice of the *questions* (all their conditions together), so shards can run in separate sessions, one after another or in parallel, in any order; finished jobs are always skipped. `--max-minutes M` stops cleanly between chunks, then re-run the same command to continue. `medvlm status --shards N` shows what is done. Jobs are ordered by question (not by condition), so an interrupted shard leaves complete questions and any prefix of the work is an unbiased subset: you can `analyze` after shard 0. Suggested for `main` on a free T4: `--shards 8` (~2 h each), `--max-minutes 170`.
+`pipeline` = prepare images (skipped if already verified) -> paraphrases (skipped if the file is complete; the paraphrase model is freed before MedGemma loads) -> MedGemma loaded **once** -> part 1 of 2 -> checkpoint `analyze` -> part 2 of 2 -> `analyze`. Each part is a fixed random half of the **questions** (all their conditions together). Resume after any crash or kill by running the **same command**: finished jobs are skipped and a half-written last line is repaired. Single part: `--part 0` / `--part 1`; stop cleanly: `--max-minutes M`; progress: `medvlm status --profile main --model medgemma4b --shards 2`.
 
-Per-machine settings (batch size, dtype, 4-bit) go in `configs/local.yaml` (gitignored) or `--set run.batch_size=16`. Set `MEDVLM_OUTPUTS_DIR` to a Drive path on Colab so outputs survive disconnects. To merge runs from several machines, drop their `results.*.jsonl` into one `outputs/<model>/<profile>/` folder.
+Results go to `results/medgemma4b/main/` (commit them) and raw outputs to `outputs/medgemma4b/main/` (small; `git add -f` it to move between machines). On Colab, set `MEDVLM_OUTPUTS_DIR` to a Drive folder and use the notebook's push cell.
 
-## 9. Team split (up to 3)
+## 11. Team split (up to 3)
 
 | Role | Owns |
 |---|---|
-| A, data and language | paraphrase generation + validation, the 100-item human audit (with a second person), VQA-RAD modality labelling (Tier 3), novelty search |
-| B, infrastructure and models | Colab/Kaggle runs, HF access, throughput + dtype decisions, second model, `full` profile on the stronger machine |
+| A, data and language | paraphrase validation, the 100-item human audit (with a second person), VQA-RAD modality labelling (Tier 3), novelty search |
+| B, infrastructure and models | big-machine runs, HF access, `bench`/`regress`, Gemma-3 comparison, `full` profile |
 | C, analysis and writing | tables, figures, qualitative panel, report, poster |
 
-Everyone reviews each other's pull requests and takes part in the audit. Working alone: follow the tiers in order.
+Everyone reviews each other's changes and takes part in the audit. Working alone: follow the tiers in order. (Team size not yet confirmed.)
 
-## 10. What a researcher will ask, and our answer
+## 12. What a researcher will ask, and our answer
 
 - *Is deleting the image a fair probe?* -> `shuf` and `blank` controls, kappa between probes (A5).
-- *Contamination?* -> test splits only; SLAKE is the known training source, so datasets are not directly comparable; A9 measures it.
-- *Are your paraphrases really equivalent?* -> automatic constraints + two-rater audit with kappa.
-- *Open-ended scoring is noisy.* -> threshold sweep; yes/no and open never pooled.
-- *Why should I trust the intervals?* -> bootstrap over images, not questions.
-- *One model is anecdote.* -> Gemma-3-4B control now, larger models on the stronger machine.
+- *Contamination?* -> test splits only; SLAKE is the known training source; A9 measures it.
+- *Are your paraphrases equivalent?* -> automatic constraints + two-rater audit with kappa.
+- *Open-ended scoring is noisy.* -> normalisation + laterality guard, threshold sweep; yes/no and open never pooled.
+- *Is blind accuracy just the prior?* -> `prior_acc` next to every accuracy.
+- *Are the intervals honest?* -> bootstrap over images, not questions.
+- *Did your speed-ups change the results?* -> equivalence tests + `regress` against stored runs.
+- *One model is anecdote.* -> Gemma-3-4B control now, larger models later.
 
-Portfolio value: a public, tested, reproducible repo (rare for course work), a pre-specified analysis plan, and honest negative results.
+Portfolio value: a public, tested, reproducible repo, a pre-specified analysis plan, honest negative results.
 
-## 11. Known limitations and risks
+## 13. Known limitations and risks
 
-- Gemma-3/MedGemma code path is unverified until Phase 1 (we tested the same backend on SmolVLM only). bf16/4-bit on a T4 untested.
-- The LLM paraphraser was only smoke-tested with a 0.5B model; paraphrase quality is the most delicate piece.
-- VQA-RAD has no modality labels; until labelled, modality conclusions rest on SLAKE (CT/MRI/X-ray) and PathVQA (pathology).
-- `shuf` partners can share the gold answer by chance (more likely for yes/no); the effect is bounded and reported.
-- `qgroup` is coarse; cells with few images are exploratory.
-- Reference-paper definitions were read from its HTML text; re-check thresholds against the PDF before the report claims to "follow" them.
-- Gated access, Colab quotas and session limits are the main schedule risks; start the access request today.
+- MedGemma batched numerics (bf16, real batch) are only verifiable on a bigger GPU (section 9). T4 bf16/`logits_to_keep` verified only via the pilot regression.
+- Paraphrase quality is the most delicate piece: validated by rules, not yet by humans; real yield on `main` unknown until the paraphrase step runs.
+- VQA-RAD has no modality labels; modality conclusions rest on SLAKE and PathVQA.
+- `shuf` partners can share the gold answer by chance (more likely for yes/no); bounded and reported.
+- For yes/no, a binary "reliant" flip can come from a tiny shift near P=0.5; the continuous PMI is the check (A4).
+- Reference-paper thresholds were read from its HTML; re-check against the PDF before claiming to "follow" them.
+- Gated access and session limits are the schedule risks; request access now.
 
-## 12. Verified facts log
+## 14. Verified facts log
 
-Checked on 2026-10-14: SLAKE splits/fields/licence and `imgs.zip` layout; VQA-RAD OSF JSON schema, 2,248 rows, 314 images, 451 `test_*`; PathVQA HF fields and split sizes; MedGemma model card (version 1.0.1, SLAKE in training list, contamination warning, tokenized-F1 VQA-RAD 49.9 / SLAKE 72.3 vs Gemma-3-4B 33.6 / 40.2); reference-paper definitions (K=5, strict consistency, binary text-only reliance, yes/no logits).
-**Corrections to earlier notes:** VQA-RAD has 2,248 QA pairs (not 3,515). **Unverified:** `medgemma-1.5-4b-it`, novelty of the cross-modality angle, MedGemma throughput.
+Checked: SLAKE splits / fields / licence / `imgs.zip` layout; VQA-RAD OSF schema (2,248 rows, 314 images, 451 `test_*`); PathVQA fields and split sizes; MedGemma model card (v1.0.1, SLAKE in training list, contamination warning, tokenized-F1 VQA-RAD 49.9 / SLAKE 72.3 vs Gemma-3-4B 33.6 / 40.2); reference-paper definitions (K=5, strict consistency, binary text-only reliance, yes/no logits); `logits_to_keep` exists in the installed Gemma 3 and Idefics3 forward signatures; HF docs on fast image processors ([link](https://huggingface.co/docs/transformers/main/image_processors)) and FlashAttention padding limits.
+**Corrections to earlier notes:** VQA-RAD has 2,248 QA pairs (not 3,515). **Unverified:** `medgemma-1.5-4b-it`; novelty of the cross-modality angle; speed on 4080 / 4090 / A100; vLLM and feature-caching gains.

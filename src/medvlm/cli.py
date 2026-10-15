@@ -5,6 +5,9 @@
   verify        check the local image cache against the manifest
   paraphrase    generate + validate paraphrases into manifests/<profile>/paraphrases.jsonl
   audit-sheet   export a CSV of paraphrases for human spot-checking
+  bench         time batch sizes 1..16 on this GPU and print the fastest that fits (2-3 min)
+  regress       re-run stored jobs and check the numbers did not change (-n jobs)
+  pipeline      prepare -> paraphrase -> run in --parts N back-to-back -> analyze, one process
   run           run the model on every (sample, condition); resumable
   status        progress per shard (use with --shards N)
   estimate      job count and wall-clock for a profile at given seconds/job
@@ -28,7 +31,10 @@ def _doctor(cfg, paths, args):
         print(f"torch       {torch.__version__}  cuda={torch.cuda.is_available()}")
         if torch.cuda.is_available():
             p = torch.cuda.get_device_properties(0)
-            print(f"gpu         {p.name}  {p.total_memory / 2**30:.1f} GiB  bf16={torch.cuda.is_bf16_supported()}")
+            gib = p.total_memory / 2**30
+            print(f"gpu         {p.name}  {gib:.1f} GiB  bf16={torch.cuda.is_bf16_supported()}")
+            preset = "t4" if "T4" in p.name else "rtx4080" if gib < 20 else "rtx4090" if gib < 30 else "a100"
+            print(f"hardware    suggested preset: --hardware {preset}  (then `medvlm bench` for the exact batch size)")
     except ImportError:
         print("torch       NOT INSTALLED (pip install -e .[model])")
     try:
@@ -134,8 +140,29 @@ def _analyze(cfg, paths, args):
     analyze(cfg, paths)
 
 
+def _bench(cfg, paths, args):
+    from .bench import bench
+    from .models import load_model
+
+    bench(cfg, paths, load_model(cfg))
+
+
+def _regress(cfg, paths, args):
+    from .models import load_model
+    from .run import regress
+
+    return 0 if regress(cfg, paths, load_model(cfg), n=args.n) else 1
+
+
+def _pipeline(cfg, paths, args):
+    from .pipeline import pipeline
+
+    pipeline(cfg, paths, parts=args.parts, part=args.part, max_minutes=args.max_minutes)
+
+
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
-            "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze}
+            "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
+            "bench": _bench, "regress": _regress, "pipeline": _pipeline}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -148,11 +175,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--limit", type=int, help="run: stop after N jobs (smoke tests)")
     ap.add_argument("--shard", help="run: 'i/n' to split samples across machines/sessions")
     ap.add_argument("--max-minutes", type=float, help="run: stop cleanly between chunks after this many minutes")
-    ap.add_argument("--shards", type=int, default=8, help="status: number of shards to report")
+    ap.add_argument("--hardware", help="preset from configs/hardware (t4, rtx4080, rtx4090, a100); or MEDVLM_HARDWARE")
+    ap.add_argument("--parts", type=int, default=2, help="pipeline: split the run into N back-to-back parts")
+    ap.add_argument("--part", type=int, help="pipeline: run only this part (0-based)")
+    ap.add_argument("--shards", type=int, default=2, help="status: number of shards to report")
     ap.add_argument("--sec-per-job", type=float, action="append", help="estimate: seconds per job (repeatable)")
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
     args = ap.parse_args(argv)
-    cfg = load_config(args.profile, args.model, args.set)
+    cfg = load_config(args.profile, args.model, args.set, hardware=args.hardware)
     return COMMANDS[args.command](cfg, get_paths(cfg), args) or 0
 
 

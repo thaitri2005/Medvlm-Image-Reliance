@@ -27,7 +27,7 @@ _STYLE_HINT = {
 _PROTECTED = {
     "left", "right", "upper", "lower", "middle", "anterior", "posterior", "medial", "lateral",
     "superior", "inferior", "proximal", "distal", "bilateral", "unilateral", "above", "below",
-    "no", "not", "without", "none", "never", "any", "all", "both", "more", "less", "larger",
+    "no", "not", "without", "none", "never", "all", "both", "more", "less", "larger",
     "smaller", "most", "least", "only", "normal", "abnormal",
 }
 _AUX = {"is", "are", "does", "do", "did", "can", "could", "was", "were", "has", "have", "will",
@@ -106,26 +106,45 @@ class TemplateParaphraser:
 
 
 class HFParaphraser:
-    """Text-only instruction-tuned LM; greedy decoding so the paraphrase file is reproducible."""
+    """Text-only instruction-tuned LM; greedy decoding so the paraphrase file is reproducible.
+    `batch` is what the pipeline uses (left-padded, shortest prompts together)."""
 
-    def __init__(self, model_id: str, device: str = "auto", dtype: str = "auto"):
+    def __init__(self, model_id: str, device: str = "auto", dtype: str = "auto", batch_size: int = 16):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
+        self.torch, self.batch_size = torch, batch_size
         self.tok = AutoTokenizer.from_pretrained(model_id, padding_side="left")
+        if self.tok.pad_token is None:
+            self.tok.pad_token = self.tok.eos_token
+        device_map = {"": 0} if device == "auto" and torch.cuda.is_available() and torch.cuda.device_count() == 1 else device
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_id, torch_dtype=dtype if dtype == "auto" else getattr(torch, dtype), device_map=device)
+            model_id, torch_dtype=dtype if dtype == "auto" else getattr(torch, dtype), device_map=device_map)
+        self.model.eval()
 
-    def __call__(self, question: str, style: str) -> str:
+    def _prompt(self, question: str, style: str) -> str:
         msg = [{"role": "user", "content":
                 "Rewrite this medical imaging question so it keeps exactly the same meaning, the same "
                 "anatomical terms, laterality, negations and numbers. Do NOT answer it. "
                 f"{_STYLE_HINT[style]}\nOutput only the rewritten question.\n\nQuestion: {question}"}]
-        ids = self.tok.apply_chat_template(msg, add_generation_prompt=True, return_tensors="pt",
-                                           return_dict=True).to(self.model.device)
-        out = self.model.generate(**ids, max_new_tokens=48, do_sample=False)
-        text = self.tok.decode(out[0, ids["input_ids"].shape[1]:], skip_special_tokens=True)
-        return text.strip().split("\n")[0].strip().strip('"').strip()
+        return self.tok.apply_chat_template(msg, add_generation_prompt=True, tokenize=False)
+
+    def batch(self, questions: list[str], style: str) -> list[str]:
+        order = sorted(range(len(questions)), key=lambda i: len(questions[i]))
+        out: list[str] = [""] * len(questions)
+        for s in range(0, len(order), self.batch_size):
+            idx = order[s:s + self.batch_size]
+            enc = self.tok([self._prompt(questions[i], style) for i in idx], return_tensors="pt",
+                           padding=True).to(self.model.device)
+            with self.torch.inference_mode():
+                gen = self.model.generate(**enc, max_new_tokens=48, do_sample=False, pad_token_id=self.tok.pad_token_id)
+            for row, i in zip(gen[:, enc["input_ids"].shape[1]:], idx):
+                text = self.tok.decode(row, skip_special_tokens=True)
+                out[i] = text.strip().split("\n")[0].strip().strip('"').strip()
+        return out
+
+    def __call__(self, question: str, style: str) -> str:
+        return self.batch([question], style)[0]
 
 
 def make_backend(cfg: dict):
@@ -133,32 +152,60 @@ def make_backend(cfg: dict):
     if kind == "template":
         return TemplateParaphraser()
     if kind == "hf":
-        return HFParaphraser(cfg["paraphrase"]["hf_model"])
+        return HFParaphraser(cfg["paraphrase"]["hf_model"], batch_size=cfg["paraphrase"].get("batch_size", 16))
     raise ValueError(f"backend {kind!r} generates nothing; use `medvlm import-paraphrases` for 'file'")
 
 
 # ---------------------------------------------------------------- pipeline
 
-def generate(items: list[Item], cfg: dict, out_path: Path, backend=None) -> int:
-    """Resumable: (sample_id, k) pairs already in out_path are kept and skipped."""
-    backend = backend or make_backend(cfg)
+def _candidates(backend, pairs: list[tuple[Item, int, str]]) -> dict[tuple[str, int], str]:
+    """Raw paraphrase text for (item, k, style) triples, batched per style when the backend can."""
+    texts: dict[tuple[str, int], str] = {}
+    if hasattr(backend, "batch"):
+        by_style: dict[str, list[tuple[Item, int]]] = {}
+        for it, k, style in pairs:
+            by_style.setdefault(style, []).append((it, k))
+        for style, members in by_style.items():
+            for (it, k), text in zip(members, backend.batch([it.question for it, _ in members], style)):
+                texts[(it.sample_id, k)] = text
+    else:
+        for it, k, style in pairs:
+            texts[(it.sample_id, k)] = backend(it.question, style)
+    return texts
+
+
+def generate(items: list[Item], cfg: dict, out_path: Path, backend=None, block: int = 256) -> int:
+    """Resumable: (sample_id, k) pairs already in out_path are kept and skipped. Written to disk
+    after every block of `block` questions, so a crash loses at most one block."""
     n = cfg["paraphrase"]["n"]
-    done = {(r["sample_id"], r["k"]): r for r in read_jsonl(out_path)} if out_path.exists() else {}
-    for it in items:
-        # a paraphrase that repeats an earlier valid one would count as a second, independent test
-        seen = {normalize(done[(it.sample_id, k)]["text"]) for k in range(1, n + 1)
-                if (it.sample_id, k) in done and done[(it.sample_id, k)]["valid"]}
-        for k, style in enumerate(STYLES[:n], start=1):
-            if (it.sample_id, k) in done:
-                continue
-            text = backend(it.question, style)
-            reasons = validate(it.question, text, it.answer_type, it.answer, cfg["paraphrase"]["min_edit_ratio"])
-            if not reasons and normalize(text) in seen:
-                reasons.append("duplicate")
-            if not reasons:
-                seen.add(normalize(text))
-            done[(it.sample_id, k)] = {"sample_id": it.sample_id, "k": k, "style": style, "text": text,
-                                       "valid": not reasons, "reasons": reasons}
+    done = {(r["sample_id"], r["k"]): r for r in read_jsonl(out_path, tolerant=True)} if out_path.exists() else {}
+    if all((it.sample_id, k) in done for it in items for k in range(1, n + 1)):
+        return len(done)                      # nothing pending: do not even load the paraphrase model
+    backend = backend or make_backend(cfg)
+    for start in range(0, len(items), block):
+        part = items[start:start + block]
+        pairs = [(it, k, style) for it in part for k, style in enumerate(STYLES[:n], start=1)
+                 if (it.sample_id, k) not in done]
+        if not pairs:
+            continue
+        texts = _candidates(backend, pairs)
+        for it in part:
+            # a paraphrase that repeats an earlier valid one would count as a second, independent test
+            seen = {normalize(done[(it.sample_id, k)]["text"]) for k in range(1, n + 1)
+                    if (it.sample_id, k) in done and done[(it.sample_id, k)]["valid"]}
+            for k, style in enumerate(STYLES[:n], start=1):
+                if (it.sample_id, k) in done:
+                    continue
+                text = texts[(it.sample_id, k)]
+                reasons = validate(it.question, text, it.answer_type, it.answer, cfg["paraphrase"]["min_edit_ratio"])
+                if not reasons and normalize(text) in seen:
+                    reasons.append("duplicate")
+                if not reasons:
+                    seen.add(normalize(text))
+                done[(it.sample_id, k)] = {"sample_id": it.sample_id, "k": k, "style": style, "text": text,
+                                           "valid": not reasons, "reasons": reasons}
+        write_jsonl(out_path, (done[key] for key in sorted(done)))
+        print(f"[paraphrase] {min(start + block, len(items))}/{len(items)} questions", flush=True)
     return write_jsonl(out_path, (done[key] for key in sorted(done)))
 
 

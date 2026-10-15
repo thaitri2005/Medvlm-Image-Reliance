@@ -1,0 +1,2 @@
+# 24 GB. Starting point only: run `medvlm bench` to find the fastest batch size that fits.
+run: {batch_size: 8}

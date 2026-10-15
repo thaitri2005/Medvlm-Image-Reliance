@@ -1,0 +1,2 @@
+# 40/80 GB. Starting point only: run `medvlm bench`. (MedGemma-27B needs the 80 GB card in bf16.)
+run: {batch_size: 16}

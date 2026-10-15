@@ -15,4 +15,6 @@ def load_model(cfg: dict) -> VLM:
         m["hf_id"], m["name"], cfg["prompt"], dtype=m.get("dtype", "bfloat16"),
         quantization=m.get("quantization"), device=m.get("device", "auto"),
         use_system=m.get("system_prompt", True), batch_size=cfg["run"]["batch_size"],
-        max_new_tokens=cfg["run"]["max_new_tokens"], revision=m.get("revision"))
+        max_new_tokens=cfg["run"]["max_new_tokens"], revision=m.get("revision"),
+        attn_implementation=m.get("attn_implementation", "sdpa"), fast_processor=m.get("fast_processor", True),
+        logits_to_keep=cfg["run"].get("logits_to_keep", True))

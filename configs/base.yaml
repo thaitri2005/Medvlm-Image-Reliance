@@ -1,5 +1,6 @@
 # Layering (later wins): base.yaml -> profiles/<profile>.yaml -> models/<model>.yaml
-#                        -> local.yaml (gitignored, per machine) -> --set a.b=c on the CLI
+#                        -> hardware/<preset>.yaml (--hardware) -> local.yaml (gitignored, per machine)
+#                        -> --set a.b=c on the CLI
 seed: 1234
 
 paths:                       # relative to repo root; override with MEDVLM_DATA_DIR / MEDVLM_OUTPUTS_DIR
@@ -25,7 +26,8 @@ paraphrase:
   n: 5                       # K per sample; strict consistency = all K agree with orig
   backend: hf                # hf | template | file
   hf_model: Qwen/Qwen2.5-3B-Instruct
-  min_edit_ratio: 0.15       # paraphrase must differ from the original by at least this much
+  batch_size: 16             # paraphrase LM batch (left-padded greedy)
+  min_edit_ratio: 0.10       # paraphrase must differ from the original by at least this much (pilot: 0.15 rejected good syntactic rewrites)
 
 scoring:
   open_correct_f1: 0.5       # open answer counts as correct if token-F1 >= this
@@ -34,6 +36,7 @@ scoring:
 run:
   batch_size: 4
   max_new_tokens: 16
+  logits_to_keep: true       # LM head on the last positions only (same results, less compute/memory)
   score_gold_logprob: true   # teacher-forced log p(gold | image, q): the continuous reliance signal
 
 analysis:

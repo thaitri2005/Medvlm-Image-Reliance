@@ -38,15 +38,22 @@ def allocate(sizes: dict[tuple, int], n: int, mode: str = "equal") -> dict[tuple
     return quota
 
 
-def stratified_sample(rows: list[dict], n: int | None, keys: list[str], seed: int,
+def stratified_sample(rows: list[dict], n: int | dict | None, keys: list[str], seed: int,
                       mode: str = "equal") -> list[dict]:
+    """n: total budget (int), everything (None), or an explicit per-stratum quota like
+    {open: 200, yesno: 600} when sampling by a single key."""
     rows = sorted(rows, key=lambda r: r["sample_id"])
-    if n is None or n >= len(rows):
+    if n is None or (isinstance(n, int) and n >= len(rows)):
         return rows
     strata: dict[tuple, list[dict]] = defaultdict(list)
     for r in rows:
         strata[tuple(r[k] for k in keys)].append(r)
-    quota = allocate({k: len(v) for k, v in strata.items()}, n, mode)
+    if isinstance(n, dict):
+        if len(keys) != 1:
+            raise ValueError("a per-stratum quota needs exactly one stratify key")
+        quota = {k: min(int(n.get(k[0], 0)), len(v)) for k, v in strata.items()}
+    else:
+        quota = allocate({k: len(v) for k, v in strata.items()}, n, mode)
     picked: list[dict] = []
     for k, members in strata.items():
         rng = random.Random(seed ^ stable_int("|".join(map(str, k))))

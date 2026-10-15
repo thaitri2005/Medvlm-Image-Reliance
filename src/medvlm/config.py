@@ -34,11 +34,16 @@ def _set_dotted(cfg: dict, dotted: str, raw: str) -> None:
     node[leaf] = yaml.safe_load(raw)
 
 
-def load_config(profile: str, model: str | None = None, overrides: list[str] | None = None) -> dict:
+def load_config(profile: str, model: str | None = None, overrides: list[str] | None = None,
+                hardware: str | None = None) -> dict:
     cfg = _read(ROOT / "configs" / "base.yaml")
     cfg = _merge(cfg, _read(ROOT / "configs" / "profiles" / f"{profile}.yaml"))
     if model:
         cfg = _merge(cfg, _read(ROOT / "configs" / "models" / f"{model}.yaml"))
+    hardware = hardware or os.environ.get("MEDVLM_HARDWARE")
+    if hardware:
+        cfg = _merge(cfg, _read(ROOT / "configs" / "hardware" / f"{hardware}.yaml"))
+        cfg["hardware"] = hardware
     local = ROOT / "configs" / "local.yaml"
     if local.exists():
         cfg = _merge(cfg, _read(local))

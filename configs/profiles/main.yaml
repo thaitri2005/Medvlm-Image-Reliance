@@ -4,7 +4,9 @@ name: main
 datasets:
   - {name: slake,   split: test, n: null, stratify: [modality, answer_type]}   # all 1,061 English questions
   - {name: vqa_rad, split: test, n: null, stratify: [answer_type]}             # all 451
-  - {name: pathvqa, split: test, n: 1000, stratify: [answer_type]}             # sampled from 6,719
+  # PathVQA open questions were near-unanswerable in the pilot (16% with image, 0% without), so they
+  # are kept for coverage but capped; the budget goes to the informative yes/no questions.
+  - {name: pathvqa, split: test, n: {open: 200, yesno: 600}, stratify: [answer_type]}   # sampled from 6,719
 paraphrase: {n: 5}
 # `blank` is an optional extra control: add it later with --set conditions='[orig,noimg,shuf,blank]';
 # the runner only runs the missing jobs, so postponing it costs nothing and saves ~25% of image jobs now.

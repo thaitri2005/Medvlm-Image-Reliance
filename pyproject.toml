@@ -23,7 +23,7 @@ dependencies = [
 # Dataset loading (PathVQA ships as HF parquet)
 data = ["datasets"]
 # Anything that actually runs a VLM. Gemma 3 / MedGemma needs transformers >= 4.50.
-model = ["torch", "transformers>=4.50", "accelerate", "sentencepiece", "datasets"]
+model = ["torch", "torchvision", "transformers>=4.50", "accelerate", "sentencepiece", "datasets"]
 # 4-bit / 8-bit loading on small GPUs (Linux / Colab only)
 gpu = ["bitsandbytes; platform_system != 'Windows'"]
 dev = ["pytest"]

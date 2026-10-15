@@ -23,6 +23,7 @@ from .config import ROOT, Paths
 from .models.base import VLM, Query
 from .paraphrase import load_valid
 from .schema import Item, load_items, read_jsonl, stable_int
+from .scoring import same_answer
 
 IMAGE_CONDITIONS = ("orig", "noimg", "shuf", "blank")
 
@@ -180,3 +181,34 @@ def estimate(cfg: dict, paths: Paths, sec_per_job: list[float], valid_frac: floa
     total = base + n_para
     for s in sec_per_job:
         print(f"   at {s:g} s/job: {total * s / 3600:.1f} h  ({total * s / 3600 / 24:.1f} days)")
+
+
+def regress(cfg: dict, paths: Paths, model: VLM, n: int = 100, min_agree: float = 0.97, max_dp: float = 0.03) -> bool:
+    """Re-run `n` jobs that already have stored results and compare. Proves that a new model build,
+    batch size or optimisation did not change the numbers. Needs an existing run for this model/profile."""
+    stored = {}
+    for f in sorted(paths.run_dir(cfg["model"]["name"], cfg["profile"]).glob("results*.jsonl")):
+        for r in read_jsonl(f, tolerant=True):
+            stored[r["key"]] = r
+    jobs = {j.key: j for j in select_jobs(cfg, paths, None) if j.key in stored}
+    keys = sorted(jobs, key=lambda k: stable_int("regress|" + k))[:n]
+    if not keys:
+        print("[regress] no stored results to compare against")
+        return False
+    outs = model.generate([make_query(jobs[k], paths, bool(cfg["run"].get("score_gold_logprob", True))) for k in keys])
+    agree, dps, dlp = 0, [], []
+    for k, o in zip(keys, outs):
+        r = stored[k]
+        agree += same_answer(jobs[k].item.answer_type, r["text"], o.text)
+        if o.p_yes is not None and r.get("p_yes") is not None:
+            dps.append(abs(o.p_yes - r["p_yes"]))
+        if o.gold_logp is not None and r.get("gold_logp") is not None:
+            dlp.append(abs(o.gold_logp - r["gold_logp"]))
+    rate = agree / len(keys)
+    mdp = sum(dps) / len(dps) if dps else 0.0
+    ok = rate >= min_agree and mdp <= max_dp
+    print(f"[regress] {len(keys)} jobs: same answer {rate:.1%} (need >= {min_agree:.0%}); "
+          f"mean |dP(yes)| {mdp:.4f} over {len(dps)} yes/no (need <= {max_dp}); "
+          f"mean |d gold_logp| {sum(dlp) / len(dlp) if dlp else 0.0:.3f} over {len(dlp)}")
+    print("[regress] PASS" if ok else "[regress] FAIL: results differ from the stored run")
+    return ok

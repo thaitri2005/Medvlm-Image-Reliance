@@ -1,0 +1,35 @@
+{
+  "model": {
+    "name": "medgemma4b",
+    "hf_id": "google/medgemma-4b-it",
+    "dtype": "bfloat16",
+    "quantization": null,
+    "device": "auto",
+    "system_prompt": true
+  },
+  "prompt": {
+    "system": "You are an expert medical imaging analyst.",
+    "yesno_suffix": "Answer with only 'yes' or 'no'.",
+    "open_suffix": "Answer with a single word or short phrase."
+  },
+  "run": {
+    "batch_size": 1,
+    "max_new_tokens": 16,
+    "score_gold_logprob": true
+  },
+  "conditions": [
+    "orig",
+    "noimg",
+    "shuf"
+  ],
+  "paraphrase": {
+    "n": 3,
+    "backend": "hf",
+    "hf_model": "Qwen/Qwen2.5-3B-Instruct",
+    "min_edit_ratio": 0.15
+  },
+  "git_commit": "f954356ddfd4c9ee90004397d508d994f9339737",
+  "python": "3.13.15",
+  "host": "3cd95a87553c",
+  "started": "2026-10-14 19:24:23"
+}

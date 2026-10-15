@@ -3,6 +3,10 @@
 name: main
 datasets:
   - {name: slake,   split: test, n: null, stratify: [modality, answer_type]}   # all 1,061 English questions
+  # SLAKE test has only 96 images (MRI 26, X-ray 30, CT 40): too few for modality comparisons. The validation
+  # split (96 more images, same source and the same unknown training exposure) doubles every modality cell.
+  # Primary tests use TEST ONLY; test+validation is pooled only in by_modality_pooled.csv (pre-specified).
+  - {name: slake,   split: validation, n: null, stratify: [modality, answer_type]}
   - {name: vqa_rad, split: test, n: null, stratify: [answer_type]}             # all 451
   # PathVQA open questions were near-unanswerable in the pilot (16% with image, 0% without), so they
   # are kept for coverage but capped; the budget goes to the informative yes/no questions.

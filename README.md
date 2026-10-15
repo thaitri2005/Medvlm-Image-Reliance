@@ -14,7 +14,7 @@ Objective, target tiers, hypotheses, design and risks: **[PLAN.md](PLAN.md)**.
 git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-Image-Reliance
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[model,dev]"                          # add ,gpu for 4-bit loading on Linux/Colab
-pytest                                                 # 68 fast tests, no GPU / network needed
+pytest                                                 # 78 fast tests, no GPU / network needed
 ```
 
 No GPU (laptop): everything except real MedGemma runs; use `--model mock` or `--model smolvlm` (CPU).
@@ -54,7 +54,9 @@ Hardware presets (`--hardware t4|rtx4080|rtx4090|a100`) set a starting batch siz
 | `estimate` | Job count and wall-clock at given seconds/job |
 | `run --shard i/n` | Inference only; resumable, shardable, `--limit`, `--max-minutes` |
 | `pipeline` | The whole thing in N back-to-back parts, one process |
-| `status`, `analyze` | Progress; tables in `results/<model>/<profile>/` |
+| `status`, `analyze` | Progress; tables in `results/<model>/<profile>/` (primary tests, CIs, sensitivity) |
+| `compare --model-b` | Paired comparison of two models on the same questions |
+| `audit-score` | Paraphrase-audit acceptance and kappa |
 
 ## Profiles, models, hardware
 
@@ -62,7 +64,7 @@ Hardware presets (`--hardware t4|rtx4080|rtx4090|a100`) set a starting batch siz
 |---|---|
 | `smoke` | ~40 questions, laptop pipeline checks only |
 | `pilot` | 330 questions, first MedGemma run (done) |
-| `main` | 2,312 questions: all SLAKE (1,061) and VQA-RAD (451) test Q + 800 PathVQA (600 yes/no, 200 open) |
+| `main` | 3,365 questions: SLAKE test + validation (2,114), VQA-RAD test (451), PathVQA test 600 yes/no + 200 open |
 | `full` | adds train/val splits (contamination analysis), for a stronger machine |
 
 Models (`--model`): `medgemma4b` (primary), `gemma3_4b` (same architecture, no medical tuning),

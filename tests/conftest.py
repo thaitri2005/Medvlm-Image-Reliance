@@ -18,7 +18,9 @@ def paths(tmp_path: Path) -> Paths:
 
 @pytest.fixture
 def cfg() -> dict:
-    return load_config("smoke", "mock")
+    c = load_config("smoke", "mock")
+    c["analysis"]["bootstrap_B"] = 60          # keeps tests fast; statistics are tested separately
+    return c
 
 
 def make_items(paths: Paths, profile: str = "smoke", n_images: int = 6, per_image: int = 3) -> list[Item]:

@@ -8,6 +8,8 @@
   bench         time batch sizes 1..16 on this GPU and print the fastest that fits (2-3 min)
   regress       re-run stored jobs and check the numbers did not change (-n jobs)
   pipeline      prepare -> paraphrase -> run in --parts N back-to-back -> analyze, one process
+  compare       paired comparison of --model and --model-b on the same questions
+  audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet
   run           run the model on every (sample, condition); resumable
   status        progress per shard (use with --shards N)
   estimate      job count and wall-clock for a profile at given seconds/job
@@ -154,6 +156,22 @@ def _regress(cfg, paths, args):
     return 0 if regress(cfg, paths, load_model(cfg), n=args.n) else 1
 
 
+def _compare(cfg, paths, args):
+    from .analysis.compare import compare
+
+    if not args.model_b:
+        raise SystemExit("compare needs --model-b (e.g. --model medgemma4b --model-b gemma3_4b)")
+    compare(cfg, paths, cfg["model"]["name"], args.model_b)
+
+
+def _audit_score(cfg, paths, args):
+    import json
+
+    from .paraphrase import score_audit
+
+    print(json.dumps(score_audit(paths.manifest_dir(cfg["profile"]) / "paraphrase_audit.csv"), indent=2))
+
+
 def _pipeline(cfg, paths, args):
     from .pipeline import pipeline
 
@@ -162,7 +180,8 @@ def _pipeline(cfg, paths, args):
 
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
-            "bench": _bench, "regress": _regress, "pipeline": _pipeline}
+            "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
+            "audit-score": _audit_score}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -175,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--limit", type=int, help="run: stop after N jobs (smoke tests)")
     ap.add_argument("--shard", help="run: 'i/n' to split samples across machines/sessions")
     ap.add_argument("--max-minutes", type=float, help="run: stop cleanly between chunks after this many minutes")
+    ap.add_argument("--model-b", help="compare: the second model (paired on the same questions)")
     ap.add_argument("--hardware", help="preset from configs/hardware (t4, rtx4080, rtx4090, a100); or MEDVLM_HARDWARE")
     ap.add_argument("--parts", type=int, default=2, help="pipeline: split the run into N back-to-back parts")
     ap.add_argument("--part", type=int, help="pipeline: run only this part (0-based)")

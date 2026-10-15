@@ -13,6 +13,8 @@ import random
 import re
 from pathlib import Path
 
+import pandas as pd
+
 from .schema import YESNO, Item, read_jsonl, write_jsonl
 from .scoring import normalize
 
@@ -230,3 +232,25 @@ def export_audit_sheet(items: list[Item], para_path: Path, out_csv: Path, n: int
         for r in rows[:n]:
             w.writerow([r["sample_id"], r["k"], r["style"], by_id[r["sample_id"]].question, r["text"], "", "", ""])
     return min(n, len(rows))
+
+
+def score_audit(csv_path: Path) -> dict:
+    """Read a filled audit sheet. Columns same_meaning_A / same_meaning_B take y/n (anything else = blank).
+    Reports the acceptance rate (share judged 'same meaning') and, when B is filled, agreement and
+    Cohen's kappa. Working alone, B is a blind second pass by the same person a few days later
+    (intra-rater agreement) -- say so in the report."""
+    from .analysis.stats import cohen_kappa
+
+    df = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
+    norm = lambda s: s.str.strip().str.lower().str[:1].map({"y": True, "n": False})  # noqa: E731
+    a, b = norm(df["same_meaning_A"]), norm(df["same_meaning_B"])
+    rate = lambda s: float(s.dropna().astype(bool).mean()) if s.notna().any() else float("nan")  # noqa: E731
+    res = {"n_rated_A": int(a.notna().sum()), "accept_A": rate(a), "n_rated_B": int(b.notna().sum())}
+    both = a.notna() & b.notna()
+    if both.any():
+        res.update(accept_B=rate(b), n_both=int(both.sum()),
+                   agreement=float((a[both] == b[both]).mean()), kappa=cohen_kappa(a[both], b[both]))
+    if "style" in df and a.notna().any():
+        res["accept_A_by_style"] = (df.assign(a=a).dropna(subset=["a"]).assign(a=lambda d: d["a"].astype(float))
+                                    .groupby("style")["a"].mean().round(3).to_dict())
+    return res

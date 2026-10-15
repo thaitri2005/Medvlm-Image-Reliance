@@ -1,12 +1,21 @@
 {
   "profile": "main",
   "seed": 1234,
-  "n_items": 2312,
-  "n_images": 811,
+  "n_items": 3365,
+  "n_images": 907,
   "datasets": [
     {
       "name": "slake",
       "split": "test",
+      "n": null,
+      "stratify": [
+        "modality",
+        "answer_type"
+      ]
+    },
+    {
+      "name": "slake",
+      "split": "validation",
       "n": null,
       "stratify": [
         "modality",
@@ -43,6 +52,12 @@
     "slake|test|mri|yesno": 73,
     "slake|test|xray|open": 265,
     "slake|test|xray|yesno": 96,
+    "slake|validation|ct|open": 282,
+    "slake|validation|ct|yesno": 200,
+    "slake|validation|mri|open": 159,
+    "slake|validation|mri|yesno": 74,
+    "slake|validation|xray|open": 254,
+    "slake|validation|xray|yesno": 84,
     "vqa_rad|test|radiology|open": 200,
     "vqa_rad|test|radiology|yesno": 251
   }

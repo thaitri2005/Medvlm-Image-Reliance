@@ -10,8 +10,7 @@ __pycache__/
 # Results from the stand-in models are plumbing checks, never findings.
 results/mock/
 results/smolvlm/
-# Raw per-sample model outputs live outside git (shared Drive / copied by hand).
-# Force-add a finished run with `git add -f outputs/<model>/<profile>` if it is small.
+# Raw per-call model outputs: force-add a finished run with `git add -f outputs/<model>/<profile>`.
 /outputs/
 
 # Machine-local overrides and secrets

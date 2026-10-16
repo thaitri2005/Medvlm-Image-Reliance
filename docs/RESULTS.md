@@ -1,6 +1,7 @@
 # Results: Consistent but Blind?
 
-MedGemma-4B and its architecture-matched general-purpose twin Gemma-3-4B (plus two replication pairs, §9),
+MedGemma-4B and its architecture-matched general-purpose twin Gemma-3-4B (plus two replication pairs, §9;
+an out-of-distribution replication of the opposite-answer probe, R4, is registered and pending, §13),
 3,365 questions × 5.6 conditions on
 average = **18,896 model calls per model** in the main run, plus **3,535 per model** for the registered probes;
 all completed (RTX 4080 SUPER, bf16, batch 1). Primary set: the 1,206 yes/no **test** questions on 670 images.
@@ -8,7 +9,8 @@ All intervals are 95% cluster-bootstrap CIs by image (B = 2,000). **Pre-register
 probes** and **post-hoc** analyses are labelled as such; every change after the analysis plan was frozen is
 logged in [PREREGISTRATION.md §13](PREREGISTRATION.md), and the probes were registered in [PREREGISTRATION.md §15](PREREGISTRATION.md) before they were run.
 Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`,
-`results/posthoc_medgemma4b_vs_gemma3_4b/main/` (`medvlm analyze`, `compare`, `posthoc`). Paper:
+`results/posthoc_medgemma4b_vs_gemma3_4b/main/`, `results/contrast/`, `results/contamination/` (`medvlm analyze`,
+`compare`, `posthoc`, `contrast --analyze`, `contamination`; index in [results/README.md](../results/README.md)). Paper:
 [report/main.pdf](../report/main.pdf).
 
 ## Summary
@@ -31,6 +33,11 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
 6. **The reversal replicates where refusal differs** (§9, registered): MedGemma-1.5 vs Gemma-3 reverses again
    (+36.5 on opposite-answer images, −7.4 under image removal). MedVLThinker vs Qwen2.5-VL, whose models never
    refuse and do not differ under any in-format probe, does not.
+7. **Following an opposite-answer image is reading it, not flipping** (§5, post hoc): MedGemma is right on both
+   images in 71.7% of pairs and wrong on both in 1.1%; Gemma-3 gives the same answer to both images in 75%.
+   **Open issue:** this probe is SLAKE-only, and SLAKE is training data of both MedGemma releases but not of
+   MedVLThinker, so a training-distribution effect explains it as well (§13). The replication on PathVQA, which
+   no medical model was trained on (R4, 1,192 questions), is registered with its decision rule and not yet run.
 
 ## 1. Sanity checks
 
@@ -112,6 +119,22 @@ exploratory; the registered set is SLAKE's 367 questions on 130 images).
 
 ![Opposite-answer image](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig6_opposite.png)
 
+**What following means (post hoc, `results/contrast/`).** The two gold answers of a swap are opposite, so a model
+that changes its answer is either right on both images or wrong on both, and one that keeps its answer is right
+on exactly one. Right on both (*pair accuracy*, the contrast-set metric) is 0 by construction for a model that
+ignores the image. On the 367 SLAKE swaps, almost every change is a correct reading:
+
+| SLAKE swaps (n = 367) | MedGemma-4B | MedGemma-1.5 | Gemma-3 | MedVLThinker | Qwen2.5-VL |
+|---|---|---|---|---|---|
+| Right on both images | **71.7%** [67.1, 75.8] | 56.7% [51.7, 61.7] | 23.4% [19.1, 27.8] | 44.4% [39.1, 49.5] | 45.8% [40.2, 51.0] |
+| Wrong on both | 1.1% | 4.6% | 1.4% | 2.7% | 3.0% |
+| Same answer to both | 27.2% | 38.7% | 75.2% | 52.9% | 51.2% |
+
+Paired pair-accuracy gaps: +48.2 [42.3, 53.8] (MedGemma-4B), +33.2 [27.5, 39.2] (MedGemma-1.5), −1.4 [−4.5,
+1.6] (MedVLThinker). Resampling the 53 question templates instead of images, which is more conservative because
+SLAKE reuses templates across images, widens the follow-rate gaps (+48.0 [36.4, 57.7], +36.5 [23.8, 46.9]) but
+leaves every conclusion unchanged.
+
 **Black image (R1, H6 failed and reversed).** Gemma-3 keeps the answer it gave with the real image on 72.9% of
 questions, MedGemma on 52.6%; chance-corrected κ 0.33 [0.28, 0.39] vs 0.11 [0.06, 0.17]. Under this probe Gemma-3
 is the more Dangerous model by 14.0 points [9.4, 18.6] (44.2% vs 58.2%). The answers explain it: on a black image
@@ -170,8 +193,11 @@ On these questions MedGemma's blind answers are informative:
 - **Above the prior (P1).** MedGemma beats the majority-answer prior on PathVQA (Holm-significant); VQA-RAD is in
   the same direction but not after correction; SLAKE is not. Gemma-3 is never above the prior. Among questions
   MedGemma *does* answer without the image (mass ≥ 0.9), the margin grows to **+11.9** [7.1, 16.6] on PathVQA and
-  **+15.7** [5.1, 25.3] on VQA-RAD (post hoc). Memorising the test set is unlikely: the margin appears on PathVQA
-  and VQA-RAD, which MedGemma's model card does not list as training data, and **not** on SLAKE, which it does.
+  **+15.7** [5.1, 25.3] on VQA-RAD (post hoc). Only the PathVQA margin is free of training exposure: MedGemma's
+  technical report removed PathVQA from training, but it trained on VQA-RAD (RL stage), and 202 of our 203
+  VQA-RAD test images also occur in VQA-RAD's train split, so the VQA-RAD margin may reflect exposure (§13;
+  corrected 2026-10-16, an earlier version of this paragraph said the model card does not list VQA-RAD). SLAKE,
+  also in training, shows no margin.
 - **Agreement beyond chance.** On the questions each model answers, κ between its answers with and without the
   image is 0.21 for MedGemma and 0.11 for Gemma-3.
 
@@ -280,6 +306,7 @@ test it formally.
 | H9 | Replication pairs: the medical model follows opposite-answer images more | **Pair A supported** (+36.5); **pair B not** (−1.6) |
 | H10 | Replication pairs: image removal ranks the pair the other way | **Pair A supported** (−7.4); **pair B not** (+3.9, opposite sign) |
 | H11 | Replication pairs: the general model refuses more without the image | **Pair A supported** (−28.7); **pair B not** (neither refuses) |
+| H12a–c | Opposite-answer probe on PathVQA (outside every medical model's training data): MedGemma-4B and MedGemma-1.5 follow more than Gemma-3; MedVLThinker within ±5 points of Qwen | **Registered, not yet run** (§13) |
 
 ## 11. Threats to validity
 
@@ -289,7 +316,9 @@ test it formally.
   predictions failed. R3 is limited to SLAKE, where templated questions recur across images.
 - Refusal is inferred from first-token probability mass, confirmed by free generation on a sample, not annotated
   for every question.
-- SLAKE is in MedGemma's training data (split unstated); VQA-RAD and PathVQA are not listed.
+- Training exposure (§13): MedGemma-4B trained on SLAKE (its train split) and on VQA-RAD, whose test images
+  mostly occur in its train split; MedGemma-1.5 lists SLAKE. Until R4 runs, the opposite-answer gap may reflect
+  the training distribution. The general models' training data are not published.
 - Paraphrase equivalence was judged by an LLM (PREREGISTRATION.md §4.5) and not validated by human raters.
 - Post-hoc analyses (chance correction, correctness split, refusal split, answer-change comparison, partner
   check) were motivated by the data and are reported as such.
@@ -312,6 +341,47 @@ conclusions rest on:
 | Dangerous share is not chance-corrected | On yes/no, 49% / 46% of answers would be "unchanged without the image" by chance | corrected with κ (§7) |
 | Dangerous mixes correct and wrong answers | 78% of MedGemma's Dangerous answers are correct | split by correctness (§6) |
 | Pilot questions (design tuned on them) are part of `main` | Without them: P1 PathVQA +6.3 [2.4, 10.6], p_Holm = 0.003; P3 +12.9 [8.9, 17.1]; wrong-image P3 −0.3 | none (`no_pilot.csv`) |
-| Training-data contamination | Model card lists SLAKE, not VQA-RAD or PathVQA | SLAKE caveat; P1 pattern argues against it |
+| Training-data contamination | MedGemma-4B: SLAKE (train split) and VQA-RAD (RL) per its technical report; PathVQA removed. 202/203 VQA-RAD test images are also VQA-RAD train images (`results/contamination/`) | P1c (VQA-RAD) may reflect exposure; R3 is on a trained-on distribution, so R4 was registered (§13). Corrected 2026-10-16 |
 | Answer capitalisation, duplicates, prior | Case normalised; 5 duplicate pairs with conflicting gold (dataset noise); the test-set prior is the strongest constant baseline | none |
 | `compare` pooled the validation split into P3 | Bug, fixed before reporting (+14.1 → +13.7) | fixed |
+
+## 13. Training data, and whether the opposite-answer result is a SLAKE effect
+
+Added 2026-10-16 after re-checking every model's training documentation (`medvlm contamination`;
+`results/contamination/`). The check corrected two statements made earlier (PREREGISTRATION.md §18).
+
+**What each model was trained on, by its own documentation.**
+
+| | SLAKE | VQA-RAD | PathVQA |
+|---|---|---|---|
+| MedGemma-4B (technical report, Table 1) | trained: 450 items = SLAKE's train images | trained: 1,391 QA, RL stage | **removed from training** |
+| MedGemma-1.5-4B (model card) | trained | not stated (data ownership only) | not mentioned |
+| MedVLThinker-3B (model card) | not mentioned (RL on PMC-VQA) | not mentioned | not mentioned |
+| Gemma-3-4B, Qwen2.5-VL-3B | unknown | unknown | unknown |
+
+**Which evaluated images occur in the dataset's own train split.**
+
+| Evaluated set | Questions | Images | Images also in the train split |
+|---|---|---|---|
+| SLAKE test / validation | 1,061 / 1,053 | 96 / 96 | 0 / 0 |
+| VQA-RAD test | 451 | 203 | **202** (250 of 251 yes/no questions) |
+| PathVQA test (main) | 800 | 512 | 0 |
+| PathVQA test + validation (R4) | 1,192 | 682 | 0 |
+
+**Consequences.** (1) The VQA-RAD results of MedGemma-4B, including its blind-answer margin (P1c), may reflect
+training exposure to the same images. (2) The SLAKE images used by R3 were not training images (if MedGemma used
+SLAKE's train split, as the count suggests), but their distribution and question templates were. Both MedGemma
+releases trained on SLAKE and both follow opposite-answer images far more than Gemma-3; MedVLThinker did not
+train on it and does not. "Trained on SLAKE" therefore explains R3 as well as "uses the image more" does.
+
+**Probe R4, registered before running (PREREGISTRATION.md §17).** The opposite-answer probe repeated on PathVQA,
+outside every medical model's listed training data: all 1,192 test + validation yes/no questions that also occur
+on a different image with the opposite answer, on 682 images (none in PathVQA's train split). Hypotheses H12a-b:
+both MedGemma releases follow more than Gemma-3; H12c: MedVLThinker within ±5 points of its base. If H12a-b hold,
+the claim that MedGemma uses the image more stands on data it was not trained on; if not, it is restricted to the
+disagreement between probes on the same questions. Run with `medvlm contrast --model all --hardware rtx4080`
+(about an hour for five models), then `medvlm contrast --analyze`. A first look at the 40 non-SLAKE swaps
+already in the main run (exploratory, seen before registering): MedGemma-4B − Gemma-3 +17.5 [0.0, 34.1],
+MedGemma-1.5 +12.5 [−5.1, 32.5], MedVLThinker 0.0 [−16.7, 17.1]: the same direction as on SLAKE, smaller, too
+few to decide.
+

@@ -52,7 +52,8 @@ MedVLThinker-3B \vs Qwen2.5-VL-3B) under five probes, with pre-registered endpoi
 replication pairs registered before they were run. For MedGemma-4B, image removal ranks the medical model as the
 less image-reliant one (\dang{} share +13.7 points\ci{10.0}{17.5}), while every probe that keeps an image in the
 input ranks it as more reliant: it changes its answer more often when the image is swapped (+5 points), blacked
-out (+20), or replaced by one on which the same question has the opposite answer (73\% \vs 25\%). The reversal
+out (+20), or replaced by one on which the same question has the opposite answer (73\% \vs 25\%; on SLAKE, which
+both MedGemma releases were trained on, so its replication outside their training data is registered). The reversal
 replicates for MedGemma-1.5 (+37 points on opposite-answer images, $-7$ under image removal). It traces to
 refusal: forced to answer yes or no without an image, Gemma-3 would rather ask for the image on 29\% of
 questions, and its forced answers there are unrelated to its answers with the image. In the Qwen pair neither
@@ -161,13 +162,14 @@ sees identical inputs.
 
 \subsection{Models}
 \textbf{MedGemma-4B} (\texttt{google/medgemma-4b-it}) is an open medical VLM whose SigLIP-style
-encoder~\cite{zhai2023siglip} and language model were further trained on medical data; its model card lists
-SLAKE (split unstated) but not VQA-RAD or PathVQA among training sources. \textbf{Gemma-3-4B}
+encoder~\cite{zhai2023siglip} and language model were further trained on medical data; its technical
+report~\cite{sellergren2025medgemma} lists SLAKE (450 items, the size of SLAKE's train split) and VQA-RAD
+(reinforcement-learning stage) among its training data and states that PathVQA was removed. \textbf{Gemma-3-4B}
 (\texttt{google/gemma-3-4b-it}) shares its architecture and size. The two differ in their whole post-training,
 not only in medical data, so we compare \emph{checkpoints} and do not attribute differences to medical data
 alone. \textbf{Replication pairs}, registered before any of their outputs were seen: \textbf{MedGemma-1.5-4B}
-(\texttt{google/medgemma-1.5-4b-it}, the 2026 release with the same architecture; its card lists SLAKE and
-VQA-RAD among training data) against the same Gemma-3-4B, and \textbf{MedVLThinker-3B}
+(\texttt{google/medgemma-1.5-4b-it}, the 2026 release with the same architecture; its card lists SLAKE among
+training data) against the same Gemma-3-4B, and \textbf{MedVLThinker-3B}
 (\texttt{UCSC-VLAA/MedVLThinker-3B-RL\_PMC}, Qwen2.5-VL-3B-Instruct trained with reinforcement learning on
 PMC-VQA) against its base \textbf{Qwen2.5-VL-3B-Instruct}. All five models run unquantized in bf16 on one
 16\,GB GPU (quantization would perturb the probabilities we audit) and receive identical prompts: a fixed system
@@ -310,7 +312,12 @@ all say the opposite.
 calls for the other answer. MedGemma follows the image on 72.8\%\ci{68.1}{77.0} of swaps and Gemma-3 on
 24.8\%\ci{20.4}{29.3} (H8, +48.0 points), so MedGemma is right on the new image 86\% of the time and Gemma-3 61\%.
 The gap holds for CT (75 \vs 26\%), MRI (57 \vs 26\%) and X-ray (81 \vs 8\%; \cref{fig:opp}) and when 40 PathVQA
-and VQA-RAD swaps are added (69.8 \vs 24.8\%, exploratory).
+and VQA-RAD swaps are added (69.8 \vs 24.8\%, exploratory). Following is reading, not flipping: the two gold
+answers are opposite, so a changed answer is right on both images or wrong on both. MedGemma is right on both
+(\emph{pair accuracy}, 0 by construction for a model that ignores the image) on 71.7\%\ci{67.1}{75.8} of swaps
+and wrong on both on 1.1\%; Gemma-3 gives the same answer to both images on 75.2\%. Resampling SLAKE's 53
+question templates instead of images widens the interval of the gap to [36.4, 57.7] (post hoc). SLAKE is,
+however, training data of both MedGemma releases (\cref{sec:limits}).
 
 \begin{figure}[t]
 \centering
@@ -363,9 +370,9 @@ each on the questions it answers). A model that looks at the image and whose pri
 same answer with and without it, and image removal scores that as blind. The correctness split shows that this is
 what MedGemma's excess consists of (\cref{fig:p3}, bottom): \dang{}-and-correct is 39.2\% \vs 25.1\%
 (+14.1\ci{11.1}{17.1}), while \dang{}-and-wrong, the cell that would mislead a user, is 11.3\% \vs 11.7\%
-($-0.4$\ci{$-2.7$}{2.0}). R3 removes this case by construction, and there MedGemma follows the image. The P1
-margin also argues against memorization: it appears on PathVQA and VQA-RAD, which the model card does not list
-as training data, and not on SLAKE, which it does.
+($-0.4$\ci{$-2.7$}{2.0}). R3 removes this case by construction, and there MedGemma follows the image. Only the PathVQA
+margin is free of training exposure: PathVQA was removed from MedGemma's training, whereas VQA-RAD was used, and
+202 of our 203 VQA-RAD test images also occur in VQA-RAD's train split.
 
 \begin{figure}[t]
 \centering
@@ -483,7 +490,12 @@ when; they do not estimate how often this happens across the field. The refusal 
 was formed after the primary results and fits all three pairs, but three pairs cannot test it formally. Medical
 and general checkpoints differ in their whole post-training, not only in medical data. The probes were registered
 after the main results were known (before running them), and one of three predictions failed. R3 is limited to
-SLAKE, where questions recur across images. SLAKE is in MedGemma's training data (split unstated). Refusal is
+SLAKE, where questions recur across images, and SLAKE is training data of both MedGemma releases but not of
+MedVLThinker: its evaluated images are not training images, but their distribution is, so a training-distribution
+effect explains R3 as well as greater use of the image does. A replication on 1,192 PathVQA questions, which no
+medical model lists as training data, is registered with its decision rule (pre-registration \S17) and has not
+been run at the time of writing. MedGemma-4B was also trained on VQA-RAD, whose test images almost all occur in
+its train split, so its VQA-RAD results may reflect exposure. Refusal is
 inferred from first-token mass and confirmed on a sample by free generation, not annotated per question.
 Paraphrase equivalence was judged by an LLM and \textbf{was not validated by human raters}; this is the main
 limitation of the consistency measure, and an LLM judge may share blind spots with the paraphraser. PathVQA
@@ -562,6 +574,9 @@ P3 restricted to the test split & An analysis bug had pooled the validation spli
 Chance correction, correctness split, refusal split, answer-change comparison across probes & Added after the run; descriptive, reported next to the registered estimates.\\
 Robustness probes R1--R3 & Registered after the main run, before running them (docs/PREREGISTRATION.md \S15); R3 restricted to SLAKE as registered (the run also covered 40 other swaps, reported as exploratory).\\
 Replication pairs, H9--H11 & Registered after the primary results, before running (docs/PREREGISTRATION.md \S16); all three new models passed the registered format check; the fallback pair was not needed.\\
+Pair accuracy for R3 & Post hoc: separates correct readings from answer changes; registered for R4.\\
+Probe R4, H12a--c & Opposite-answer probe on PathVQA, outside the medical models' training data; registered before running (\S17), pending.\\
+Training-data statements & Corrected after re-checking the documentation (\S18): MedGemma-4B was trained on VQA-RAD; MedGemma-1.5's card lists only SLAKE.\\
 \bottomrule
 \end{tabular}
 

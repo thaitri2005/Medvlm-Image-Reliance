@@ -1,7 +1,8 @@
 # Reproducing the audit
 
-Everything below runs from a fresh clone. The study design and every decision are in
-[PREREGISTRATION.md](PREREGISTRATION.md); this file is only *how to run it*.
+Everything below runs from a fresh clone on one GPU with at least 16 GB (all reported runs: RTX 4080 SUPER, bf16,
+batch size 1). The study design and every decision are in [PREREGISTRATION.md](PREREGISTRATION.md); the numbers
+are in [RESULTS.md](RESULTS.md); this file is only *how to run it*.
 
 ## 1. Environment
 
@@ -10,14 +11,14 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 97 fast tests, no GPU / network needed
+pytest                                                  # 103 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
-([MedGemma-4B](https://huggingface.co/google/medgemma-4b-it), [Gemma-3-4B](https://huggingface.co/google/gemma-3-4b-it)),
-then `hf auth login`.
+([MedGemma-4B](https://huggingface.co/google/medgemma-4b-it), [MedGemma-1.5-4B](https://huggingface.co/google/medgemma-1.5-4b-it),
+[Gemma-3-4B](https://huggingface.co/google/gemma-3-4b-it)), then `hf auth login`. Keep the token out of the repo.
 
-## 2. Pre-flight (about 30 min on one GPU)
+## 2. Pre-flight (about 30 min)
 
 ```bash
 medvlm doctor   --model medgemma4b                                   # cuda, bf16, HF access, suggested preset
@@ -28,39 +29,33 @@ medvlm regress  --profile pilot --model medgemma4b --hardware rtx4080 -n 200   #
 ```
 
 `regress` re-runs stored pilot jobs and compares answers and probabilities; it is what makes results from
-different GPUs comparable. Hardware presets (`t4`, `rtx4080`, `rtx4090`, `a100`) all run at **batch size 1**:
+different GPUs comparable. Every hardware preset (`t4`, `rtx4080`, `rtx4090`, `a100`) runs at **batch size 1**:
 in bf16, batching shifts teacher-forced log-probabilities by up to ~1 nat (PREREGISTRATION.md section 13, item 10).
 
-## 3. The main runs (~1.5 h per model on an RTX 4080 SUPER)
+## 3. Primary pair: main run, probes, post-hoc analyses (~1.5 h per model)
 
 ```bash
 medvlm pipeline --profile main --model medgemma4b --hardware rtx4080 --parts 2
 medvlm pipeline --profile main --model gemma3_4b  --hardware rtx4080 --parts 2
-medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b
-medvlm probes   --profile main --model medgemma4b --hardware rtx4080    # robustness probes, ~7 min per model
+medvlm compare  --profile main --model medgemma4b --model-b gemma3_4b   # P3
+medvlm probes   --profile main --model medgemma4b --hardware rtx4080    # R1-R3, ~7 min per model
 medvlm probes   --profile main --model gemma3_4b  --hardware rtx4080
-medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # all post-hoc tables + figures
+medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # post-hoc tables + figures 1-7
 ```
 
-`probes` runs the three robustness probes registered in PREREGISTRATION.md section 15 (black image, "unknown" allowed,
-opposite-answer image) into separate folders (`outputs/<model>__<probe>/main`). `posthoc` writes tables to
-`results/posthoc_*/main/` (including `reversal.csv`, the answer-change rate of both models under every probe,
-and `probe_tests.csv`, the registered H6-H8 tests) and figures twice: titled versions there, paper versions to
-`report/figures/`. The teaser figure is built by `python report/make_teaser.py`; the paper compiles with
-`latexmk -pdf main.tex` or `tectonic main.tex` in `report/` (see [report/README.md](../report/README.md)).
+`pipeline` = verify images -> validate the committed paraphrases (no LM needed) -> load the model once -> part 1
+-> checkpoint analysis -> part 2 -> analysis. `probes` writes to separate folders (`outputs/<model>__<probe>/main`)
+so the main run is never touched. `posthoc` writes titled figures to `results/posthoc_*/main/` and paper versions
+to `report/figures/`.
 
-`pipeline` = verify images -> validate paraphrases (no LM needed: they are committed) -> load the model once
--> part 1 -> checkpoint analysis -> part 2 -> analysis. Every command writes a timestamped
+**Interrupted?** Run the same command again: finished jobs are skipped and a half-written last line is repaired.
+`medvlm status --profile main --model medgemma4b --shards 2` shows progress. Every long command writes
 `logs/<time>_<command>_<model>_<profile>.log` with progress, ETA, GPU memory and format warnings.
 
-**Interrupted?** Run the same command again: finished jobs are skipped, a half-written last line is repaired.
-`medvlm status --profile main --model medgemma4b --shards 2` shows progress at any time.
-
-## 3b. Replication pairs (PREREGISTRATION.md section 16)
+## 4. Replication pairs (PREREGISTRATION.md section 16)
 
 Pair A: `medgemma15_4b` vs `gemma3_4b` (Gemma-3 outputs are reused). Pair B: `medvlthinker_3b` vs `qwen25vl_3b`.
-Same protocol as the primary pair. Per new model: slow tests, a pilot run, the pre-registered format check,
-then the main run and the probes.
+Same protocol; each new model first passes the registered format check.
 
 ```bash
 MEDVLM_TEST_MODEL=medvlthinker_3b pytest -m slow tests/test_hf_backend.py
@@ -69,10 +64,32 @@ medvlm format-check --profile pilot --model medvlthinker_3b          # must PASS
 medvlm pipeline     --profile main  --model medvlthinker_3b --hardware rtx4080 --parts 2
 medvlm probes       --profile main  --model medvlthinker_3b --hardware rtx4080
 medvlm posthoc      --profile main  --model medvlthinker_3b --model-b qwen25vl_3b
-medvlm replication  --profile main                                   # H9-H11, Holm across pairs
+medvlm replication  --profile main                                   # H9-H11, Holm across pairs, figure 8
 ```
 
-## 4. Commands
+## 5. Probe R4: opposite-answer images outside the training data (PREREGISTRATION.md section 17)
+
+```bash
+medvlm contrast --model all --hardware rtx4080      # five models, one after another; resumable (~1 h)
+medvlm contrast --analyze                           # tables + figure 9; no GPU
+```
+
+`--model` also takes a comma-separated list (`--model medgemma4b,gemma3_4b`). The manifest
+(`manifests/contrast/`, 1,192 PathVQA questions) is committed; the command only fetches and SHA-checks its 682
+images. Each model answers every question on its own image (`outputs/<model>/contrast`) and on the
+opposite-answer partner (`outputs/<model>__opp/contrast`). `--analyze` writes `results/contrast/`: per-model rates,
+paired differences, and the registered H12 tests, which are computed only when all five models are complete.
+It also covers the SLAKE probe R3 from the main run.
+
+## 6. Training-data check
+
+```bash
+medvlm contamination        # image overlap with each dataset's train split + documented training use
+```
+
+Writes `results/contamination/`. It downloads the train splits (SLAKE, VQA-RAD, PathVQA); no model is loaded.
+
+## 7. Commands
 
 | Command | What it does |
 |---|---|
@@ -80,14 +97,16 @@ medvlm replication  --profile main                                   # H9-H11, H
 | `prepare` / `verify` | Sample questions into `manifests/<profile>` (first time only); fetch + hash-verify images |
 | `paraphrase` | Generate candidates (LM + templates) and (re)validate all of them against rules and judgments |
 | `audit-sheet -n N` / `audit-score` | Export a fresh sample for human rating / score acceptance and kappa |
-| `bench` | Time batch sizes on this GPU |
+| `bench`, `estimate` | Time batch sizes on this GPU; job count and wall-clock at given seconds/job |
 | `regress -n N` | Re-run stored jobs; PASS if answers and probabilities did not change |
-| `estimate` | Job count and wall-clock at given seconds/job |
 | `run --shard i/n` | Inference only; resumable, `--limit`, `--max-minutes` |
-| `pipeline` | The whole study for one model, in N back-to-back parts |
-| `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison |
-| `probes --probe blank\|abstain\|opp\|all` | Registered robustness probes (PREREGISTRATION.md section 15) |
-| `posthoc --model-b B` | Post-hoc analyses, probe tests and all figures (web + paper versions) |
+| `pipeline` | The whole main run for one model, in N back-to-back parts |
+| `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison (P3) |
+| `probes --probe blank\|abstain\|opp\|all` | Robustness probes R1-R3 |
+| `posthoc --model-b B` | Post-hoc analyses, probe tests and figures for one pair |
+| `format-check`, `replication` | Format rule for a new model; replication tests H9-H11 across pairs |
+| `contrast [--analyze]` | Probe R4 and the opposite-answer tables (R3 + R4) |
+| `contamination` | Train-split image overlap and documented training use |
 
 Config layering: `configs/base.yaml` -> profile -> model -> hardware -> `configs/local.yaml` (gitignored) ->
 `--set a.b=c`.
@@ -95,22 +114,18 @@ Config layering: `configs/base.yaml` -> profile -> model -> hardware -> `configs
 | Profile | Purpose |
 |---|---|
 | `smoke` | ~40 questions, CPU pipeline checks (`--model mock` or `smolvlm`) |
-| `pilot` | 330 questions, design-tuning run on a Colab T4 (done) |
+| `pilot` | 330 questions: the design-tuning run, and the reference for `regress` and `format-check` |
 | `main` | 3,365 questions: SLAKE test + validation, VQA-RAD test, PathVQA test (600 yes/no + 200 open) |
-| `full` | adds train splits for a contamination analysis (deferred) |
+| `contrast` | 1,192 PathVQA test + validation yes/no questions with an opposite-answer partner (probe R4) |
 
-## 5. What is in git, and why it is reproducible
+## 8. What is in git, and why it is reproducible
 
 - **Manifests** (`manifests/<profile>/`): the exact sampled questions, gold answers, wrong-image partners and
   SHA hashes of every image; all paraphrase candidates with their rejection reasons; the semantic-equivalence
   judgments; the audit sheets. `prepare` never re-samples an existing manifest.
 - **Determinism:** sampling and partners use SHA-1 (never Python's `hash()`); greedy decoding; batch size 1;
   every run writes `meta.json` (config, git commit, versions, host).
-- **Results:** `results/<model>/<profile>/*.csv`; raw per-job outputs are force-added after a finished run
-  (`git add -f outputs/<model>/main`).
-- **Not in git:** images (re-fetched and hash-checked) and model weights.
-
-## 6. Colab
-
-[notebooks/colab_run.ipynb](../notebooks/colab_run.ipynb) wraps the same commands (secret `HF_TOKEN`, GPU
-runtime, `--hardware t4`). A free T4 runs at ~4.5 s/job, so split `main` into more parts.
+- **Registrations** are git tags (`prereg-main`, `prereg-probes`, `prereg-replication`, `prereg-contrast`).
+- **Results:** `results/` (index in [results/README.md](../results/README.md)); raw per-call outputs are
+  force-added after a finished run (`git add -f outputs/<model>/<profile>`).
+- **Not in git:** images (re-fetched and hash-checked), model weights, logs.

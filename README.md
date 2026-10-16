@@ -16,7 +16,9 @@
 > the image says the medical model uses the image **less**; every in-format test says it uses the image
 > **more**, by up to 48 points. A pre-registered replication with MedGemma-1.5 shows the same reversal; a Qwen
 > pair whose models never refuse to answer does not. Image removal measures whether a model will answer
-> without an image, and whether its priors agree with the image, not whether it looks.
+> without an image, and whether its priors agree with the image, not whether it looks. The largest in-format
+> gap is on SLAKE, which both MedGemma releases were trained on; its replication on PathVQA, outside every
+> medical model's training data, is registered and waiting to run.
 
 ---
 
@@ -82,8 +84,10 @@ the pre-registered sensitivity grid.
 The cleanest is the
 opposite-answer image: the same question asked about another image of the same modality whose correct answer
 is the opposite. MedGemma follows the image **73%** of the time, Gemma-3 **25%** (+48.0 [41.9, 53.8]), in CT,
-MRI and X-ray alike. Given a black image, Gemma-3 keeps its real-image answer far more often (κ 0.33 vs
-0.11), and becomes the more *Dangerous* model by 14 points.
+MRI and X-ray alike. Following is reading, not flipping: MedGemma is right on **both** images in 71.7% of
+these pairs and wrong on both in 1.1%, while Gemma-3 gives the same answer to both images in 75%. Given a black
+image, Gemma-3 keeps its real-image answer far more often (κ 0.33 vs 0.11), and becomes the more *Dangerous*
+model by 14 points.
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig6_opposite.png" width="55%"></p>
 
@@ -129,6 +133,15 @@ wrong answers (AUROC 0.51, at chance; the model's confidence reaches 0.71).
 - Whether a medical model uses the image more than its base is model-specific: both MedGemma releases do,
   MedVLThinker does not.
 
+**7. One open question, registered before testing it.** The opposite-answer probe uses SLAKE, and SLAKE is
+training data of both MedGemma releases (their evaluated images are not, but the distribution is) and not of
+MedVLThinker. So "trained on SLAKE" explains result 2 as well as "uses the image more" does. Re-checking the
+training documentation also showed that MedGemma-4B was trained on VQA-RAD, whose test images almost all (202 of
+203) also appear in its train split, which corrects an earlier claim about memorisation
+([docs/RESULTS.md §13](docs/RESULTS.md)). Probe **R4** repeats the opposite-answer test on 1,192 PathVQA questions
+that no medical model was trained on, with predictions and a decision rule fixed in advance
+([docs/PREREGISTRATION.md §17](docs/PREREGISTRATION.md), git tag `prereg-contrast`).
+
 ### Confirmatory tests
 
 Endpoints P1–P3 were frozen before the main run; probe hypotheses H6–H8 after it, but before the probes were
@@ -145,6 +158,7 @@ Failed predictions are reported as such.
 | H7 | Declines with "unknown" allowed, MedGemma − Gemma-3 < 0 | −6.7 [−8.2, −5.3], p_Holm < 0.001 | supported; both ≥ 93% |
 | H8 | Follows an opposite-answer image, MedGemma − Gemma-3 > 0 | +48.0 [41.9, 53.8], p_Holm < 0.001 | supported |
 | H9–H11 | Replication: medical − general follows the opposite image more, changes less without the image, refuses less | MedGemma-1.5: +36.5, −7.4, −28.7 (all p_Holm < 0.001); MedVLThinker: −1.6, +3.9, 0.0 | **replicates for MedGemma-1.5, not for MedVLThinker** |
+| H12a–c | Opposite-answer probe on PathVQA (outside the medical models' training data) | registered before running | **pending** |
 
 ## Method
 
@@ -210,20 +224,24 @@ pandas · NumPy · scikit-learn · matplotlib · pytest · LaTeX (CVPR kit)
 - **A paraphrase pipeline** with generation, rule validation and LLM-judged equivalence, enforced fail-closed.
 - **Statistics as code.** Cluster bootstrap, Holm, κ and all post-hoc analyses in one tested module; a
   simulation test shows the clustered intervals reach nominal coverage where naive ones do not.
-- **CLI and configs.** `medvlm prepare | paraphrase | pipeline | probes | analyze | compare | posthoc | regress
-  | status | doctor`; configs layer base → profile → model → hardware; every command writes a timestamped log
+- **CLI and configs.** `medvlm prepare | paraphrase | pipeline | probes | contrast | analyze | compare | posthoc
+  | contamination | regress | status | doctor`; configs layer base → profile → model → hardware; every command writes a timestamped log
   with progress, ETA and GPU memory.
-- **97 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
-  equivalence and the construction of opposite-answer partners.
+- **103 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
+  equivalence, the construction of opposite-answer partners and an oracle-vs-blind check of pair accuracy.
+- **Registrations are git tags** (`prereg-main`, `prereg-probes`, `prereg-replication`, `prereg-contrast`), so
+  the date of every plan relative to its results can be checked.
 
 ## Reproduce
 
 ```bash
-pip install -e ".[model,dev]" && pytest                         # 97 fast tests, no GPU needed
+pip install -e ".[model,dev]" && pytest                         # 103 fast tests, no GPU needed
 medvlm pipeline --profile main --model medgemma4b --hardware rtx4080 --parts 2
 medvlm pipeline --profile main --model gemma3_4b  --hardware rtx4080 --parts 2
 medvlm probes   --profile main --model medgemma4b --hardware rtx4080      # and gemma3_4b
 medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b     # all tables and figures
+medvlm contrast --model all --hardware rtx4080                            # probe R4 (five models, ~1 h)
+medvlm contrast --analyze                                                 # its tables and figure, no GPU
 ```
 
 Full instructions, including gated-model access and pre-flight checks: [docs/REPRODUCE.md](docs/REPRODUCE.md).
@@ -231,17 +249,17 @@ Full instructions, including gated-model access and pre-flight checks: [docs/REP
 ## Repository
 
 ```
-report/            the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/
-RESULTS.md         every result with its CI, the hypotheses, threats to validity and a post-run audit
-docs/PREREGISTRATION.md            pre-registration, design decisions and lab notebook (frozen sections marked)
-docs/REPRODUCE.md  how to run everything from a fresh clone
-src/medvlm/        data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, probes.py,
-                   scoring.py, analysis/ (stats, tables, post-hoc, figures), cli.py
-configs/           base -> profile -> model -> hardware layering
-manifests/         exact questions, image hashes, paraphrases, equivalence judgments, audit sheets
-results/           analysis tables and figures per model and comparison
-outputs/           raw per-call model outputs of the finished runs
-tests/             fast unit tests and -m slow real-model tests
+docs/RESULTS.md          every result with its CI, the hypotheses, threats to validity and a post-run audit
+docs/PREREGISTRATION.md  the registrations (frozen sections, tagged in git), change log, errata
+docs/REPRODUCE.md        how to run everything from a fresh clone
+report/                  the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/
+src/medvlm/              data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, probes.py,
+                         scoring.py, analysis/ (stats, tables, post-hoc, contrast, contamination), cli.py
+configs/                 base -> profile -> model -> hardware layering
+manifests/               exact questions, image hashes, paraphrases, equivalence judgments, audit sheets
+results/                 analysis tables and figures (index: results/README.md)
+outputs/                 raw per-call model outputs of the finished runs
+tests/                   fast unit tests and -m slow real-model tests
 ```
 
 ## Limitations
@@ -250,12 +268,14 @@ tests/             fast unit tests and -m slow real-model tests
   predicts when; not enough to say how often it happens across the field. The refusal account was formed after
   the primary results and fits all three pairs, but three pairs cannot test it formally.
 - **Checkpoints, not causes.** Each medical model differs from its base in its whole post-training, not only in
-  medical data. MedGemma-1.5's training data includes SLAKE and VQA-RAD.
+  medical data.
 - **Probe timing.** The probes were registered after the main results were known (before running them); one of
   three predictions failed.
 - **Paraphrases** were judged by an LLM and not validated by human raters. Quadrant results cover questions
   with at least two valid paraphrases (84% of the primary set).
-- SLAKE is in MedGemma's training data (split unstated). PathVQA questions are auto-generated from captions.
+- **Training exposure.** MedGemma-4B trained on SLAKE (its train split) and VQA-RAD (whose test images
+  mostly occur in its train split); MedGemma-1.5 lists SLAKE. The opposite-answer result rests on SLAKE until R4
+  runs. The general models' training data are not published. PathVQA questions are auto-generated from captions.
 - Benchmark VQA is not clinical use. Nothing here is a clinical claim.
 
 ## Related work

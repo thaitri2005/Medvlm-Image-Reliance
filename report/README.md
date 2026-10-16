@@ -1,6 +1,7 @@
 # Report
 
-LaTeX source of the paper, on the official CVPR author kit (`cvpr.sty`, `ieeenat_fullname.bst`).
+LaTeX source of the paper, on the official CVPR author kit (`cvpr.sty`, `ieeenat_fullname.bst`). The compiled
+paper is [main.pdf](main.pdf); rebuild it after any change to the text or figures.
 
 - **Overleaf:** New Project -> Upload Project -> zip this folder -> Recompile (pdfLaTeX).
 - **Locally:** `latexmk -pdf main.tex` (or `pdflatex main && bibtex main && pdflatex main && pdflatex main`).

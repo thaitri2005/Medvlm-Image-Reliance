@@ -15,7 +15,9 @@ qualifies them.
   harm            Dangerous split into correct and wrong answers; share of each model's errors that are Dangerous.
   probe_*         the robustness probes registered in PLAN.md section 15 (blank, abstain, opp) and their
                   Holm-adjusted tests H6-H8, when `medvlm probes` outputs exist.
-  figures         fig1-fig6, twice: titled (results/, README) and paper-sized without titles (report/figures/).
+  reversal        one measure (answer changes) under every probe, both models: the probes disagree.
+  removal_split   answer changes without the image, split by whether the model would rather refuse.
+  figures         fig1-fig7, twice: titled (results/, README) and paper-sized without titles (report/figures/).
 """
 from __future__ import annotations
 
@@ -363,6 +365,66 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
     return out
 
 
+def removal_split(samples, raws, B, seed) -> pd.DataFrame:
+    """Why image removal misranks: split 'answer changes without the image' (test yes/no) by whether the model
+    would rather refuse (first-token yes/no mass < 0.5). Forced answers on refused questions are unrelated to the
+    with-image answer (kappa ~ 0), so they count as 'image-reliant' about half the time."""
+    rows = []
+    for m, t in samples.items():
+        idx = t.index[(t.answer_type == "yesno") & (t.split == "test")]
+        p, mass = _wide(raws[m], "p_yes").loc[idx], _wide(raws[m], "yn_mass").loc[idx, "noimg"]
+        D = pd.DataFrame({"o": p["orig"] >= .5, "n": p["noimg"] >= .5, "image_id": t.loc[idx, "image_id"]})
+        for name, sel in (("all", mass.notna()), ("refuses (mass < 0.5)", mass < ABSTAIN_MASS),
+                          ("answers (mass >= 0.5)", mass >= ABSTAIN_MASS)):
+            g = D[sel]
+            ch = _ci(g, lambda x: float((x.o != x.n).mean()), B, seed)
+            k = _ci(g, lambda x: _kappa(x.o, x.n), B, seed)
+            rows.append({"model": m, "subset": name, "n": len(g), "changed_noimg": ch["est"], "lo": ch["lo"],
+                         "hi": ch["hi"], "kappa_orig_noimg": k["est"], "kappa_lo": k["lo"], "kappa_hi": k["hi"],
+                         "yes_rate_noimg": float(g.n.mean())})
+    return pd.DataFrame(rows)
+
+
+REVERSAL_PROBES = (("noimg", "Image removed"), ("shuf", "Wrong image"), ("blank", "Black image"),
+                   ("opp", "Opposite-answer image"))
+
+
+def reversal(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> pd.DataFrame:
+    """One measure across every probe: the share of yes/no answers that change when the image is altered.
+    Test yes/no for image removed / wrong / black; the registered SLAKE set of probe R3 for opposite-answer images.
+    Descriptive (the confirmatory tests are P3 and H6-H8); shows that the probes rank the two models differently."""
+    a = samples[model_a]
+    test_yn = a.index[(a.answer_type == "yesno") & (a.split == "test")]
+    by_id = {it.sample_id: it for it in items}
+
+    def p_yes(m, probe):
+        if probe in ("noimg", "shuf"):
+            return _wide(raws[m], "p_yes")[probe]
+        res = load_results(paths.run_dir(f"{m}__{probe}", cfg["profile"]))
+        return None if res.empty else _wide(res, "p_yes")[probe]
+
+    rows = []
+    for probe, label in REVERSAL_PROBES:
+        pp = {m: p_yes(m, probe) for m in (model_a, model_b)}
+        if any(v is None for v in pp.values()):
+            continue
+        idx = test_yn if probe != "opp" else pd.Index([s for s in pp[model_a].dropna().index
+                                                        if s in pp[model_b].dropna().index and by_id[s].dataset == "slake"])
+        cols = {}
+        for tag, m in (("a", model_a), ("b", model_b)):
+            po, pr = _wide(raws[m], "p_yes")["orig"].reindex(idx), pp[m].reindex(idx)
+            cols[tag] = ((po >= .5) != (pr >= .5)).astype(float).where(po.notna() & pr.notna())
+        D = pd.DataFrame({**cols, "image_id": [by_id[s].image_id for s in idx]}, index=idx).dropna()
+        for tag, m in (("a", model_a), ("b", model_b)):
+            r = _ci(D, lambda x, t=tag: float(x[t].mean()), B, seed)
+            rows.append({"probe": probe, "label": label, "model": m, "changed": r["est"], "lo": r["lo"], "hi": r["hi"],
+                         "n": len(D), "n_images": D.image_id.nunique()})
+        d = _ci(D, lambda x: float((x.a - x.b).mean()), B, seed)
+        rows.append({"probe": probe, "label": label, "model": f"{model_a} - {model_b}", "changed": d["est"],
+                     "lo": d["lo"], "hi": d["hi"], "p": d["p"], "n": len(D), "n_images": D.image_id.nunique()})
+    return pd.DataFrame(rows)
+
+
 # ------------------------------------------------------------------ figures
 # Each figure is drawn twice: "web" (titled, for README/RESULTS/poster) and "paper" (no title, sized for the
 # CVPR column: 3.25 in single column, 6.9 in full width; the caption lives in LaTeX).
@@ -468,7 +530,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                     "Worst (flips, not reliant)"], loc="upper center", ncol=4, frameon=False, fontsize=fs,
                    bbox_to_anchor=(0.5, 0.0))
         fig.tight_layout()
-        save(fig, "fig1_quadrants.png", "Fig. 1  Quadrant composition of yes/no answers (test split)")
+        save(fig, "fig1_quadrants.png", "Quadrant composition of yes/no answers (test split)")
 
         # 2: Dangerous share by SLAKE modality, both probes (single column in the paper)
         fig, axes = plt.subplots(1, 2, figsize=(col, 1.85) if paper else (9.5, 3.4), sharey=True)
@@ -492,7 +554,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                    [LABEL[m] for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
                    bbox_to_anchor=(0.55, 0.0))
         fig.tight_layout()
-        save(fig, "fig2_modality.png", "Fig. 2  Dangerous share by modality (SLAKE yes/no, test+val, 95% CI by image)")
+        save(fig, "fig2_modality.png", "Dangerous share by modality (SLAKE yes/no, test+val, 95% CI by image)")
 
         # 3: does image reliance flag wrong answers? label-free scores only
         sel = tabs["selective_labelfree"]
@@ -508,7 +570,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         ax.legend(frameon=False, fontsize=fs - 0.5, loc="upper right")
         _style(ax, None, fs)
         fig.tight_layout()
-        save(fig, "fig3_selective.png", "Fig. 3  Does image reliance flag wrong answers? (test yes/no)")
+        save(fig, "fig3_selective.png", "Does image reliance flag wrong answers? (test yes/no)")
 
         # 4: abstention without the image: forced yes/no (main run) and with 'unknown' allowed (probe R2)
         abst = tabs["abstention"]
@@ -530,7 +592,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
             _bars(axes[0, 1], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
             _style(axes[0, 1], "Instruction allows 'unknown' (probe R2)", fs)
         fig.tight_layout()
-        save(fig, "fig4_abstention.png", "Fig. 4  Declines to answer when the image is removed")
+        save(fig, "fig4_abstention.png", "Declines to answer when the image is removed")
 
         # 5: the MedGemma - Gemma-3 Dangerous gap under every variant (forest plot, one axis: share difference)
         p3 = tabs["p3_sensitivity"].copy()
@@ -560,7 +622,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         ax.set_xlabel("Dangerous share, MedGemma − Gemma-3 (points, 95% CI)", color=INK2, fontsize=fs)
         _style(ax, None, fs)
         fig.tight_layout()
-        save(fig, "fig5_p3.png", "Fig. 5  The Dangerous gap, by probe and by correctness")
+        save(fig, "fig5_p3.png", "The Dangerous gap, by probe and by correctness")
 
         # 6: opposite-answer images (probe R3): follow rate by modality
         po = tabs.get("probe_opp")
@@ -575,7 +637,48 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                        bbox_to_anchor=(0.55, 0.0))
             _style(ax, None, fs)
             fig.tight_layout()
-            save(fig, "fig6_opposite.png", "Fig. 6  Image swapped for one whose correct answer is opposite (SLAKE)")
+            save(fig, "fig6_opposite.png", "Image swapped for one whose correct answer is opposite (SLAKE)")
+
+        # 7: the headline: one measure (answer changes) under every probe, both models
+        rv = tabs.get("reversal")
+        if rv is not None and not rv.empty:
+            probes = [p for p, _ in REVERSAL_PROBES if p in set(rv.probe)]
+            sub = {"noimg": "the reference probe", "shuf": "same dataset and modality",
+                   "blank": "probe R1", "opp": "probe R3, SLAKE"}
+            fig, ax = plt.subplots(figsize=(col, 2.6) if paper else (8.0, 4.3))
+            y = np.arange(len(probes))[::-1].astype(float)
+            ms, lw = (4.5 if paper else 8), (1.4 if paper else 2.2)
+            off = {models[0]: 0.0, models[1]: -0.26}
+            for m in models:
+                g = rv[rv.model == m].set_index("probe").loc[probes]
+                ax.errorbar(g.changed, y + off[m], xerr=[g.changed - g.lo, g.hi - g.changed], fmt="o", ms=ms,
+                            color=color[m], ecolor=color[m], elinewidth=lw, mec=SURFACE, mew=1)
+            d = rv[rv.model.str.contains(" - ")].set_index("probe").loc[probes]
+            for yi, p in zip(y, probes):
+                head = ax.text(0.005, yi + 0.2, dict(REVERSAL_PROBES)[p], fontsize=fs, color=INK, ha="left",
+                               va="baseline", fontweight="bold")
+                ax.annotate(f"{sub[p]} · n={int(d.loc[p, 'n']):,}", xy=(1, 0), xycoords=head, xytext=(4, 0),
+                            textcoords="offset points", fontsize=fs - 1.5, color=INK2, ha="left", va="bottom")
+                ax.text(1.02, yi - 0.13, f"{d.loc[p, 'changed'] * 100:+.0f}".replace("-", "−"),
+                        transform=ax.get_yaxis_transform(), ha="left", va="center", fontsize=fs, color=INK)
+            ax.text(1.02, y[0] + 0.55, "MedGemma\n− Gemma-3", transform=ax.get_yaxis_transform(), ha="left",
+                    va="bottom", fontsize=fs - 1.5, color=INK2, linespacing=1.05)
+            ax.axhline(y[0] - 0.55, color=GRID, lw=0.8)
+            ax.set_yticks([])
+            ax.spines["left"].set_visible(False)
+            ax.set_ylim(y[-1] - 0.5, y[0] + 0.62)
+            ax.set_xlim(0, 1)
+            ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+            ax.grid(axis="x", color=GRID, lw=0.6)
+            ax.set_axisbelow(True)
+            ax.set_xlabel("yes/no answers that change when the image is altered (95% CI)", color=INK2, fontsize=fs)
+            _style(ax, None, fs)
+            ax.spines["left"].set_visible(False)
+            fig.legend([Line2D([], [], marker="o", ls="", ms=ms, color=color[m]) for m in models],
+                       [LABEL[m] for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
+                       bbox_to_anchor=(0.5, 0.0))
+            fig.tight_layout()
+            save(fig, "fig7_reversal.png", "Which model uses the image? The probes disagree")
     return written
 
 
@@ -591,6 +694,8 @@ def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
            "harm": harm(samples, model_a, model_b, B, seed),
            "no_pilot": no_pilot(cfg, paths, samples, raws, items, model_a, model_b, B, seed)}
     out.update(probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed))
+    out["reversal"] = reversal(cfg, paths, samples, raws, items, model_a, model_b, B, seed)
+    out["removal_split"] = removal_split(samples, raws, B, seed)
     out_dir = paths.results / f"posthoc_{model_a}_vs_{model_b}" / profile
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, df in out.items():

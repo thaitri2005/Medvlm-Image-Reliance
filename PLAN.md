@@ -2,9 +2,15 @@
 
 A modality-by-modality audit of image reliance in a small medical VLM. Solo course project, ~2 weeks, all
 runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
-[README.md](README.md) is the paper-style overview and [docs/REPRODUCE.md](docs/REPRODUCE.md) the how-to-run. Last updated 2026-10-15.
+[README.md](README.md) is the paper-style overview and [docs/REPRODUCE.md](docs/REPRODUCE.md) the how-to-run. Last updated 2026-10-16.
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is
 listed in section 13 with its reason.
+
+> **Framing after the results (2026-10-16).** Sections 0 and 3 keep the framing the study was planned with
+> (a cross-modality audit of MedGemma, with Gemma-3 as control). The results changed the headline: image removal,
+> the taxonomy's reference probe, ranks the two models opposite to every in-format probe (section 15.1), so the
+> paper and README are now framed around that comparison ("Image Removal Misranks Image Reliance"). No frozen
+> section was edited; the new summaries are post hoc and listed in section 13, item 17.
 
 ## 0. Objective, target, scope
 
@@ -35,7 +41,7 @@ a modality (reported as exploratory only), training anything, clinical claims.
 
 - Built: loaders + deterministic sampler + image hashing, batched paraphrasing + validation, resumable
   runner, scoring, statistics (cluster bootstrap, Holm, kappa), `analyze`, `compare`, `bench`, `regress`,
-  `pipeline`, hardware presets. **95 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
+  `pipeline`, hardware presets. **96 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
@@ -44,7 +50,9 @@ a modality (reported as exploratory only), training anything, clinical claims.
   Main runs done 2026-10-16 (18,896 calls per model, both complete). Results: [RESULTS.md](RESULTS.md).
   Post-run deviations and post-hoc analyses: section 13, items 12-16.
 - Robustness probes (section 15) registered at commit `44131a5`, then run 2026-10-16 (3,535 calls per model):
-  H6 failed (reversed), H7 and H8 supported. The report is in `report/` (CVPR format).
+  H6 failed (reversed), H7 and H8 supported. The report is in `report/` (CVPR format, `report/main.pdf`).
+- Prior work re-checked 2026-10-16 (section 14) and the paper reframed around the probe comparison.
+  Next: more model pairs; human rating of 50 paraphrases (`manifests/main/paraphrase_audit.csv`); poster.
 
 ## 2. Prior work and our delta
 
@@ -62,7 +70,7 @@ a same-architecture control for medical tuning. **Novelty search still to do** (
 
 ## 3. Hypotheses (directional guesses; nulls are reported as findings)
 
-*Outcomes: [RESULTS.md section 8](RESULTS.md). H1 supported (MedGemma, PathVQA); H2 probe-dependent; H3 not
+*Outcomes: [RESULTS.md section 9](RESULTS.md). H1 supported (MedGemma, PathVQA); H2 probe-dependent; H3 not
 supported (image reliance at chance for flagging errors); H4 supported under the pre-registered probe (image
 removed) only: null under a wrong image, reversed under a black image (section 15); H5 supported. Probe
 hypotheses H6-H8: section 15.*
@@ -319,11 +327,25 @@ after unblinding.
 1,315); fixed to the test split as pre-registered (+13.7, n = 1,012) with a unit test.
 (15) **Wrong-image confound check**: where the partner image carries the same question, compare gold answers
 (112 swaps; exploratory).
-(16) **Post-run audit** (RESULTS.md section 9): no answer reaches a model's input; prompts verified
+(16) **Post-run audit** (RESULTS.md section 11): no answer reaches a model's input; prompts verified
 identical across models; the answer-type instruction is gold-derived but disagrees with question phrasing
 for 4/3,365; **the Dangerous share has a large chance floor on yes/no** (41.5% / 35.8%), so P3 is
 additionally reported chance-corrected (d-kappa +0.11 [0.04, 0.18]); results unchanged without the pilot
 questions; model card lists SLAKE (not VQA-RAD/PathVQA) as training data.
+(17) **After the probes: two descriptive summaries** (`medvlm posthoc`). `reversal.csv` puts every probe on
+one scale (share of yes/no answers that change when the image is altered): image removed -6.1 points
+(MedGemma - Gemma-3), wrong image +5.1, black image +20.3, opposite-answer image +48.0. `removal_split.csv`
+splits image-removed changes by refusal (mass < 0.5): on refused questions the forced answer is unrelated to
+the with-image answer (kappa 0.04 / -0.01), and Gemma-3 refuses on 354 vs 219 questions. Both summarise runs
+that were already registered; neither is a new test.
+
+**Prior work re-checked 2026-10-16** (before reframing the paper). The reference study (arXiv 2603.20985)
+corroborated image removal with a KL score, a black image and random swaps, which agreed on its chest X-ray
+models. Zafar et al. (arXiv 2607.03647) use blank, shuffled, absent and hard-negative images to define reliance
+metrics and train against them; Lotfinia et al. (arXiv 2606.17710) use image swaps and occlusion and find model
+class does not predict image use; MedVIGIL (arXiv 2605.07919) and Hearsay (arXiv 2607.26886) study refusal
+without evidence. None of these, as far as we could find, compares the probes' *rankings* of models on the
+same questions; that comparison and the two confounds behind the disagreement are what we claim as new.
 
 ## 15. Robustness probes (registered 2026-10-16, after the main run, BEFORE running these probes)
 

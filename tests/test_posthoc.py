@@ -45,3 +45,15 @@ def test_kappa_is_zero_for_independent_answers_even_when_raw_agreement_is_high()
     n = pd.Series(rng.random(20000) < 0.8)          # independent default "yes" without it
     assert (o == n).mean() > 0.6                    # 68% "unchanged" -> would look like image-blind answers
     assert abs(_kappa(o, n)) < 0.03                 # but none of it is beyond chance
+
+
+def test_removal_split_counts_forced_answers_on_refused_questions_and_partitions_the_set():
+    from medvlm.analysis.posthoc import removal_split
+
+    _, samples, raws = _fake(seed=3)
+    out = removal_split({"m": samples}, {"m": raws}, B=50, seed=1).set_index("subset")
+    assert out.loc["all", "n"] == 400
+    assert out.loc["refuses (mass < 0.5)", "n"] + out.loc["answers (mass >= 0.5)", "n"] == 400
+    # random outputs: about half of the answers "change" and none of it is beyond chance
+    assert abs(out.loc["all", "changed_noimg"] - 0.5) < 0.1
+    assert abs(out.loc["all", "kappa_orig_noimg"]) < 0.15

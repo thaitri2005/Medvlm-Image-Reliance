@@ -10,7 +10,7 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 95 fast tests, no GPU / network needed
+pytest                                                  # 96 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
@@ -44,8 +44,10 @@ medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # all po
 
 `probes` runs the three robustness probes registered in PLAN.md section 15 (black image, "unknown" allowed,
 opposite-answer image) into separate folders (`outputs/<model>__<probe>/main`). `posthoc` writes tables to
-`results/posthoc_*/main/` and figures twice: titled versions there, paper versions to `report/figures/`.
-The teaser figure is built by `python report/make_teaser.py`.
+`results/posthoc_*/main/` (including `reversal.csv`, the answer-change rate of both models under every probe,
+and `probe_tests.csv`, the registered H6-H8 tests) and figures twice: titled versions there, paper versions to
+`report/figures/`. The teaser figure is built by `python report/make_teaser.py`; the paper compiles with
+`latexmk -pdf main.tex` or `tectonic main.tex` in `report/` (see [report/README.md](../report/README.md)).
 
 `pipeline` = verify images -> validate paraphrases (no LM needed: they are committed) -> load the model once
 -> part 1 -> checkpoint analysis -> part 2 -> analysis. Every command writes a timestamped

@@ -1,0 +1,7 @@
+profile,dataset,split,questions,images,images_in_train_split,yesno_questions_on_train_images,yesno_questions
+contrast,pathvqa,test,667,371,0,0,667
+contrast,pathvqa,validation,525,311,0,0,525
+main,pathvqa,test,800,512,0,0,600
+main,slake,test,1061,96,0,0,355
+main,slake,validation,1053,96,0,0,358
+main,vqa_rad,test,451,203,202,250,251

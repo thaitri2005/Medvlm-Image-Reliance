@@ -12,7 +12,7 @@ from pathlib import Path
 
 from ..config import Paths
 from ..schema import Item, load_items, write_jsonl
-from .sampling import assign_shuffle_partners, stratified_sample
+from .sampling import assign_shuffle_partners, keep_with_opposite_partner, stratified_sample
 from .sources import Source, export_image, get_source
 
 
@@ -36,6 +36,10 @@ def prepare(cfg: dict, paths: Paths, rebuild: bool = False) -> list[Item]:
         for spec in cfg["datasets"]:
             src = sources.setdefault(spec["name"], get_source(spec["name"], paths))
             pool = src.rows(spec["split"], spec.get("pool_limit"))
+            if spec.get("only") == "opposite_yesno":      # contrast set: yes/no questions with an opposite-answer partner
+                pool = keep_with_opposite_partner(pool)
+            elif spec.get("only"):
+                raise ValueError(f"unknown dataset filter only={spec['only']!r}")
             rows += stratified_sample(pool, spec.get("n"), spec.get("stratify", []), cfg["seed"],
                                       spec.get("allocation", "equal"))
         assign_shuffle_partners(rows, cfg["seed"])

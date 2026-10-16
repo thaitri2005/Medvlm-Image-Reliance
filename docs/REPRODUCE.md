@@ -1,7 +1,7 @@
 # Reproducing the audit
 
 Everything below runs from a fresh clone. The study design and every decision are in
-[PLAN.md](../PLAN.md); this file is only *how to run it*.
+[PREREGISTRATION.md](PREREGISTRATION.md); this file is only *how to run it*.
 
 ## 1. Environment
 
@@ -29,7 +29,7 @@ medvlm regress  --profile pilot --model medgemma4b --hardware rtx4080 -n 200   #
 
 `regress` re-runs stored pilot jobs and compares answers and probabilities; it is what makes results from
 different GPUs comparable. Hardware presets (`t4`, `rtx4080`, `rtx4090`, `a100`) all run at **batch size 1**:
-in bf16, batching shifts teacher-forced log-probabilities by up to ~1 nat (PLAN.md section 13, item 10).
+in bf16, batching shifts teacher-forced log-probabilities by up to ~1 nat (PREREGISTRATION.md section 13, item 10).
 
 ## 3. The main runs (~1.5 h per model on an RTX 4080 SUPER)
 
@@ -42,7 +42,7 @@ medvlm probes   --profile main --model gemma3_4b  --hardware rtx4080
 medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b   # all post-hoc tables + figures
 ```
 
-`probes` runs the three robustness probes registered in PLAN.md section 15 (black image, "unknown" allowed,
+`probes` runs the three robustness probes registered in PREREGISTRATION.md section 15 (black image, "unknown" allowed,
 opposite-answer image) into separate folders (`outputs/<model>__<probe>/main`). `posthoc` writes tables to
 `results/posthoc_*/main/` (including `reversal.csv`, the answer-change rate of both models under every probe,
 and `probe_tests.csv`, the registered H6-H8 tests) and figures twice: titled versions there, paper versions to
@@ -56,7 +56,7 @@ and `probe_tests.csv`, the registered H6-H8 tests) and figures twice: titled ver
 **Interrupted?** Run the same command again: finished jobs are skipped, a half-written last line is repaired.
 `medvlm status --profile main --model medgemma4b --shards 2` shows progress at any time.
 
-## 3b. Replication pairs (PLAN.md section 16)
+## 3b. Replication pairs (PREREGISTRATION.md section 16)
 
 Pair A: `medgemma15_4b` vs `gemma3_4b` (Gemma-3 outputs are reused). Pair B: `medvlthinker_3b` vs `qwen25vl_3b`.
 Same protocol as the primary pair. Per new model: slow tests, a pilot run, the pre-registered format check,
@@ -86,7 +86,7 @@ medvlm replication  --profile main                                   # H9-H11, H
 | `run --shard i/n` | Inference only; resumable, `--limit`, `--max-minutes` |
 | `pipeline` | The whole study for one model, in N back-to-back parts |
 | `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison |
-| `probes --probe blank\|abstain\|opp\|all` | Registered robustness probes (PLAN.md section 15) |
+| `probes --probe blank\|abstain\|opp\|all` | Registered robustness probes (PREREGISTRATION.md section 15) |
 | `posthoc --model-b B` | Post-hoc analyses, probe tests and all figures (web + paper versions) |
 
 Config layering: `configs/base.yaml` -> profile -> model -> hardware -> `configs/local.yaml` (gitignored) ->

@@ -1,0 +1,12 @@
+model,dataset,status,detail,source,checked
+medgemma4b,slake,trained,"SLAKE (450) in vision, pre-training and RL stages; 450 = SLAKE train images","MedGemma technical report, arXiv 2507.05201 (Table 1)",2026-10-16
+medgemma4b,vqa_rad,trained,"VQA-RAD (1,391 QA) in the RL stage","MedGemma technical report, arXiv 2507.05201 (Table 1)",2026-10-16
+medgemma4b,pathvqa,not trained,PathVQA removed from training for data-quality issues,"MedGemma technical report, arXiv 2507.05201 (Table 1)",2026-10-16
+medgemma15_4b,slake,trained,listed among training sources,model card google/medgemma-1.5-4b-it,2026-10-16
+medgemma15_4b,vqa_rad,not stated,"listed under data ownership and citation, not under training sources",model card google/medgemma-1.5-4b-it,2026-10-16
+medgemma15_4b,pathvqa,not stated,not mentioned,model card google/medgemma-1.5-4b-it,2026-10-16
+medvlthinker_3b,slake,not stated,RL on PMC-VQA only,model card UCSC-VLAA/MedVLThinker-3B-RL_PMC,2026-10-16
+medvlthinker_3b,vqa_rad,not stated,RL on PMC-VQA only,model card UCSC-VLAA/MedVLThinker-3B-RL_PMC,2026-10-16
+medvlthinker_3b,pathvqa,not stated,RL on PMC-VQA only,model card UCSC-VLAA/MedVLThinker-3B-RL_PMC,2026-10-16
+gemma3_4b,all,unknown,pre-training data not published,model card google/gemma-3-4b-it,2026-10-16
+qwen25vl_3b,all,unknown,pre-training data not published,model card Qwen/Qwen2.5-VL-3B-Instruct,2026-10-16

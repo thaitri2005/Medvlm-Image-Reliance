@@ -1,5 +1,5 @@
 """`medvlm posthoc`: analyses added after the main run, each motivated by something the run showed.
-Logged in PLAN.md section 13 (items 12-15). Nothing here replaces a pre-registered endpoint; it
+Logged in docs/PREREGISTRATION.md section 13 (items 12-15). Nothing here replaces a pre-registered endpoint; it
 qualifies them.
 
   abstention      without the image, models often answer "please provide the image" instead of yes/no;
@@ -13,7 +13,7 @@ qualifies them.
                   chance. Chance agreement, the chance-only Dangerous floor, Cohen's kappa and paired d(kappa).
   no_pilot        key endpoints re-estimated without the 330 pilot questions the design was tuned on.
   harm            Dangerous split into correct and wrong answers; share of each model's errors that are Dangerous.
-  probe_*         the robustness probes registered in PLAN.md section 15 (blank, abstain, opp) and their
+  probe_*         the robustness probes registered in docs/PREREGISTRATION.md section 15 (blank, abstain, opp) and their
                   Holm-adjusted tests H6-H8, when `medvlm probes` outputs exist.
   reversal        one measure (answer changes) under every probe, both models: the probes disagree.
   removal_split   answer changes without the image, split by whether the model would rather refuse.
@@ -272,7 +272,7 @@ def harm(samples, model_a, model_b, B, seed) -> pd.DataFrame:
 
 
 def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> dict[str, pd.DataFrame]:
-    """The registered robustness probes (PLAN.md section 15), if their outputs exist."""
+    """The registered robustness probes (docs/PREREGISTRATION.md section 15), if their outputs exist."""
     from ..probes import opposite_partners
     from .stats import holm
 
@@ -386,7 +386,7 @@ def removal_split(samples, raws, B, seed) -> pd.DataFrame:
 
 
 def replication_tests(samples, raws, tabs, model_a, model_b, B, seed) -> pd.DataFrame:
-    """H9-H11 (PLAN.md section 16) for one pair, model_a = medical: R3 follow rate (> 0), answer change without
+    """H9-H11 (docs/PREREGISTRATION.md section 16) for one pair, model_a = medical: R3 follow rate (> 0), answer change without
     the image (< 0), refusal without the image (< 0). Raw p-values; Holm across pairs in `replication_summary`."""
     rows = []
     po, rv = tabs.get("probe_opp"), tabs.get("reversal")
@@ -414,7 +414,7 @@ def replication_tests(samples, raws, tabs, model_a, model_b, B, seed) -> pd.Data
 
 
 def replication_summary(results_dir, pairs: list[tuple[str, str]], profile: str = "main") -> pd.DataFrame:
-    """Holm across H9-H11 of the replication pairs; a pair replicates if H9 and H10 hold (PLAN.md section 16)."""
+    """Holm across H9-H11 of the replication pairs; a pair replicates if H9 and H10 hold (docs/PREREGISTRATION.md section 16)."""
     from .stats import holm
 
     frames = []

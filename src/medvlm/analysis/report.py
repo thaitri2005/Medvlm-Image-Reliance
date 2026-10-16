@@ -1,6 +1,6 @@
 """`medvlm analyze`: turn a finished (or partial) run into the committed result tables.
 
-Pre-registered primary endpoints (PLAN.md section 5) are computed with image-clustered bootstrap CIs and
+Pre-registered primary endpoints (docs/PREREGISTRATION.md section 5) are computed with image-clustered bootstrap CIs and
 two-sided p-values, Holm-adjusted as one family. Everything else is descriptive (estimate + 95% CI) and
 cells with < 30 images are flagged `exploratory`.
 

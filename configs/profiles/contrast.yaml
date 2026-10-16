@@ -1,0 +1,12 @@
+# Probe R4 (PREREGISTRATION.md section 17): the opposite-answer probe outside every medical model's listed
+# training data. All PathVQA test + validation yes/no questions that are also asked about a different image
+# with the opposite answer (MedGemma's technical report removed PathVQA from training; MedGemma-1.5 and
+# MedVLThinker do not list it). Each question is run on its own image (`orig`) and then on the partner image
+# (`medvlm contrast` runs the `opp` probe); no paraphrases, no gold scoring.
+name: contrast
+datasets:
+  - {name: pathvqa, split: test,       n: null, only: opposite_yesno}
+  - {name: pathvqa, split: validation, n: null, only: opposite_yesno}
+paraphrase: {n: 0}
+conditions: [orig]
+run: {score_gold_logprob: false}

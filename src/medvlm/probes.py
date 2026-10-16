@@ -1,4 +1,4 @@
-"""`medvlm probes`: robustness probes registered after the main run (PLAN.md section 15), each answering a
+"""`medvlm probes`: robustness probes registered after the main run (docs/PREREGISTRATION.md section 15), each answering a
 question a skeptical reader would ask. Outputs go to separate run folders (outputs/<model>__<probe>/main), so
 the frozen main results are never touched.
 
@@ -14,9 +14,9 @@ from __future__ import annotations
 import copy
 
 from .config import Paths
+from .data.sampling import is_opposite, opposite_key
 from .run import Job, run
 from .schema import YESNO, Item, load_items, stable_int
-from .scoring import normalize
 
 PROBES = ("blank", "abstain", "opp")
 ABSTAIN_SUFFIX = "Answer 'yes' or 'no'. If this cannot be determined without seeing the image, answer 'unknown'."
@@ -28,13 +28,13 @@ def opposite_partners(items: list[Item]) -> dict[str, Item]:
     by_q: dict[tuple, list[Item]] = {}
     for it in items:
         if it.answer_type == YESNO:
-            by_q.setdefault((it.dataset, it.modality, normalize(it.question)), []).append(it)
+            by_q.setdefault(opposite_key(it.dataset, it.modality, it.question), []).append(it)
     out = {}
     for it in items:
         if it.answer_type != YESNO:
             continue
-        pool = sorted((o for o in by_q[(it.dataset, it.modality, normalize(it.question))]
-                       if o.image_id != it.image_id and o.answer.strip().lower() != it.answer.strip().lower()),
+        pool = sorted((o for o in by_q[opposite_key(it.dataset, it.modality, it.question)]
+                       if o.image_id != it.image_id and is_opposite(o.answer, it.answer)),
                       key=lambda o: o.sample_id)
         if pool:
             out[it.sample_id] = pool[stable_int(f"opp|{it.sample_id}") % len(pool)]
@@ -78,3 +78,29 @@ def run_probes(cfg: dict, paths: Paths, model, which: list[str], max_minutes: fl
         run(pc, paths, model, jobs=jobs, max_minutes=max_minutes)
     if hasattr(model, "prompt_cfg"):
         model.prompt_cfg = cfg["prompt"]
+
+
+def run_contrast(models: list[str], overrides: list[str], hardware: str | None,
+                 max_minutes: float | None = None, loader=None, paths: Paths | None = None) -> None:
+    """Probe R4 (docs/PREREGISTRATION.md section 17), one model after another: fetch + verify the committed
+    `contrast` manifest's images, run every question on its own image (`orig`), then on its opposite-answer
+    partner (`opp`). Resumable like every run; `loader` and `paths` are for tests."""
+    from .config import get_paths, load_config
+    from .data.prepare import prepare, verify
+    from .pipeline import _free_gpu
+
+    if loader is None:
+        from .models import load_model as loader
+    for name in models:
+        cfg = load_config("contrast", name, overrides, hardware=hardware)
+        paths = paths or get_paths(cfg)
+        if not (paths.manifest_dir("contrast") / "items.jsonl").exists():
+            raise SystemExit("[contrast] manifests/contrast/items.jsonl missing: `git pull` (it is committed)")
+        if verify(cfg, paths):
+            prepare(cfg, paths)
+        print(f"[contrast] === {name} ===", flush=True)
+        model = loader(cfg)
+        run(cfg, paths, model, max_minutes=max_minutes)                 # own image
+        run_probes(cfg, paths, model, ["opp"], max_minutes=max_minutes)  # opposite-answer partner image
+        del model
+        _free_gpu()

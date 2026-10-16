@@ -1,0 +1,25 @@
+{
+  "profile": "contrast",
+  "seed": 1234,
+  "n_items": 1192,
+  "n_images": 682,
+  "datasets": [
+    {
+      "name": "pathvqa",
+      "split": "test",
+      "n": null,
+      "only": "opposite_yesno"
+    },
+    {
+      "name": "pathvqa",
+      "split": "validation",
+      "n": null,
+      "only": "opposite_yesno"
+    }
+  ],
+  "python": "3.12.2",
+  "counts": {
+    "pathvqa|test|pathology|yesno": 667,
+    "pathvqa|validation|pathology|yesno": 525
+  }
+}

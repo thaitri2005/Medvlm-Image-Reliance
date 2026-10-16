@@ -49,7 +49,7 @@ def compare(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
         rows.append(row)
     by_cell = pd.DataFrame(rows)
 
-    # P3 uses the pre-registered primary analysis set: official TEST splits only (PLAN.md section 5)
+    # P3 uses the pre-registered primary analysis set: official TEST splits only (docs/PREREGISTRATION.md section 5)
     yn = meta[(meta["answer_type"] == "yesno") & (meta["split"] == "test")].index
     d = pd.DataFrame({"d": a.loc[yn, "q_dangerous"] - b.loc[yn, "q_dangerous"],
                       "image_id": meta.loc[yn, "image_id"]}).dropna()

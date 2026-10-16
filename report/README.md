@@ -10,4 +10,4 @@ paper is [main.pdf](main.pdf); rebuild it after any change to the text or figure
 `figures/fig1..fig6` are the untitled, column-sized versions that `medvlm posthoc --profile main --model
 medgemma4b --model-b gemma3_4b` writes here directly (titled versions go to `results/posthoc_*/main/`).
 `figures/fig0_teaser.png` comes from `python make_teaser.py` (examples in `teaser_examples.json`). Every
-number in the text is taken from the committed tables under `results/` (see RESULTS.md).
+number in the text is taken from the committed tables under `results/` (see [docs/RESULTS.md](../docs/RESULTS.md)).

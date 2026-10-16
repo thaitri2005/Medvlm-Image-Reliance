@@ -4,8 +4,8 @@
 3 medical VLMs vs their general-purpose bases &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
 <p align="center">
-<a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="RESULTS.md">All results</a> &nbsp;·&nbsp;
-<a href="PLAN.md">Pre-registration &amp; lab notebook</a> &nbsp;·&nbsp; <a href="docs/REPRODUCE.md">Reproduce</a>
+<a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="docs/RESULTS.md">All results</a> &nbsp;·&nbsp;
+<a href="docs/PREREGISTRATION.md">Pre-registration &amp; lab notebook</a> &nbsp;·&nbsp; <a href="docs/REPRODUCE.md">Reproduce</a>
 </p>
 
 <p align="center"><img src="report/figures/fig0_teaser.png" width="100%"></p>
@@ -67,7 +67,7 @@ and three medical/general model pairs, and to explain why they disagree.
 *18,896 model calls per model in the main run plus 3,535 per model for the probes, five models. Primary pair:
 MedGemma-4B vs Gemma-3-4B; results 1–5 are for it, result 6 for the two replication pairs. Primary set: 1,206
 yes/no test questions on 670 images. All intervals are 95% cluster-bootstrap CIs by image. Every number:
-[RESULTS.md](RESULTS.md).*
+[RESULTS.md](docs/RESULTS.md).*
 
 **1. By the reference test, MedGemma looks more "consistent but blind".** With the image removed, its
 *Dangerous* share is **+13.7 points** higher than Gemma-3's [10.0, 17.5]: in every dataset and every cell of
@@ -112,7 +112,7 @@ kind that no label-free check would catch.
 **5. A negative result.** Image reliance, measured as image PMI of the model's own answer, does **not** flag
 wrong answers (AUROC 0.51, at chance; the model's confidence reaches 0.71).
 
-**6. The reversal replicates where refusal differs** (pre-registered, [PLAN.md §16](PLAN.md)).
+**6. The reversal replicates where refusal differs** (pre-registered, [docs/PREREGISTRATION.md §16](docs/PREREGISTRATION.md)).
 
 | | MedGemma-4B | MedGemma-1.5-4B | Gemma-3-4B | MedVLThinker-3B | Qwen2.5-VL-3B |
 |---|---|---|---|---|---|
@@ -132,7 +132,7 @@ wrong answers (AUROC 0.51, at chance; the model's confidence reaches 0.71).
 ### Confirmatory tests
 
 Endpoints P1–P3 were frozen before the main run; probe hypotheses H6–H8 after it, but before the probes were
-run ([PLAN.md §15](PLAN.md)); replication hypotheses H9–H11 before the new models were run ([§16](PLAN.md)).
+run ([docs/PREREGISTRATION.md §15](docs/PREREGISTRATION.md)); replication hypotheses H9–H11 before the new models were run ([§16](docs/PREREGISTRATION.md)).
 Failed predictions are reported as such.
 
 | | Test | Estimate [95% CI] | Outcome |
@@ -233,7 +233,7 @@ Full instructions, including gated-model access and pre-flight checks: [docs/REP
 ```
 report/            the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/
 RESULTS.md         every result with its CI, the hypotheses, threats to validity and a post-run audit
-PLAN.md            pre-registration, design decisions and lab notebook (frozen sections marked)
+docs/PREREGISTRATION.md            pre-registration, design decisions and lab notebook (frozen sections marked)
 docs/REPRODUCE.md  how to run everything from a fresh clone
 src/medvlm/        data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, probes.py,
                    scoring.py, analysis/ (stats, tables, post-hoc, figures), cli.py

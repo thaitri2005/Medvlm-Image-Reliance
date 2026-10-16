@@ -146,7 +146,7 @@ class VqaRad(Source):
                 "image_id": f"vqa_rad-{stem}",
                 "question": r["question"].strip(), "answer": ans,
                 "answer_type": answer_kind(ans),
-                "modality": "radiology",   # not annotated in VQA-RAD; labelled later (see PLAN.md, Phase 2)
+                "modality": "radiology",   # not annotated in VQA-RAD; labelled later (see docs/PREREGISTRATION.md, Phase 2)
                 "region": str(r["image_organ"]).lower(),
                 "qgroup": _VQARAD_QGROUP.get(qt, "other"),
                 "qtype_raw": str(r["question_type"]),

@@ -139,7 +139,7 @@ def _gpu_peak_gib() -> float | None:
 
 class _Progress:
     """Timestamped progress lines for the log (the tqdm bar only shows in the terminal), plus the
-    stop-the-line format check from PLAN.md section 11 (yn_mass < 0.9) and empty open answers."""
+    stop-the-line format check from docs/PREREGISTRATION.md section 11 (yn_mass < 0.9) and empty open answers."""
 
     def __init__(self, total: int, every_sec: float, min_yn_mass: float = 0.9, warn: bool = True):
         self.total, self.every, self.min_yn_mass, self.warn = total, every_sec, min_yn_mass, warn

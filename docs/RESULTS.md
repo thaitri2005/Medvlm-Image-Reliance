@@ -6,10 +6,10 @@ average = **18,896 model calls per model** in the main run, plus **3,535 per mod
 all completed (RTX 4080 SUPER, bf16, batch 1). Primary set: the 1,206 yes/no **test** questions on 670 images.
 All intervals are 95% cluster-bootstrap CIs by image (B = 2,000). **Pre-registered** results, **registered
 probes** and **post-hoc** analyses are labelled as such; every change after the analysis plan was frozen is
-logged in [PLAN.md §13](PLAN.md), and the probes were registered in [PLAN.md §15](PLAN.md) before they were run.
+logged in [PREREGISTRATION.md §13](PREREGISTRATION.md), and the probes were registered in [PREREGISTRATION.md §15](PREREGISTRATION.md) before they were run.
 Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`,
 `results/posthoc_medgemma4b_vs_gemma3_4b/main/` (`medvlm analyze`, `compare`, `posthoc`). Paper:
-[report/main.pdf](report/main.pdf).
+[report/main.pdf](../report/main.pdf).
 
 ## Summary
 
@@ -68,11 +68,11 @@ which evaluates a harder "balanced" split. Both were anticipated in the pre-regi
 
 Gemma-3's P1 values: +1.3 [−2.8, 5.3], −3.1 [−8.3, 2.3], +2.4 [−4.5, 9.2]; P2: −0.071 [−0.116, −0.026]. P2
 is computed on the model's own answer; the registered formula used the gold answer, which is not available at
-deployment and predicts correctness by construction (PLAN.md §13, item 13).
+deployment and predicts correctness by construction (PREREGISTRATION.md §13, item 13).
 
 ## 4. The reference probe: quadrants and P3
 
-![Quadrant composition](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png)
+![Quadrant composition](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png)
 
 Raw shares, as the taxonomy defines them. On yes/no questions they include chance agreement (§7) and correct
 answers (§6), so a share near 50% is not "half the answers ignore the image".
@@ -92,7 +92,7 @@ blind. The next two sections show why that reading is wrong.
 
 ## 5. Four probes, one scale: the ranking reverses
 
-![Answer changes under every probe](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig7_reversal.png)
+![Answer changes under every probe](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig7_reversal.png)
 
 Share of yes/no answers that change when the image is altered (`reversal.csv`; descriptive, post hoc as a
 summary of the registered probes). A model that uses the image should change its answer when the image changes.
@@ -110,7 +110,7 @@ MedGemma is right on the new image 86.1% of the time and Gemma-3 61.0%. The gap 
 (57 vs 26%) and X-ray (81 vs 8%; exploratory), and with the 40 PathVQA/VQA-RAD swaps added (69.8 vs 24.8%,
 exploratory; the registered set is SLAKE's 367 questions on 130 images).
 
-![Opposite-answer image](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig6_opposite.png)
+![Opposite-answer image](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig6_opposite.png)
 
 **Black image (R1, H6 failed and reversed).** Gemma-3 keeps the answer it gave with the real image on 72.9% of
 questions, MedGemma on 52.6%; chance-corrected κ 0.33 [0.28, 0.39] vs 0.11 [0.06, 0.17]. Under this probe Gemma-3
@@ -124,7 +124,7 @@ partner often has the same correct answer: where the partner image carries the s
 X-ray partners had the same correct answer** (CT 58%, MRI 60%), so an unchanged answer there is correct, not
 blind. This is why the modality ordering reverses between probes:
 
-![Dangerous share by modality](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig2_modality.png)
+![Dangerous share by modality](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig2_modality.png)
 
 Under image removal MedGemma's Dangerous share is ~50% for CT (50.8 [46.6, 55.6]) and MRI (50.0 [42.6, 57.4])
 and lower for X-ray (33.1 [24.8, 41.2]); under a wrong image X-ray becomes the most "Dangerous" (75.4%). The two
@@ -135,7 +135,7 @@ main-run probes agree poorly (κ between their reliance labels: MedGemma 0.23, �
 
 ### Refusal
 
-![Declines to answer without the image](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig4_abstention.png)
+![Declines to answer without the image](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig4_abstention.png)
 
 The pre-registered format check (yes+no first-token mass ≥ 0.9) failed in one condition only: **image removed**
 (MedGemma 37–67% of questions below 0.9, Gemma-3 18–76%; with the image ≥ 99.8%). Free generation shows why:
@@ -186,7 +186,7 @@ is what MedGemma's excess consists of:
 | All errors | 25.7% | 37.6% | −12.0 [−15.5, −8.5] |
 | Share of errors that are Dangerous | 43.8% | 31.0% | **+12.9** [6.0, 19.9] |
 
-![The Dangerous gap by probe and by correctness](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig5_p3.png)
+![The Dangerous gap by probe and by correctness](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig5_p3.png)
 
 The opposite-answer probe (§5) removes this case by construction (the image contradicts the original answer),
 and there MedGemma follows the image. **The residual concern** is subtler than "ignores the image": MedGemma errs
@@ -205,7 +205,7 @@ against it. The chance-corrected image-removal effect is Δκ = +0.112 [0.044, 0
 
 ## 8. Does image reliance flag wrong answers? No
 
-![Selective prediction](results/posthoc_medgemma4b_vs_gemma3_4b/main/fig3_selective.png)
+![Selective prediction](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig3_selective.png)
 
 Each yes/no answer is scored by its image PMI, log p(answer | image) − log p(answer | no image) for the answer
 the model gave: how much the image raised the probability of that answer. It ranks correct above incorrect
@@ -214,7 +214,7 @@ confidence reaches 0.709 and 0.603 (**better by 0.197** [0.145, 0.250] and 0.071
 wrong-image variant is no better (0.52 / 0.54). *Whether a model leaned on the image does not tell you whether
 it was right.*
 
-## 9. Replication on two more pairs (registered, PLAN.md §16)
+## 9. Replication on two more pairs (registered, PREREGISTRATION.md §16)
 
 Registered before any output of these models was seen: **pair A**, MedGemma-1.5-4B vs Gemma-3-4B (same family;
 Gemma-3 outputs reused), and **pair B**, MedVLThinker-3B (Qwen2.5-VL-3B + RL on PMC-VQA) vs Qwen2.5-VL-3B-Instruct
@@ -222,7 +222,7 @@ Gemma-3 outputs reused), and **pair B**, MedVLThinker-3B (Qwen2.5-VL-3B + RL on 
 new models passed the registered format check (yes/no mass with the image 0.93-0.999 on the pilot); the fallback
 pair was not needed. 18,896 + 3,535 calls per model, all complete.
 
-![All three pairs](results/replication_main/fig8_pairs.png)
+![All three pairs](../results/replication_main/fig8_pairs.png)
 
 **Registered tests** (medical − general; one Holm family over pairs A and B; `results/replication_main.csv`):
 
@@ -290,7 +290,7 @@ test it formally.
 - Refusal is inferred from first-token probability mass, confirmed by free generation on a sample, not annotated
   for every question.
 - SLAKE is in MedGemma's training data (split unstated); VQA-RAD and PathVQA are not listed.
-- Paraphrase equivalence was judged by an LLM (PLAN.md §4.5) and not validated by human raters.
+- Paraphrase equivalence was judged by an LLM (PREREGISTRATION.md §4.5) and not validated by human raters.
 - Post-hoc analyses (chance correction, correctness split, refusal split, answer-change comparison, partner
   check) were motivated by the data and are reported as such.
 

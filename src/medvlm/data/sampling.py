@@ -38,6 +38,29 @@ def allocate(sizes: dict[tuple, int], n: int, mode: str = "equal") -> dict[tuple
     return quota
 
 
+def opposite_key(dataset: str, modality: str, question: str) -> tuple[str, str, str]:
+    """Two yes/no questions are 'the same question' when dataset, modality and normalised text agree."""
+    from ..scoring import normalize
+
+    return dataset, modality, normalize(question)
+
+
+def is_opposite(answer_a: str, answer_b: str) -> bool:
+    return str(answer_a).strip().lower() != str(answer_b).strip().lower()
+
+
+def keep_with_opposite_partner(rows: list[dict]) -> list[dict]:
+    """Yes/no rows whose question is also asked about a DIFFERENT image with the OPPOSITE gold answer
+    (the contrast-set construction of the opposite-answer probe; same rule as probes.opposite_partners)."""
+    by_key: dict[tuple, list[dict]] = defaultdict(list)
+    for r in rows:
+        if r["answer_type"] == "yesno":
+            by_key[opposite_key(r["dataset"], r["modality"], r["question"])].append(r)
+    return [r for r in rows if r["answer_type"] == "yesno" and any(
+        o["image_id"] != r["image_id"] and is_opposite(o["answer"], r["answer"])
+        for o in by_key[opposite_key(r["dataset"], r["modality"], r["question"])])]
+
+
 def stratified_sample(rows: list[dict], n: int | dict | None, keys: list[str], seed: int,
                       mode: str = "equal") -> list[dict]:
     """n: total budget (int), everything (None), or an explicit per-stratum quota like

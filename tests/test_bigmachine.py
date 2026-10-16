@@ -15,7 +15,7 @@ from .conftest import make_items
 def test_hardware_presets_keep_experiments_at_batch_1():
     base = load_config("main", "medgemma4b")
     assert base["run"]["batch_size"] == 1                                   # safe default
-    for hw in ("t4", "rtx4080", "rtx4090", "a100"):                         # PLAN.md section 13, item 10
+    for hw in ("t4", "rtx4080", "rtx4090", "a100"):                         # docs/PREREGISTRATION.md section 13, item 10
         assert load_config("main", "medgemma4b", hardware=hw)["run"]["batch_size"] == 1
     assert load_config("main", "medgemma4b", ["run.batch_size=2"], hardware="rtx4090")["run"]["batch_size"] == 2  # --set wins
     assert load_config("main", "medgemma4b", hardware="a100")["hardware"] == "a100"

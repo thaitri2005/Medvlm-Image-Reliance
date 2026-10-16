@@ -1,4 +1,4 @@
-# Replication pair B, medical model (PLAN.md section 16): Qwen2.5-VL-3B-Instruct + RL on PMC-VQA
+# Replication pair B, medical model (docs/PREREGISTRATION.md section 16): Qwen2.5-VL-3B-Instruct + RL on PMC-VQA
 # (UCSC-VLAA, Apache-2.0; training data does not list SLAKE, VQA-RAD or PathVQA). Trained to reason in
 # <think> tags; it gets the SAME prompt as every other model, and the pre-registered format check decides
 # whether its yes/no scoring is valid.

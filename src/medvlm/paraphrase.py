@@ -255,7 +255,7 @@ def _candidates(backend, pairs: list[tuple[Item, int, str]]) -> dict[tuple[str, 
 
 def load_judgments(path: Path) -> dict[tuple[str, str], tuple[str, str]]:
     """Semantic-equivalence verdicts per unique (original, paraphrase) pair: {pair: (y|n, reason)}.
-    Written once by an LLM judge over every rule-valid pair (PLAN.md 4.5) and committed with the manifest."""
+    Written once by an LLM judge over every rule-valid pair (docs/PREREGISTRATION.md 4.5) and committed with the manifest."""
     with open(path, encoding="utf-8", newline="") as f:
         return {(r["original"].strip(), r["paraphrase"].strip()): (r["verdict"].strip().lower(), r["reason"])
                 for r in csv.DictReader(f)}

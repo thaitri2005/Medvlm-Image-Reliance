@@ -1,4 +1,4 @@
-# Replication pair B, general model (PLAN.md section 16): the base that medvlthinker_3b was trained from.
+# Replication pair B, general model (docs/PREREGISTRATION.md section 16): the base that medvlthinker_3b was trained from.
 # Not gated. Native processor settings (dynamic resolution, default pixel limits), as its model card uses them.
 model:
   name: qwen25vl_3b

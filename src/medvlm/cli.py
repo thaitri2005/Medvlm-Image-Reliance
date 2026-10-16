@@ -11,6 +11,10 @@
   compare       paired comparison of --model and --model-b on the same questions
   probes        robustness probes (blank image, abstain-allowed prompt, opposite-answer image); --probe NAME|all
   posthoc       analyses added after the main run (abstention, label-free PMI, probe confounds) + figures
+  format-check  registered format rule for a new model (yes/no mass with the image >= 0.9 per dataset)
+  replication   Holm-adjusted replication tests over the model pairs + the all-pairs figure
+  contrast      probe R4: opposite-answer images on PathVQA; --model all|a,b,..; --analyze for tables only
+  contamination image overlap of evaluated sets with each dataset's train split + documented training use
   audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet
   run           run the model on every (sample, condition); resumable
   status        progress per shard (use with --shards N)
@@ -174,6 +178,25 @@ def _probes(cfg, paths, args):
     run_probes(cfg, paths, load_model(cfg), which, max_minutes=args.max_minutes)
 
 
+def _contrast(cfg, paths, args):
+    """Probe R4. `--analyze` (no GPU): tables + figure for every opposite-answer set that has outputs."""
+    from .analysis.contrast import MODELS, analyze_contrast
+
+    if not args.analyze:
+        from .probes import run_contrast
+
+        models = list(MODELS) if args.model == "all" else args.model.split(",")
+        run_contrast(models, args.set, args.hardware, max_minutes=args.max_minutes)
+    analyze_contrast(paths, B=cfg["analysis"]["bootstrap_B"], seed=cfg["seed"],
+                     paper_dir=paths.root / "report" / "figures")
+
+
+def _contamination(cfg, paths, args):
+    from .analysis.contamination import contamination
+
+    contamination(paths)
+
+
 def _posthoc(cfg, paths, args):
     from .analysis.posthoc import posthoc
 
@@ -183,7 +206,7 @@ def _posthoc(cfg, paths, args):
 
 
 def _format_check(cfg, paths, args):
-    """PLAN.md section 16 format rule: mean first-token yes+no mass WITH the image >= 0.9 in every dataset."""
+    """docs/PREREGISTRATION.md section 16 format rule: mean first-token yes+no mass WITH the image >= 0.9 in every dataset."""
     import pandas as pd
 
     f = paths.results / cfg["model"]["name"] / cfg["profile"] / "by_dataset.csv"
@@ -193,7 +216,7 @@ def _format_check(cfg, paths, args):
     for ds, m in t.items():
         print(f"  {ds:8s} yes/no mass with image = {m:.3f}  {'ok' if m >= 0.9 else 'FAIL'}")
     ok = bool((t >= 0.9).all())
-    print(f"[format-check] {cfg['model']['name']}: {'PASS' if ok else 'FAIL'} (threshold 0.9, PLAN.md section 16)")
+    print(f"[format-check] {cfg['model']['name']}: {'PASS' if ok else 'FAIL'} (threshold 0.9, docs/PREREGISTRATION.md section 16)")
     if not ok:
         raise SystemExit(1)
 
@@ -229,9 +252,10 @@ COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphra
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
             "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
             "audit-score": _audit_score, "posthoc": _posthoc, "probes": _probes,
-            "format-check": _format_check, "replication": _replication}
+            "format-check": _format_check, "replication": _replication, "contrast": _contrast,
+            "contamination": _contamination}
 # Long or GPU commands get a logs/*.log file; quick ones only print.
-LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc", "probes"}
+LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc", "probes", "contrast"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -253,8 +277,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("-n", type=int, default=100, help="audit-sheet: number of paraphrases to export")
     ap.add_argument("--no-log", action="store_true", help="do not write a logs/*.log file")
     ap.add_argument("--probe", help="probes: blank | abstain | opp | all (default all)")
+    ap.add_argument("--analyze", action="store_true", help="contrast: only build tables and figures (no GPU)")
     args = ap.parse_args(argv)
-    cfg = load_config(args.profile, args.model, args.set, hardware=args.hardware)
+    if args.command == "contrast":         # several models in one call; the profile is fixed by the probe
+        args.profile = "contrast"
+    first = args.model.split(",")[0]
+    cfg = load_config(args.profile, "medgemma4b" if first == "all" else first, args.set, hardware=args.hardware)
     if args.command in LOGGED and not args.no_log:
         from .logs import start_log
 

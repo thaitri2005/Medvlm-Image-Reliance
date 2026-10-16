@@ -2,9 +2,15 @@
 
 A modality-by-modality audit of image reliance in a small medical VLM. Solo project, ~2 weeks, all
 runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
-[README.md](README.md) is the paper-style overview and [docs/REPRODUCE.md](docs/REPRODUCE.md) the how-to-run. Last updated 2026-10-16.
+[README.md](../README.md) is the paper-style overview and [docs/REPRODUCE.md](REPRODUCE.md) the how-to-run. Last updated 2026-10-16.
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is
 listed in section 13 with its reason.
+
+> **Registrations are tagged in git**, so anyone can check that a plan predates its results (this file was
+> `PLAN.md` at the root until 2026-10-16): `prereg-main` (the plan when the main run started, sections 0-14),
+> `prereg-probes` (section 15), `prereg-replication` (section 16), `prereg-contrast` (section 17). For example
+> `git show prereg-main:PLAN.md`. Corrections of facts found later are listed in section 18, never edited into
+> the frozen text.
 
 > **Framing after the results (2026-10-16).** Sections 0 and 3 keep the framing the study was planned with
 > (a cross-modality audit of MedGemma, with Gemma-3 as control). The results changed the headline: image removal,
@@ -439,3 +445,71 @@ Qwen2.5-VL 0.998-0.999, MedVLThinker 0.999); the fallback pair C was not needed.
 Reading (post hoc): the reversal appears in both pairs whose models differ in forced-format refusal and not in the
 pair whose models never refuse; in pair B the medical fine-tune does not change image use under any in-format
 probe, so there is no ranking to reverse.
+
+## 17. Out-of-distribution opposite-answer probe R4 (registered 2026-10-16, BEFORE running it)
+
+**Why.** R3 (+48.0 points, the strongest evidence that MedGemma uses the image more than Gemma-3) is on SLAKE
+only, and SLAKE is training data of both MedGemma releases (section 18) but not of MedVLThinker, the one medical
+model that showed no gap. "Trained on SLAKE" therefore predicts the R3 pattern as well as "uses the image more"
+does. SLAKE's test and validation images are disjoint from its train split (`results/contamination/overlap.csv`),
+so the R3 images were not themselves seen in training, but their distribution and question templates were.
+R4 repeats R3 on PathVQA, which none of the three medical models lists as training data: MedGemma's technical
+report says PathVQA was removed from training; the MedGemma-1.5 and MedVLThinker cards do not mention it.
+
+**Set** (`manifests/contrast/items.jsonl`, committed with this registration; `configs/profiles/contrast.yaml`).
+Every PathVQA test and validation yes/no question that is also asked about a different image with the opposite
+gold answer: **1,192 questions on 682 images** (test 667, validation 525). Partners are chosen by hash with the
+same rule as R3 (`probes.opposite_partners`); 326 partners cross test/validation. Most questions are organ-system
+templates (e.g. "is cardiovascular present?"); 65% of gold answers are "yes". None of the 682 images occurs in
+PathVQA's train split.
+
+**Protocol.** Identical to R3 for all five models: each question on its own image (`orig`), then on the partner
+image (`opp`); same prompt and system line, bf16, batch 1, greedy, answer = P(yes) >= 0.5.
+Command: `medvlm contrast --model all --hardware rtx4080` (resumable), then `medvlm contrast --analyze`.
+
+**Measures** (per model and per pair, `results/contrast/`): follow rate (answer changes); pair accuracy (right
+on both images; 0 for a model that ignores the image); both wrong; stuck (answer unchanged); refusal (yes/no mass
+< 0.5 on either image). Paired medical - general differences, cluster bootstrap by the question's image
+(B = 2,000, seed 1234), 95% percentile CIs, two-sided p.
+
+**Hypotheses** (medical - general follow rate; H12a-c form one Holm family):
+
+| | Pair | Predicted | Supported if |
+|---|---|---|---|
+| H12a | MedGemma-4B - Gemma-3-4B | > 0 | CI lower bound > 0 and p_Holm < 0.05 |
+| H12b | MedGemma-1.5-4B - Gemma-3-4B | > 0 | CI lower bound > 0 and p_Holm < 0.05 |
+| H12c | MedVLThinker-3B - Qwen2.5-VL-3B | no difference | 95% CI inside [-5, +5] points |
+
+**Decision rule.** (i) H12a and H12b supported: the follow gap is not specific to the medical models' training
+distribution, and the paper states that both MedGemma releases use the image more than Gemma-3 on data outside
+their listed training sets, reporting the SLAKE and PathVQA gaps side by side. (ii) Either fails with a CI that
+includes 0: the SLAKE gap is reported as possibly a training-distribution effect, and the paper's claim is
+restricted to the disagreement between probes on the same questions. (iii) A gap below 0: reported as such, and
+the claim that this MedGemma release uses the image more is withdrawn. Pair accuracy, per-split results and a
+sensitivity analysis that resamples question templates instead of images are descriptive.
+
+**Already seen before registering (disclosed).** The 40 non-SLAKE opposite-answer swaps of the main run
+(PathVQA and VQA-RAD; exploratory in section 15.1): MedGemma-4B - Gemma-3 +17.5 [0.0, 34.1], MedGemma-1.5 +12.5
+[-5.1, 32.5], MedVLThinker 0.0 [-16.7, 17.1] (`results/contrast/contrast_pairs.csv`, set `main_other`). 108
+of the 667 PathVQA test questions in R4 are also in the main run, so their with-image answers (not their partner
+answers) have been seen.
+
+## 18. Errata (found 2026-10-16 when re-checking training-data documentation)
+
+Corrections of facts, not of the analysis plan; no pre-registered estimate changes. RESULTS.md and the paper
+carry the corrected interpretation.
+
+1. **MedGemma-4B was trained on VQA-RAD.** The MedGemma technical report (arXiv 2507.05201, Table 1) lists
+   VQA-RAD (1,391 QA pairs) in the RL stage. Section 13 item 16, RESULTS.md and the paper said the model card
+   does not list it. Moreover **202 of the 203 VQA-RAD test images also occur in VQA-RAD's train split** (250 of
+   251 yes/no test questions; `medvlm contamination`), so MedGemma-4B may have seen our VQA-RAD test images.
+   Consequence: P1c (VQA-RAD) cannot be separated from training exposure, and the argument that MedGemma's
+   blind-answer margin appears on data it was not trained on rests on PathVQA (P1a) alone, which the report
+   says was removed from training.
+2. **MedGemma-1.5 and VQA-RAD.** Section 16 says its model card lists SLAKE and VQA-RAD as training data. The
+   card lists SLAKE among training sources; VQA-RAD appears only under data ownership and citation. Corrected
+   to "not stated".
+3. **Which SLAKE data MedGemma-4B saw.** The report lists 450 SLAKE items, the number of images in SLAKE's train
+   split; test and validation images are disjoint from it. If the train split was used, the evaluated SLAKE
+   images were not training images, but their distribution was (motivating R4, section 17).
+

@@ -199,14 +199,16 @@ def _format_check(cfg, paths, args):
 
 
 def _replication(cfg, paths, args):
-    from .analysis.posthoc import replication_summary
+    from .analysis.posthoc import PRIMARY_PAIR, pairs_figure, replication_summary
 
     pairs = [("medgemma15_4b", "gemma3_4b"), ("medvlthinker_3b", "qwen25vl_3b")]
     T = replication_summary(paths.results, pairs, cfg["profile"])
     out = paths.results / f"replication_{cfg['profile']}.csv"
     T.to_csv(out, index=False)
     print(T.round(4).to_string(index=False))
-    print(f"[replication] -> {out}")
+    figs = pairs_figure(paths.results, [PRIMARY_PAIR] + pairs, paths.results / f"replication_{cfg['profile']}",
+                        paths.root / "report" / "figures", cfg["profile"])
+    print(f"[replication] -> {out}; figures: {', '.join(str(f) for f in figs)}")
 
 
 def _audit_score(cfg, paths, args):

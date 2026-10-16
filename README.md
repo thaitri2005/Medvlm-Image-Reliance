@@ -1,7 +1,7 @@
 <h1 align="center">Consistent but Blind?</h1>
 <p align="center"><b>Removing the image misranks how much a medical vision-language model uses it</b></p>
 <p align="center">
-MedGemma-4B vs Gemma-3-4B &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
+3 medical VLMs vs their general-purpose bases &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
 <p align="center">
 <a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="RESULTS.md">All results</a> &nbsp;·&nbsp;
@@ -12,22 +12,25 @@ MedGemma-4B vs Gemma-3-4B &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nb
 
 > **TL;DR.** A recent taxonomy flags a medical VLM as *consistent but dangerous* when its answer survives
 > rephrasing **and** survives removing the image. We ran that test, and three tests that keep an image in the
-> input, on the same questions for a medical model and its general-purpose twin. Removing the image says the
-> medical model uses the image **less**. Every in-format test says it uses the image **more**, by up to 48
-> points. Image removal measures whether a model will answer without an image, and whether its priors agree
-> with the image, not whether it looks.
+> input, on the same questions for three medical VLMs and their general-purpose bases. For MedGemma, removing
+> the image says the medical model uses the image **less**; every in-format test says it uses the image
+> **more**, by up to 48 points. A pre-registered replication with MedGemma-1.5 shows the same reversal; a Qwen
+> pair whose models never refuse to answer does not. Image removal measures whether a model will answer
+> without an image, and whether its priors agree with the image, not whether it looks.
 
 ---
 
 ## The finding in one figure
 
-<p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig7_reversal.png" width="82%"></p>
+<p align="center"><img src="results/replication_main/fig8_pairs.png" width="100%"></p>
 
-Each row alters the image in a different way and counts how often the yes/no answer changes. A model that
-uses the image should change its answer when the image changes. Only **image removal**, the probe that
-defines the taxonomy, ranks Gemma-3 as the more image-reliant model (−6 points). A wrong image (+5), a black
-image (+20) and an image on which the same question has the **opposite** correct answer (+48) all rank
-MedGemma as more reliant. Same questions, same models, same scoring; 95% CIs clustered by image.
+Each row alters the image in a different way and counts how often the yes/no answer changes; blue is the
+medical model, orange its general-purpose base. A model that uses the image should change its answer when the
+image changes. For **both MedGemma releases**, image removal, the probe that defines the taxonomy, ranks
+Gemma-3 as the more image-reliant model (−6, −7 points), while the in-format probes rank MedGemma higher (up to
++48 on an image whose correct answer is the opposite). **MedVLThinker and its Qwen base** do not differ under
+any in-format probe, and neither ever refuses to answer, so there is no ranking to reverse. Same questions,
+prompts and scoring for all five models; 95% CIs clustered by image.
 
 ## Why this matters
 
@@ -49,20 +52,21 @@ reliance axis, removing the image, can be trusted to **rank** models, and finds 
 
 The quadrant taxonomy, the individual probes and the observation that VLMs answer medical questions without
 images all predate this project. Our contribution is to run the probes **side by side** on the same questions
-and a matched model pair, and to explain why they disagree.
+and three medical/general model pairs, and to explain why they disagree.
 
 | | Prior work | This project |
 |---|---|---|
 | Quadrant taxonomy | Introduced on chest X-ray yes/no ([CbD](https://arxiv.org/abs/2603.20985)) | Reused unchanged as the reference; extended to CT, MRI and pathology on three VQA datasets |
-| Black-image, swapped and hard-negative images | Used to corroborate image removal ([CbD](https://arxiv.org/abs/2603.20985)) or to define reliance metrics and train against them ([Zafar et al.](https://arxiv.org/abs/2607.03647), [Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | Compared as **rankings** of two models: image removal ranks them opposite to every in-format probe |
+| Black-image, swapped and hard-negative images | Used to corroborate image removal ([CbD](https://arxiv.org/abs/2603.20985)) or to define reliance metrics and train against them ([Zafar et al.](https://arxiv.org/abs/2607.03647), [Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | Compared as **rankings** of model pairs: image removal ranks two of three pairs opposite to the in-format probes |
 | Refusing without an image | Studied as a safety outcome ([MedVIGIL](https://arxiv.org/abs/2605.07919), [Hearsay](https://arxiv.org/abs/2607.26886)) | Shown to be a **confound** of the image-removal probe: a forced yes/no turns refusals into scored answers |
 | *Dangerous* share | Raw share; accuracy per quadrant | Chance floor and Cohen's κ; paired split into correct and wrong *Dangerous* answers |
-| Medical vs general checkpoint | Model class does not predict image use ([Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | An architecture-matched pair, so the comparison is not confounded by architecture or size |
+| Medical vs general checkpoint | Model class does not predict image use ([Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | Three pairs, each a medical model and the exact general model it was trained from, so no comparison is confounded by architecture or size |
 
 ## Results
 
-*18,896 model calls per model in the main run plus 3,535 per model for the probes. Primary set: 1,206 yes/no
-test questions on 670 images. All intervals are 95% cluster-bootstrap CIs by image. Every number:
+*18,896 model calls per model in the main run plus 3,535 per model for the probes, five models. Primary pair:
+MedGemma-4B vs Gemma-3-4B; results 1–5 are for it, result 6 for the two replication pairs. Primary set: 1,206
+yes/no test questions on 670 images. All intervals are 95% cluster-bootstrap CIs by image. Every number:
 [RESULTS.md](RESULTS.md).*
 
 **1. By the reference test, MedGemma looks more "consistent but blind".** With the image removed, its
@@ -71,7 +75,11 @@ the pre-registered sensitivity grid.
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png" width="92%"></p>
 
-**2. Every probe that keeps an image in the input says the opposite** (figure above). The cleanest is the
+**2. Every probe that keeps an image in the input says the opposite.**
+
+<p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig7_reversal.png" width="78%"></p>
+
+The cleanest is the
 opposite-answer image: the same question asked about another image of the same modality whose correct answer
 is the opposite. MedGemma follows the image **73%** of the time, Gemma-3 **25%** (+48.0 [41.9, 53.8]), in CT,
 MRI and X-ray alike. Given a black image, Gemma-3 keeps its real-image answer far more often (κ 0.33 vs
@@ -104,10 +112,28 @@ kind that no label-free check would catch.
 **5. A negative result.** Image reliance, measured as image PMI of the model's own answer, does **not** flag
 wrong answers (AUROC 0.51, at chance; the model's confidence reaches 0.71).
 
+**6. The reversal replicates where refusal differs** (pre-registered, [PLAN.md §16](PLAN.md)).
+
+| | MedGemma-4B | MedGemma-1.5-4B | Gemma-3-4B | MedVLThinker-3B | Qwen2.5-VL-3B |
+|---|---|---|---|---|---|
+| Follows an opposite-answer image | 72.8% | 61.3% | 24.8% | 47.1% | 48.8% |
+| Answer changes when the image is removed | 42.0% | 40.6% | 48.0% | 46.4% | 42.5% |
+| Refuses without the image (forced yes/no) | 18.2% | 0.7% | 29.4% | 0% | 0% |
+| Accuracy with the image, SLAKE yes/no | 86.5% | 81.1% | 68.7% | 78.9% | 76.6% |
+
+- **MedGemma-1.5 vs Gemma-3: replicates.** +36.5 points on opposite-answer images, −7.4 under image removal;
+  it refuses on 8 questions to Gemma-3's 354, and on questions both answer the *Dangerous* gap disappears
+  (+3.0 [−3.6, 9.5]).
+- **MedVLThinker vs Qwen2.5-VL: no reversal.** The medical fine-tune changed neither accuracy nor image use
+  (opposite-answer −1.6 [−4.9, 1.4]) and neither model refuses, so image removal has nothing to reverse.
+- Whether a medical model uses the image more than its base is model-specific: both MedGemma releases do,
+  MedVLThinker does not.
+
 ### Confirmatory tests
 
 Endpoints P1–P3 were frozen before the main run; probe hypotheses H6–H8 after it, but before the probes were
-run ([PLAN.md §15](PLAN.md)). One prediction failed and is reported as such.
+run ([PLAN.md §15](PLAN.md)); replication hypotheses H9–H11 before the new models were run ([§16](PLAN.md)).
+Failed predictions are reported as such.
 
 | | Test | Estimate [95% CI] | Outcome |
 |---|---|---|---|
@@ -118,6 +144,7 @@ run ([PLAN.md §15](PLAN.md)). One prediction failed and is reported as such.
 | H6 | κ(real, black image), MedGemma − Gemma-3 > 0 | −0.22 [−0.30, −0.14], p_Holm < 0.001 | **failed, reversed** |
 | H7 | Declines with "unknown" allowed, MedGemma − Gemma-3 < 0 | −6.7 [−8.2, −5.3], p_Holm < 0.001 | supported; both ≥ 93% |
 | H8 | Follows an opposite-answer image, MedGemma − Gemma-3 > 0 | +48.0 [41.9, 53.8], p_Holm < 0.001 | supported |
+| H9–H11 | Replication: medical − general follows the opposite image more, changes less without the image, refuses less | MedGemma-1.5: +36.5, −7.4, −28.7 (all p_Holm < 0.001); MedVLThinker: −1.6, +3.9, 0.0 | **replicates for MedGemma-1.5, not for MedVLThinker** |
 
 ## Method
 
@@ -146,7 +173,11 @@ flowchart LR
 - **Models.** [`google/medgemma-4b-it`](https://huggingface.co/google/medgemma-4b-it) and its
   architecture-matched general twin [`google/gemma-3-4b-it`](https://huggingface.co/google/gemma-3-4b-it), both
   unquantized (bf16), because quantization would perturb the probabilities being audited. The two differ in
-  their whole post-training, so we compare *checkpoints*, not "medical data" in isolation.
+  their whole post-training, so we compare *checkpoints*, not "medical data" in isolation. Replication pairs:
+  [`google/medgemma-1.5-4b-it`](https://huggingface.co/google/medgemma-1.5-4b-it) vs the same Gemma-3, and
+  [`UCSC-VLAA/MedVLThinker-3B-RL_PMC`](https://huggingface.co/UCSC-VLAA/MedVLThinker-3B-RL_PMC) vs its base
+  [`Qwen/Qwen2.5-VL-3B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct). Every model gets the same
+  prompts, precision and scoring, and each passed a registered format check before its run.
 - **Data.** [SLAKE](https://www.med-vqa.com/slake/) (CT, MRI, X-ray; the only dataset with modality labels),
   [VQA-RAD](https://osf.io/89kps/) (radiology), [PathVQA](https://github.com/UCSD-AI4H/PathVQA) (pathology):
   3,365 questions on 907 images, sampled once with SHA-1 seeds and fixed in `manifests/main/`.
@@ -215,10 +246,11 @@ tests/             fast unit tests and -m slow real-model tests
 
 ## Limitations
 
-- **One model pair.** One counter-example is enough to show that image removal *can* misrank models, but not
-  how often it does; more pairs are the next step.
-- **Checkpoints, not causes.** MedGemma and Gemma-3 differ in their whole post-training, not only in medical
-  data.
+- **Three pairs, two families.** Enough to show that image removal *can* misrank models and that refusal
+  predicts when; not enough to say how often it happens across the field. The refusal account was formed after
+  the primary results and fits all three pairs, but three pairs cannot test it formally.
+- **Checkpoints, not causes.** Each medical model differs from its base in its whole post-training, not only in
+  medical data. MedGemma-1.5's training data includes SLAKE and VQA-RAD.
 - **Probe timing.** The probes were registered after the main results were known (before running them); one of
   three predictions failed.
 - **Paraphrases** were judged by an LLM and not validated by human raters. Quadrant results cover questions

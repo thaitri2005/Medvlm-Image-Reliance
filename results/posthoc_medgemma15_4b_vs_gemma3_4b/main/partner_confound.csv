@@ -1,0 +1,15 @@
+model,partner_same_gold,n,answer_changed,breakdown,modality,partner_same_gold_rate
+gemma3_4b,False,35,0.17142857142857143,answer change by whether the partner's gold answer is the same,,
+gemma3_4b,True,77,0.07792207792207792,answer change by whether the partner's gold answer is the same,,
+medgemma15_4b,False,35,0.6857142857142857,answer change by whether the partner's gold answer is the same,,
+medgemma15_4b,True,77,0.16883116883116883,answer change by whether the partner's gold answer is the same,,
+gemma3_4b,,69,,"share of partners with the same gold answer, by modality",ct,0.5797101449275363
+gemma3_4b,,15,,"share of partners with the same gold answer, by modality",mri,0.6
+gemma3_4b,,4,,"share of partners with the same gold answer, by modality",pathology,1.0
+gemma3_4b,,1,,"share of partners with the same gold answer, by modality",radiology,1.0
+gemma3_4b,,23,,"share of partners with the same gold answer, by modality",xray,1.0
+medgemma15_4b,,69,,"share of partners with the same gold answer, by modality",ct,0.5797101449275363
+medgemma15_4b,,15,,"share of partners with the same gold answer, by modality",mri,0.6
+medgemma15_4b,,4,,"share of partners with the same gold answer, by modality",pathology,1.0
+medgemma15_4b,,1,,"share of partners with the same gold answer, by modality",radiology,1.0
+medgemma15_4b,,23,,"share of partners with the same gold answer, by modality",xray,1.0

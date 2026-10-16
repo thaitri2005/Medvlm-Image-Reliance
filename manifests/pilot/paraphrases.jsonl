@@ -1,0 +1,990 @@
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1016", "style": "lexical", "text": "Is there evidence of coronary artery atherosclerosis in cases of carcinomatosis?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1016", "style": "syntactic", "text": "Does carcinomatosis demonstrate coronary artery atherosclerosis?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "pathvqa-test-1016", "style": "formal", "text": "Does carcinomatosis demonstrate coronary artery atherosclerosis?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1108", "style": "lexical", "text": "Is there evidence of acute inflammation, with rolling leukocytes that are polymorphonuclear neutrophils in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1108", "style": "syntactic", "text": "Does this image demonstrate acute inflammation with rolling leukocytes, specifically polymorphonuclear neutrophils?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "pathvqa-test-1108", "style": "formal", "text": "Does this image demonstrate acute inflammation with rolling leukocytes, specifically polymorphonuclear neutrophils?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1137", "style": "lexical", "text": "Is there evidence of vasculitis depicted in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1137", "style": "syntactic", "text": "Does this image demonstrate vasculitis?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1137", "style": "formal", "text": "Does this image demonstrate evidence of vasculitis?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1187", "style": "lexical", "text": "Is vascular network discernible?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1187", "style": "syntactic", "text": "Is vasculature absent?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1187", "style": "formal", "text": "Is there evidence of vascular structures on the imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1196", "style": "lexical", "text": "Does this image depict postmortem dissected arteries with numerous lesions?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1196", "style": "syntactic", "text": "Does this image display extensive lesions in postmortem dissected arteries?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1196", "style": "formal", "text": "Does this image demonstrate extensive lesions within dissected postmortem arteries on both sides?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1315", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1315", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1315", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1338", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1338", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1338", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1419", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1419", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1419", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1452", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1452", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1452", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1550", "style": "lexical", "text": "Is the notochord clearly depicted?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1550", "style": "syntactic", "text": "Is the notochord well shown?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1550", "style": "formal", "text": "Is the notochord adequately visualized on the imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1701", "style": "lexical", "text": "What presence of regenerative area is found within a moderate-sized artery situated just exterior to the adrenal gland's boundary?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1701", "style": "syntactic", "text": "What has a healing lesion within a medium-sized artery located just exterior to the adrenal capsule section?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1701", "style": "formal", "text": "What is the presence of a healing lesion within a medium-sized artery located just exterior to the adrenal capsule section?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1765", "style": "lexical", "text": "Is there a clear depiction in this image of the parotid gland on one side featuring a tumor capsule along with a distinctly invasive tumor?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1765", "style": "syntactic", "text": "Does this image display a clear photograph of the parotid gland on one side featuring a tumor capsule with an evident invasive tumor?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1765", "style": "formal", "text": "Does this image demonstrate a clear view of the parotid gland on one side, featuring a tumor capsule with an evident invasive component?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1806", "style": "lexical", "text": "Is the aorta observable?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1806", "style": "syntactic", "text": "Is the aorta present on both sides?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1806", "style": "formal", "text": "Is the aorta present on the left side of the body?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1888", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1888", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-1888", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1896", "style": "lexical", "text": "What can be observed?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-1896", "style": "syntactic", "text": "What are present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1896", "style": "formal", "text": "What structures are present?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1922", "style": "lexical", "text": "Is there any evidence of dysplasia present?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-1922", "style": "syntactic", "text": "Is dysplasia present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1922", "style": "formal", "text": "Is there evidence of dysplasia present?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-193", "style": "lexical", "text": "Is there evidence of tuberculous involvement in the peritoneum?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-193", "style": "syntactic", "text": "Is tuberculous peritonitis laterally present on the imaging studies?", "valid": false}
+{"k": 3, "reasons": ["length_ratio"], "sample_id": "pathvqa-test-193", "style": "formal", "text": "Is there evidence of tuberculous peritonitis on the imaging studies, specifically focusing on the parietal peritoneum and visceral peritoneum, and excluding any signs of other inflammatory processes or malignancy?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1953", "style": "lexical", "text": "Is there evidence of gangrene affecting both extremities caused by an embolism related to a patent ductus arteriosus in a patient with Down syndrome in this imaging study?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1953", "style": "syntactic", "text": "Does this image demonstrate gangrene in both hands caused by an embolism related to an arteriovenous canal defect in a case of Down's syndrome?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1953", "style": "formal", "text": "Does this image demonstrate gangrene affecting both hands attributed to embolism related to an arteriovenous (AV) canal anomaly in a patient with Down syndrome?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1997", "style": "lexical", "text": "Is there evidence of a mild deformity and high arched feet in a 22-year-old juvenile rheumatoid arthritis case on this image?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-1997", "style": "syntactic", "text": "Does this image exhibit a 22WF juvenile rheumatoid arthritis with mild deformity and high arch?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-1997", "style": "formal", "text": "Does this image demonstrate bilateral juvenile rheumatoid arthritis with mild deformity and a high arched foot?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-1999", "style": "lexical", "text": "What can be observed?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-1999", "style": "syntactic", "text": "What are present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-1999", "style": "formal", "text": "What structures are present?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2107", "style": "lexical", "text": "Is there an eye present?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2107", "style": "syntactic", "text": "Is the eye present on either side?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2107", "style": "formal", "text": "Is there an eye present bilaterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2129", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2129", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2129", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2271", "style": "lexical", "text": "Is there any fibroid visible?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2271", "style": "syntactic", "text": "Is there any myoma present?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-2271", "style": "formal", "text": "Is there evidence of a uterine myoma present on the imaging study?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2431", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2431", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2431", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2436", "style": "lexical", "text": "Is there evidence of a normal breast in this partially fixed gross examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2436", "style": "syntactic", "text": "Does this partially fixed grossly demonstrate a normal breast?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-2436", "style": "formal", "text": "Does the partially fixed gross specimen demonstrate normal breast tissue?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2468", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2468", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2468", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2519", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2519", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2519", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2707", "style": "lexical", "text": "Is there any presence of the gastrointestinal tract?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2707", "style": "syntactic", "text": "Is gastrointestinal present on either side?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2707", "style": "formal", "text": "Is there evidence of gastrointestinal involvement on the affected side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2796", "style": "lexical", "text": "Is the tongue visible in the medial region, and is there a herpes ulcer present there?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2796", "style": "syntactic", "text": "Does the medial aspect display the tongue or herpes ulcers?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-2796", "style": "formal", "text": "Does the medial aspect demonstrate the presence of a tongue and a herpes ulcer?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2811", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2811", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-2811", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2941", "style": "lexical", "text": "From which side does this originate?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-2941", "style": "syntactic", "text": "Where is this image from?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-2941", "style": "formal", "text": "Where is the lesion located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-2993", "style": "lexical", "text": "Is there any presence of the gastrointestinal tract?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2993", "style": "syntactic", "text": "Is gastrointestinal present on either side?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-2993", "style": "formal", "text": "Is there evidence of gastrointestinal involvement on the affected side?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3280", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3280", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3280", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3346", "style": "lexical", "text": "Is duplicated spleen condition observed?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3346", "style": "syntactic", "text": "Is polysplenia absent?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-3346", "style": "formal", "text": "Is there evidence of polysplenia on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3468", "style": "lexical", "text": "Is there an occurrence of chronic myeloid leukemia?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3468", "style": "syntactic", "text": "Is chronic myelogenous leukemia present on the left side?", "valid": false}
+{"k": 3, "reasons": ["not_a_question", "length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3468", "style": "formal", "text": "Is there evidence of chronic myelogenous leukemia on the examination, specifically focusing on the bone marrow, with no significant findings of blast cells in the peripheral blood smear, and without observing any hepatosplenomegaly or lymphadenopathy indicative", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3526", "style": "lexical", "text": "Is this image indicative of the spleen exhibiting chronic congestion as a result of portal hypertension associated with cirrhosis, caused by HCV?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-3526", "style": "syntactic", "text": "Does this image demonstrate the spleen with chronic congestion attributed to portal hypertension resulting from cirrhosis, caused by HCV?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-3526", "style": "formal", "text": "Does this image demonstrate the presence of the spleen with chronic congestion indicative of portal hypertension associated with cirrhosis, and is hepatitis C virus (HCV) present?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3546", "style": "lexical", "text": "What can be found within the putamen and thalamus?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-3546", "style": "syntactic", "text": "What are present in the putamen and thalamus?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3546", "style": "formal", "text": "What structures are present within the putamen and thalamus bilaterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3589", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-3589", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3589", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3592", "style": "lexical", "text": "Is there a ring-like appearance in meningiomas?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-3592", "style": "syntactic", "text": "Does a meningioma exhibit a ring-like appearance?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-3592", "style": "formal", "text": "Does a meningioma exhibit a ring-like appearance on imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3630", "style": "lexical", "text": "Is there evidence of tuberculosis in either lung?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3630", "style": "syntactic", "text": "Is tuberculosis present in either the left or right lung?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3630", "style": "formal", "text": "Is there evidence of tuberculous involvement in any lung lobes on either side of the chest?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3643", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3643", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3643", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3658", "style": "lexical", "text": "Is there an exemplary depiction of an iron stain visible in this image sourced from an unidentified origin?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3658", "style": "syntactic", "text": "Does this image exhibit an excellent example of an iron stain, with no known source?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3658", "style": "formal", "text": "Does this image demonstrate an excellent example of an iron stain, with no indication of the source?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-366", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-366", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-366", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-3813", "style": "lexical", "text": "What is a distinctive feature resulting from cutting?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-3813", "style": "syntactic", "text": "What is a highly characteristic artifact associated with sectioning?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-3813", "style": "formal", "text": "What is a highly characteristic artifact observed during sectioning?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-3869", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3869", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-3869", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4033", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4033", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4033", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4049", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4049", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4049", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4186", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4186", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4186", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4401", "style": "lexical", "text": "Is microscopic examination indicative of scarred granulomas?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4401", "style": "syntactic", "text": "Does microscopy demonstrate healed granulomas?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-4401", "style": "formal", "text": "Does microscopic examination reveal healed granulomas?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4451", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4451", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4451", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4566", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4566", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4566", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4568", "style": "lexical", "text": "Is there a well-developed liver observable?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4568", "style": "syntactic", "text": "Is there a quite good liver present bilaterally?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4568", "style": "formal", "text": "Is there a well-defined liver present on imaging, without any significant abnormalities or atrophy noted bilaterally?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4762", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed", "leaks_answer"], "sample_id": "pathvqa-test-4762", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed", "leaks_answer"], "sample_id": "pathvqa-test-4762", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteoarthritis or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4866", "style": "lexical", "text": "Is there evidence of bone, specifically in the skull, indicative of Wernicke's encephalopathy?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4866", "style": "syntactic", "text": "Does the skull's bone exhibit Wernicke's encephalopathy?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-4866", "style": "formal", "text": "Does the bone of the skull demonstrate Wernicke's encephalopathy?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4898", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4898", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4898", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4922", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4922", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4922", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4934", "style": "lexical", "text": "Is there an appearance observed?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-4934", "style": "syntactic", "text": "Is there no surface present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-4934", "style": "formal", "text": "Is there a surface observed?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-4936", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-4936", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-4936", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5020", "style": "lexical", "text": "Is there evidence of brain lymphoma in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5020", "style": "syntactic", "text": "Does this image demonstrate the presence of brain lymphoma?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "pathvqa-test-5020", "style": "formal", "text": "Does this image demonstrate the presence of brain lymphoma?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5182", "style": "lexical", "text": "Where is this located?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "pathvqa-test-5182", "style": "syntactic", "text": "Where is this located?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5182", "style": "formal", "text": "Where is the lesion observed on the left side of the brain not visible on the right side?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-521", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-521", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-521", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5290", "style": "lexical", "text": "Is there involvement of processes in the development of fluid accumulation in the heart?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5290", "style": "syntactic", "text": "Is there involvement of mechanisms in the pathogenesis of cardiac edema?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5290", "style": "formal", "text": "Is there involvement of mechanisms contributing to the development of cardiac edema?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5344", "style": "lexical", "text": "Is there an absence of?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-5344", "style": "syntactic", "text": "Is there present?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5344", "style": "formal", "text": "Is there evidence of presence of any abnormality on the left side of the patient's thoracic spine on the latest MRI scan?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5360", "style": "lexical", "text": "Is there any fat necrosis absent?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5360", "style": "syntactic", "text": "Is there any fat necrosis absent?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5360", "style": "formal", "text": "Is fat necrosis present in all affected regions?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5400", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5400", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5400", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5413", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5413", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5413", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5428", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5428", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5428", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5508", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5508", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5508", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5615", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5615", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5615", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5664", "style": "lexical", "text": "Where is this located?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "pathvqa-test-5664", "style": "syntactic", "text": "Where is this located?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5664", "style": "formal", "text": "Where is the lesion observed on the left side of the brain not visible on the right side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5754", "style": "lexical", "text": "Is there evidence of lung, infarct, acute changes, and organization visible in the exposed muscle?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5754", "style": "syntactic", "text": "Does opening the muscle reveal lung, infarct, acute changes, and organized tissue?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-5754", "style": "formal", "text": "Does the opened muscle demonstrate the presence of lung parenchyma, infarction, acute changes, and organized healing?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5908", "style": "lexical", "text": "Is there evidence of cryptococcal dermatitis in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-5908", "style": "syntactic", "text": "Does this image demonstrate cryptococcal dermatitis?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-5908", "style": "formal", "text": "Does this image demonstrate the presence of cryptococcal dermatitis?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-5909", "style": "lexical", "text": "Is typical tuberculous exudate indicative of cryptococcal dermatitis?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-5909", "style": "syntactic", "text": "Does typical tuberculous exudate exhibit cryptococcal dermatitis?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-5909", "style": "formal", "text": "Does typical tuberculous exudate demonstrate the presence of cryptococcal dermatitis?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-593", "style": "lexical", "text": "Is there any myocardial tissue present?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-593", "style": "syntactic", "text": "Is the myocardium present on either side of the body?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-593", "style": "formal", "text": "Is there evidence of myocardial presence on the imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-5986", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5986", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-5986", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6060", "style": "lexical", "text": "Is there an entity depicted in this radiographic image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6060", "style": "syntactic", "text": "Does this image demonstrate the presence of an organism?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "pathvqa-test-6060", "style": "formal", "text": "Does this image demonstrate the presence of an organism?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-6062", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6062", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6062", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6077", "style": "lexical", "text": "Where is this located?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "pathvqa-test-6077", "style": "syntactic", "text": "Where is this located?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6077", "style": "formal", "text": "Where is the lesion observed on the left side of the brain not visible on the right side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6087", "style": "lexical", "text": "Is there evidence of malignant melanoma?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-6087", "style": "syntactic", "text": "Is malignant melanoma present in either the left or right side of the skin?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6087", "style": "formal", "text": "Is there evidence of malignant melanoma in the lesion, considering both left and right sides of the body, and excluding any areas that have already been confirmed as benign?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-6095", "style": "lexical", "text": "Is purulent sinusitis depicted in a more detailed view of the tumor's surface?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6095", "style": "syntactic", "text": "Does purulent sinusitis provide a closer view of the tumor's cut surface?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-6095", "style": "formal", "text": "Does purulent sinusitis demonstrate a close-up view of the tumor's cut surface?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6110", "style": "lexical", "text": "What is depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6110", "style": "syntactic", "text": "What does this image demonstrate?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6110", "style": "formal", "text": "What anatomical structures are depicted in this image, and what abnormalities, if any, can be observed laterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6148", "style": "lexical", "text": "Is there evidence of candidal abscesses in the kidneys observed through the median line on an imaging study of a patient diagnosed with acute myelogenous leukemia?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-6148", "style": "syntactic", "text": "Does the so-called median bar demonstrate kidney candida abscesses in the affected kidney of a patient with acute myelogenous leukemia?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-6148", "style": "formal", "text": "Does the so-called median arcuate line demonstrate the presence of candidal abscesses within the kidneys in a patient diagnosed with acute myelogenous leukemia?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-617", "style": "lexical", "text": "Is there evidence of multiple cysts in the affected area?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-617", "style": "syntactic", "text": "Is polycystic disease present in either the left or right kidney?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-617", "style": "formal", "text": "Is there evidence of polycystic disease on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6210", "style": "lexical", "text": "Is there a kidney present?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "pathvqa-test-6210", "style": "syntactic", "text": "Is there a kidney present?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6210", "style": "formal", "text": "Is there evidence of a kidney present bilaterally, excluding any findings suggestive of absence or atrophy?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6262", "style": "lexical", "text": "Where is this located?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "pathvqa-test-6262", "style": "syntactic", "text": "Where is this located?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-6262", "style": "formal", "text": "Where is the lesion observed on the left side of the brain not visible on the right side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6375", "style": "lexical", "text": "Is it depicted in the microscopic examination of breast carcinoma that the tumor cells spread into the breast stroma and fat through clusters and strands?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6375", "style": "syntactic", "text": "Does the microscopic examination of breast carcinoma demonstrate the infiltration of breast stroma and fat by clusters and strands of tumor cells?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-6375", "style": "formal", "text": "Does the microscopic examination of the breast carcinoma demonstrate the infiltration of the breast stroma and fat by nests and cords of neoplastic cells?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6418", "style": "lexical", "text": "Is there evidence of consistent cell composition with a marked mitotic activity in the tumor?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6418", "style": "syntactic", "text": "Does the tumor exhibit uniform cellularity with a high mitotic rate?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "pathvqa-test-6418", "style": "formal", "text": "Does the tumor exhibit uniform cellularity with a high mitotic rate?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6491", "style": "lexical", "text": "What demonstrate superficial invasive clusters of malignant cells within the subepithelial soft tissues?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "pathvqa-test-6491", "style": "syntactic", "text": "What demonstrate superficial invasive islands of malignant cells within the subepithelial soft tissues?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "pathvqa-test-6491", "style": "formal", "text": "What demonstrates superficial invasive islands of malignant cells within the subepithelial soft tissues?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "pathvqa-test-6642", "style": "lexical", "text": "Are elevated blastemal patterns and widespread anaplasia linked to particular molecular abnormalities?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "pathvqa-test-6642", "style": "syntactic", "text": "Are blastemal morphology predominance and diffuse anaplasia associated with particular molecular lesions?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "pathvqa-test-6642", "style": "formal", "text": "Are predominance of blastemal morphology and diffuse anaplasia consistently observed in association with particular molecular lesions?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "pathvqa-test-872", "style": "lexical", "text": "What does not exist?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-872", "style": "syntactic", "text": "What is present in the right knee joint but not in the left knee joint?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "pathvqa-test-872", "style": "formal", "text": "What structures are present in the right knee joint, excluding any signs of osteophytes or meniscal tears?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11949", "style": "lexical", "text": "Is there presence of the liver depicted in the image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-11949", "style": "syntactic", "text": "Does the image lack a liver?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-11949", "style": "formal", "text": "Does the image demonstrate the presence of liver tissue?", "valid": true}
+{"k": 1, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11952", "style": "lexical", "text": "Is there any evidence of pathology within the lungs?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11952", "style": "syntactic", "text": "Is there any evidence of disease in the lung on either side?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11952", "style": "formal", "text": "Is there evidence of pathology within the lungs, specifically excluding any findings that would suggest consolidation, emphysema, or infiltrates on either the left or right side of the thorax?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11960", "style": "lexical", "text": "Is there any depiction of the lungs in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-11960", "style": "syntactic", "text": "Does the image show lungs present?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-11960", "style": "formal", "text": "Does the image demonstrate the presence of lung tissue?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11962", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-11962", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-11962", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11963", "style": "lexical", "text": "Is there any evidence of pathology within the lungs?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11963", "style": "syntactic", "text": "Is there any evidence of disease in the lung on either side?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-11963", "style": "formal", "text": "Is there evidence of pathology within the lungs, specifically excluding any findings that would suggest consolidation, emphysema, or infiltrates on either the left or right side of the thorax?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11964", "style": "lexical", "text": "Where are the abnormalities situated?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-11964", "style": "syntactic", "text": "Where are the abnormalities located?", "valid": false}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-11964", "style": "formal", "text": "Where are the abnormalities situated?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11970", "style": "lexical", "text": "Is there any presence of anomalies within this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-11970", "style": "syntactic", "text": "Are abnormalities present in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-11970", "style": "formal", "text": "Are there any detectable anomalies present within this imaging study?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-11976", "style": "lexical", "text": "Is the liver appearing normally?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-11976", "style": "syntactic", "text": "Does the liver appear normally?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-11976", "style": "formal", "text": "Does the liver exhibit any abnormal findings on examination?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-11992", "style": "lexical", "text": "Where are the abnormalities situated?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-11992", "style": "syntactic", "text": "Where are the abnormalities located?", "valid": false}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-11992", "style": "formal", "text": "Where are the abnormalities situated?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12005", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12005", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12005", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12036", "style": "lexical", "text": "Is this depiction considered normative?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12036", "style": "syntactic", "text": "Does this image not appear abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12036", "style": "formal", "text": "Does this image demonstrate any abnormal findings or deviate from the expected normal anatomical structures as per the specified laterality and anatomical regions?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12050", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12050", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12050", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12052", "style": "lexical", "text": "Is there any evidence of pathology within the lungs?", "valid": false}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12052", "style": "syntactic", "text": "Is there any evidence of disease in the lung on either side?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12052", "style": "formal", "text": "Is there evidence of pathology within the lungs, specifically excluding any findings that would suggest consolidation, emphysema, or infiltrates on either the left or right side of the thorax?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12060", "style": "lexical", "text": "Is there presence of the liver depicted in the image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12060", "style": "syntactic", "text": "Does the image lack a liver?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12060", "style": "formal", "text": "Does the image demonstrate the presence of liver tissue?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12063", "style": "lexical", "text": "Is the liver appearing normally?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12063", "style": "syntactic", "text": "Does the liver appear normally?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12063", "style": "formal", "text": "Does the liver exhibit any abnormal findings on examination?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12066", "style": "lexical", "text": "Which technique generates this diagnostic picture?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12066", "style": "syntactic", "text": "What modality is employed to capture this lateral image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12066", "style": "formal", "text": "What imaging modality was employed to acquire this examination, and what is its indication for use in relation to the left knee?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12068", "style": "lexical", "text": "Is there any indication of pathology in this scan?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12068", "style": "syntactic", "text": "Does this image not appear normal?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12068", "style": "formal", "text": "Does this image demonstrate any signs of pathology or abnormality?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12079", "style": "lexical", "text": "Is there a depiction of the kidneys in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12079", "style": "syntactic", "text": "Does the image show the presence of kidneys?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12079", "style": "formal", "text": "Does the image demonstrate the presence of kidneys in both the left and right sides?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12101", "style": "lexical", "text": "Is the hepatocyte state indicative of normal health?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12101", "style": "syntactic", "text": "Is the liver not unhealthy?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12101", "style": "formal", "text": "Is the liver free from any signs of pathology, inflammation, or abnormal enhancement on the imaging studies performed, bilaterally?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12105", "style": "lexical", "text": "What is the imaging orientation in this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12105", "style": "syntactic", "text": "What is the scanning plane of this image, considering its lateral orientation and excluding any sagittal views?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12105", "style": "formal", "text": "What is the plane of the scan in this imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12122", "style": "lexical", "text": "Which extremity holds the greatest volume within the depicted image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12122", "style": "syntactic", "text": "What organ is depicted as being the largest in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12122", "style": "formal", "text": "What is the largest organ depicted in the image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12135", "style": "lexical", "text": "Which organ is located at the far right in this visual?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12135", "style": "syntactic", "text": "What organ is located on the right side in this image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12135", "style": "formal", "text": "What is the organ located at the rightmost position within this image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12147", "style": "lexical", "text": "Is this depiction considered normative?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12147", "style": "syntactic", "text": "Does this image not appear abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12147", "style": "formal", "text": "Does this image demonstrate any abnormal findings or deviate from the expected normal anatomical structures as per the specified laterality and anatomical regions?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12153", "style": "lexical", "text": "What is the imaging orientation in this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12153", "style": "syntactic", "text": "What is the scanning plane of this image, considering its lateral orientation and excluding any sagittal views?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12153", "style": "formal", "text": "What is the plane of the scan in this imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12157", "style": "lexical", "text": "How many paired kidneys are depicted in this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12157", "style": "syntactic", "text": "How many kidneys are depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12157", "style": "formal", "text": "How many kidneys are present in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12158", "style": "lexical", "text": "Is there presence of the liver depicted in the image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12158", "style": "syntactic", "text": "Does the image lack a liver?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12158", "style": "formal", "text": "Does the image demonstrate the presence of liver tissue?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12159", "style": "lexical", "text": "Is there a depiction of the kidneys in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12159", "style": "syntactic", "text": "Does the image show the presence of kidneys?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12159", "style": "formal", "text": "Does the image demonstrate the presence of kidneys in both the left and right sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12161", "style": "lexical", "text": "Which technique generates this diagnostic picture?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12161", "style": "syntactic", "text": "What modality is employed to capture this lateral image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12161", "style": "formal", "text": "What imaging modality was employed to acquire this examination, and what is its indication for use in relation to the left knee?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12165", "style": "lexical", "text": "Is there a depiction of the kidneys in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12165", "style": "syntactic", "text": "Does the image show the presence of kidneys?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12165", "style": "formal", "text": "Does the image demonstrate the presence of kidneys in both the left and right sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12173", "style": "lexical", "text": "Which extremity holds the greatest volume within the depicted image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12173", "style": "syntactic", "text": "What organ is depicted as being the largest in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12173", "style": "formal", "text": "What is the largest organ depicted in the image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12185", "style": "lexical", "text": "What structure is present on the left side within the dark area of the photograph?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12185", "style": "syntactic", "text": "What organ is not visible on the right side of the image and described as the black part?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12185", "style": "formal", "text": "What organ is not present on the left side of the image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12197", "style": "lexical", "text": "Is there any depiction of the lungs in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12197", "style": "syntactic", "text": "Does the image show lungs present?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12197", "style": "formal", "text": "Does the image demonstrate the presence of lung tissue?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12198", "style": "lexical", "text": "Is there a depiction of the heart in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12198", "style": "syntactic", "text": "Does the image show the presence of a heart?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12198", "style": "formal", "text": "Does the image demonstrate the presence of the heart?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12199", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12199", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12199", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12200", "style": "lexical", "text": "Where are the abnormalities situated?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12200", "style": "syntactic", "text": "Where are the abnormalities located?", "valid": false}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12200", "style": "formal", "text": "Where are the abnormalities situated?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12208", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12208", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12208", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12209", "style": "lexical", "text": "Is this depiction considered normative?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12209", "style": "syntactic", "text": "Does this image not appear abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12209", "style": "formal", "text": "Does this image demonstrate any abnormal findings or deviate from the expected normal anatomical structures as per the specified laterality and anatomical regions?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12228", "style": "lexical", "text": "Is there a depiction of the heart in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12228", "style": "syntactic", "text": "Does the image show the presence of a heart?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12228", "style": "formal", "text": "Does the image demonstrate the presence of the heart?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12238", "style": "lexical", "text": "Is there presence of the liver depicted in the image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12238", "style": "syntactic", "text": "Does the image lack a liver?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12238", "style": "formal", "text": "Does the image demonstrate the presence of liver tissue?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12245", "style": "lexical", "text": "What structure is present on the left side within the dark area of the photograph?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12245", "style": "syntactic", "text": "What organ is not visible on the right side of the image and described as the black part?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12245", "style": "formal", "text": "What organ is not present on the left side of the image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12269", "style": "lexical", "text": "Which bodily system undergoes examination through imaging?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12269", "style": "syntactic", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12269", "style": "formal", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12271", "style": "lexical", "text": "Are there any anomalies present in the patient's superior respiratory region on the right side?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12271", "style": "syntactic", "text": "Are there any abnormalities present in the patient's right lung?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12271", "style": "formal", "text": "Are there any abnormalities present in the right lung of the patient?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12274", "style": "lexical", "text": "What hue is displayed on the image for the left lung?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12274", "style": "syntactic", "text": "What color does the left lung exhibit in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12274", "style": "formal", "text": "What color does the left lung demonstrate in the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12285", "style": "lexical", "text": "Is this an examination of the thoracic region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12285", "style": "syntactic", "text": "Is this not a study of the chest?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12285", "style": "formal", "text": "Is this a study involving the thoracic cavity on both sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12292", "style": "lexical", "text": "What is the primary reason for the condition located in the lower right part of the lung as depicted in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12292", "style": "syntactic", "text": "What is the primary cause of the disease located in the lower right lung as seen in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12292", "style": "formal", "text": "What is the primary etiology responsible for the pathology observed in the lower right lobe of the lung as depicted in the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12294", "style": "lexical", "text": "Is this radiographic image an X-ray?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12294", "style": "syntactic", "text": "Is this image not an X-Ray image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12294", "style": "formal", "text": "Is this image an X-ray examination, and if so, is there any indication of left-sided pathology present?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12299", "style": "lexical", "text": "Is this an examination of the thoracic region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12299", "style": "syntactic", "text": "Is this not a study of the chest?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12299", "style": "formal", "text": "Is this a study involving the thoracic cavity on both sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12316", "style": "lexical", "text": "Is there presence of any anomalies in the patient's condition?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12316", "style": "syntactic", "text": "Does the patient lack any abnormalities?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12316", "style": "formal", "text": "Does the patient exhibit any anomalies in their imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12320", "style": "lexical", "text": "How many respiratory cavities are depicted in this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12320", "style": "syntactic", "text": "How many lungs are depicted in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12320", "style": "formal", "text": "How many lungs are depicted in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12321", "style": "lexical", "text": "What extent of harm might occur to the anatomy undergoing such a scan?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12321", "style": "syntactic", "text": "How much harm will be inflicted upon the body upon acquiring such an image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12321", "style": "formal", "text": "How much damage does the acquisition of such an image cause to the body?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12324", "style": "lexical", "text": "Is this radiographic image an X-ray?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12324", "style": "syntactic", "text": "Is this image not an X-Ray image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12324", "style": "formal", "text": "Is this image an X-ray examination, and if so, is there any indication of left-sided pathology present?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12331", "style": "lexical", "text": "What condition are conditions depicted on the thoracic region's right lung?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12331", "style": "syntactic", "text": "What disease are/are shown on the right lung?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12331", "style": "formal", "text": "What disease are/are present on the right lung?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12348", "style": "lexical", "text": "Is cardiomegaly discernible within the cardiac region depicted in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12348", "style": "syntactic", "text": "Is cardiomegaly visible in the heart depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12348", "style": "formal", "text": "Can cardiomegaly be identified in the heart on this image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12361", "style": "lexical", "text": "Is there any indication of an abnormality within the lungs?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12361", "style": "syntactic", "text": "Does the lung exhibit any abnormalities?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12361", "style": "formal", "text": "Does the right lung exhibit any signs of abnormality?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12362", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12362", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12362", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12363", "style": "lexical", "text": "Is there evidence of pulmonary infiltration visible in the upper right lung depicted here?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12363", "style": "syntactic", "text": "Is pulmonary infiltration visible in the upper right lung in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12363", "style": "formal", "text": "Can pulmonary infiltration be identified in the upper right lung on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12366", "style": "lexical", "text": "What is the impact on the primary structure depicted here?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12366", "style": "syntactic", "text": "What is the effect of the main organ depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12366", "style": "formal", "text": "What is the observed effect on the primary organ depicted in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12375", "style": "lexical", "text": "Which bodily system undergoes examination through imaging?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12375", "style": "syntactic", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12375", "style": "formal", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12376", "style": "lexical", "text": "Is the lung depicted without abnormalities?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12376", "style": "syntactic", "text": "Is there a normal appearance in the lung?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12376", "style": "formal", "text": "Is the lung demonstrated without evidence of abnormal enhancement or atypia on the imaging study?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12377", "style": "lexical", "text": "Is this image without abnormalities present?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12377", "style": "syntactic", "text": "Is this image not abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12377", "style": "formal", "text": "Is the provided image devoid of any abnormal findings or indicative of pathology in the specified anatomical regions, and does it demonstrate normal laterality and symmetry as expected for the given condition or age group?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12394", "style": "lexical", "text": "Which hue is depicted in the image for the right lung?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12394", "style": "syntactic", "text": "What color does the right lung exhibit in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12394", "style": "formal", "text": "What color does the right lung demonstrate in the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12396", "style": "lexical", "text": "What role does the primary structure perform in this illustration?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12396", "style": "syntactic", "text": "What is the function of the main organ depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12396", "style": "formal", "text": "What is the function of the primary organ observed in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12399", "style": "lexical", "text": "Is this a magnetic resonance imaging examination?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12399", "style": "syntactic", "text": "Is this not an MRI scan?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12399", "style": "formal", "text": "Is this imaging modality an MRI examination?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12408", "style": "lexical", "text": "Is there evidence of a pneumothorax visible in the lower right lung section within this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12408", "style": "syntactic", "text": "Is pneumothorax visible in the lower right lung in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12408", "style": "formal", "text": "Can a pneumothorax be visualized in the lower right lung lobe on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12421", "style": "lexical", "text": "Is there any presence of anomalies within this visual examination?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12421", "style": "syntactic", "text": "Are abnormalities present in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12421", "style": "formal", "text": "Are there any detectable anomalies present within this imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12423", "style": "lexical", "text": "Is there evidence of a pneumothorax visible in the lower left lung section within this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12423", "style": "syntactic", "text": "Is pneumothorax visible in the lower left lung in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12423", "style": "formal", "text": "Can a pneumothorax be visualized in the lower left lung lobe on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12424", "style": "lexical", "text": "What hue does the lung exhibit in the depicted image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12424", "style": "syntactic", "text": "What color is the lung on the right side of the image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12424", "style": "formal", "text": "What is the color of the lung on the right side of the image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12425", "style": "lexical", "text": "How many hearts are depicted in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12425", "style": "syntactic", "text": "How many hearts exist in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12425", "style": "formal", "text": "How many hearts are present in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12429", "style": "lexical", "text": "Is this radiographic image an X-ray?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12429", "style": "syntactic", "text": "Is this image not an X-Ray image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12429", "style": "formal", "text": "Is this image an X-ray examination, and if so, is there any indication of left-sided pathology present?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12437", "style": "lexical", "text": "Is there any indication of pathology within the lungs?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12437", "style": "syntactic", "text": "Is there an abnormality in the lung?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12437", "style": "formal", "text": "Is there evidence of an abnormality within the lungs, considering both the right and left sides, excluding any normal anatomical variations?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12439", "style": "lexical", "text": "What hue does the lung exhibit in the depicted image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12439", "style": "syntactic", "text": "What color is the lung on the right side of the image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12439", "style": "formal", "text": "What is the color of the lung on the right side of the image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12458", "style": "lexical", "text": "Which parts/structure within the depicted image pertain to the respiratory system?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12458", "style": "syntactic", "text": "Which organs/organ in the picture do not belong to the respiratory system?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12458", "style": "formal", "text": "Which organs/organ in the image are part of the respiratory system?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12464", "style": "lexical", "text": "Which bodily system undergoes examination through imaging?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12464", "style": "syntactic", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12464", "style": "formal", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12479", "style": "lexical", "text": "Is this an examination of the thoracic region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12479", "style": "syntactic", "text": "Is this not a study of the chest?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12479", "style": "formal", "text": "Is this a study involving the thoracic cavity on both sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12483", "style": "lexical", "text": "Is pneumonia visible within the lower right lung in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12483", "style": "syntactic", "text": "Is pneumonia visible in the lower right lung in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12483", "style": "formal", "text": "Can pneumonia be visualized in the lower right lung lobe on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12485", "style": "lexical", "text": "How many present thoracic cavities depicted in this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12485", "style": "syntactic", "text": "How many lungs are present in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12485", "style": "formal", "text": "How many lungs are present in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12493", "style": "lexical", "text": "Which lung region does the infiltration occur in?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12493", "style": "syntactic", "text": "What part of the lung does not exhibit infiltration?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12493", "style": "formal", "text": "What part of the lung is the infiltrative change present in?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12501", "style": "lexical", "text": "What purpose does the dark structure within this picture serve?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12501", "style": "syntactic", "text": "What can the organ depicted in black in this image be utilized for?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12501", "style": "formal", "text": "What can the organ depicted in black on this image be utilized for?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12515", "style": "lexical", "text": "How many respiratory cavities are depicted in this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12515", "style": "syntactic", "text": "How many lungs are depicted in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12515", "style": "formal", "text": "How many lungs are depicted in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12519", "style": "lexical", "text": "Which technique generates this diagnostic picture?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12519", "style": "syntactic", "text": "What modality is employed to capture this lateral image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12519", "style": "formal", "text": "What imaging modality was employed to acquire this examination, and what is its indication for use in relation to the left knee?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12524", "style": "lexical", "text": "Is this an examination of the belly?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12524", "style": "syntactic", "text": "Is this not a study of the abdomen?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12524", "style": "formal", "text": "Is this a study involving the abdomen, and does it not include images of the contralateral abdominal region?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12527", "style": "lexical", "text": "Is this image without abnormalities present?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12527", "style": "syntactic", "text": "Is this image not abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12527", "style": "formal", "text": "Is the provided image devoid of any abnormal findings or indicative of pathology in the specified anatomical regions, and does it demonstrate normal laterality and symmetry as expected for the given condition or age group?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12554", "style": "lexical", "text": "Which bodily system is predominantly shown in this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12554", "style": "syntactic", "text": "What organ system is primarily absent from this image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12554", "style": "formal", "text": "What organ system is predominantly depicted within this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12555", "style": "lexical", "text": "Are the auditory organs visible in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12555", "style": "syntactic", "text": "Does this image contain ears?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12555", "style": "formal", "text": "Does the ear exist in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12575", "style": "lexical", "text": "Which parts/structure within the image pertain to the nervous system?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12575", "style": "syntactic", "text": "Which organs/organ in the picture do not belong to the nervous system?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12575", "style": "formal", "text": "Which organs/organ in the image belong to the nervous system?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12583", "style": "lexical", "text": "Is the trachea present in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12583", "style": "syntactic", "text": "Does the trachea manifest in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12583", "style": "formal", "text": "Does the trachea manifest in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12596", "style": "lexical", "text": "What is the contour of the trachea in this individual?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12596", "style": "syntactic", "text": "What is the shape of the trachea in this patient?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12596", "style": "formal", "text": "What is the shape of the trachea on this patient's right side?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12602", "style": "lexical", "text": "Is this a plane that cuts through the body horizontally?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12602", "style": "syntactic", "text": "Is this not a transverse section?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12602", "style": "formal", "text": "Is this image a transverse section?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12604", "style": "lexical", "text": "Which part is the trachea depicted in this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12604", "style": "syntactic", "text": "Which trachea is depicted in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12604", "style": "formal", "text": "Which trachea is depicted in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12606", "style": "lexical", "text": "Is there presence of the spinal cord in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12606", "style": "syntactic", "text": "Does the image exhibit the presence of the spinal cord?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12606", "style": "formal", "text": "Does the image demonstrate the presence of the spinal cord?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12607", "style": "lexical", "text": "Are/Is there any kidneys visible in the image?", "valid": true}
+{"k": 2, "reasons": ["duplicate"], "sample_id": "slake-test-12607", "style": "syntactic", "text": "Are/Is there any kidneys visible in the image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12607", "style": "formal", "text": "Are/Is there any kidney visualized on the provided image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12611", "style": "lexical", "text": "Is there an organ depicted in the image that is responsible for eliminating waste?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12611", "style": "syntactic", "text": "Does the image depict the organ responsible for excretion?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12611", "style": "formal", "text": "Does the image demonstrate the presence of the organ responsible for excretion?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12613", "style": "lexical", "text": "Is this a computed tomography image?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12613", "style": "syntactic", "text": "Is this not a CT scan?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12613", "style": "formal", "text": "Is this imaging study a computed tomography (CT) scan of the axial plane, excluding any sagittal or coronal views, and does it not demonstrate any abnormalities in the right liver parenchyma or left lung fields?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12618", "style": "lexical", "text": "Which bodily system undergoes examination through imaging?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12618", "style": "syntactic", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12618", "style": "formal", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12623", "style": "lexical", "text": "Is this Magnetic Resonance Imaging (MRI) showcasing T1 weighting?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12623", "style": "syntactic", "text": "Is this an MRI image not showing T1 weighting?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12623", "style": "formal", "text": "Is this magnetic resonance imaging (MRI) image showing T1-weighted images?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12637", "style": "lexical", "text": "What condition(ies) can be observed on the lateral side of the cerebrum?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12637", "style": "syntactic", "text": "What disease are/are shown on the left side of the brain?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12637", "style": "formal", "text": "What disease are/are present on the left side of the brain?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12641", "style": "lexical", "text": "Which technique is depicted within this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12641", "style": "syntactic", "text": "What modality is depicted in this image?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12641", "style": "formal", "text": "What imaging modality is depicted in this examination, and what is its representation regarding the left versus right side of the body?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12644", "style": "lexical", "text": "Are the structures depicted within the radiographic image located within the thoracic cavity?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12644", "style": "syntactic", "text": "Do the organs in the image not exist outside of the chest?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12644", "style": "formal", "text": "Do the organs depicted within the image exist on both sides of the chest?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12652", "style": "lexical", "text": "Is this a transverse plane?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12652", "style": "syntactic", "text": "Is this a coronal section?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12652", "style": "formal", "text": "Is this image a coronal section?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12655", "style": "lexical", "text": "Is this an examination of the cranial region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12655", "style": "syntactic", "text": "Is this not a study of the head?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12655", "style": "formal", "text": "Is this a study that includes the head, without omission of any part thereof?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12656", "style": "lexical", "text": "Is there indication of cerebral swelling?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12656", "style": "syntactic", "text": "Is there no evidence of brain edema?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12656", "style": "formal", "text": "Is there evidence of cerebral edema on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12663", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12663", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12663", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12664", "style": "lexical", "text": "In which location is the neurological growth situated?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12664", "style": "syntactic", "text": "Where is not the location of the brain tumor?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12664", "style": "formal", "text": "Where is the brain tumor located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12669", "style": "lexical", "text": "Which technique was employed to produce this image, T1 or T2?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12669", "style": "syntactic", "text": "Which kind of weighting was this image generated with, T1 or T2?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12669", "style": "formal", "text": "Which type of weighting was used to generate this image, T1 or T2?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12675", "style": "lexical", "text": "Is the lesion dense or not dense?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12675", "style": "syntactic", "text": "Is the abnormality not hyperdense but hypodense?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12675", "style": "formal", "text": "Is the lesion hyperdense or hypodense on the axial view of the affected side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12681", "style": "lexical", "text": "In which location is the neurological growth situated?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12681", "style": "syntactic", "text": "Where is not the location of the brain tumor?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12681", "style": "formal", "text": "Where is the brain tumor located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12682", "style": "lexical", "text": "Which bodily system undergoes examination through imaging?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12682", "style": "syntactic", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "slake-test-12682", "style": "formal", "text": "Which organ system is being imaged?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12690", "style": "lexical", "text": "Is this an examination of the cranial region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12690", "style": "syntactic", "text": "Is this not a study of the head?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12690", "style": "formal", "text": "Is this a study that includes the head, without omission of any part thereof?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12694", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12694", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12694", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12696", "style": "lexical", "text": "Which primary structure can be observed within the depicted area?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12696", "style": "syntactic", "text": "What is the primary organ depicted in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12696", "style": "formal", "text": "What is the primary organ depicted within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12698", "style": "lexical", "text": "Is there any depiction of brain in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12698", "style": "syntactic", "text": "Does the image show the brain?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12698", "style": "formal", "text": "Does the image demonstrate the presence of brain structures?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12725", "style": "lexical", "text": "Is this an examination of the thoracic region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12725", "style": "syntactic", "text": "Is this not a study of the chest?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12725", "style": "formal", "text": "Is this a study involving the thoracic cavity on both sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12729", "style": "lexical", "text": "Which kind of MRI can be observed in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12729", "style": "syntactic", "text": "What type of MRI is depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12729", "style": "formal", "text": "What specific type of magnetic resonance imaging (MRI) technique is depicted in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12734", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12734", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12734", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12738", "style": "lexical", "text": "Is this Magnetic Resonance Imaging (MRI) showcasing T2 weighting?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12738", "style": "syntactic", "text": "Is this an MRI image that is not T2 weighted?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12738", "style": "formal", "text": "Is this magnetic resonance imaging (MRI) image demonstrating T2-weighted sequences?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12743", "style": "lexical", "text": "What condition(s) can be observed in the inferior left region of the brain?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12743", "style": "syntactic", "text": "What disease are/are shown in the lower left part of the brain?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12743", "style": "formal", "text": "What disease are/are present in the lower left hemisphere of the brain?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12748", "style": "lexical", "text": "Is this Magnetic Resonance Imaging (MRI) showcasing T2 weighting?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12748", "style": "syntactic", "text": "Is this an MRI image that is not T2 weighted?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12748", "style": "formal", "text": "Is this magnetic resonance imaging (MRI) image demonstrating T2-weighted sequences?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12749", "style": "lexical", "text": "What is the imaging orientation in this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12749", "style": "syntactic", "text": "What is the scanning plane of this image, considering its lateral orientation and excluding any sagittal views?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12749", "style": "formal", "text": "What is the plane of the scan in this imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12750", "style": "lexical", "text": "Are there any structures depicted within the visual field that reside in the cranial region?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12750", "style": "syntactic", "text": "Do the organs in the image not exist in the head?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12750", "style": "formal", "text": "Do the organs depicted in the image exist in the cranial region?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12757", "style": "lexical", "text": "What is the MRI setting employed in this photograph?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12757", "style": "syntactic", "text": "What is the MRI weighting in this image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12757", "style": "formal", "text": "What is the magnetic resonance (MR) weighting setting in this image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12758", "style": "lexical", "text": "Is this a transverse plane?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12758", "style": "syntactic", "text": "Is this a coronal section?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12758", "style": "formal", "text": "Is this image a coronal section?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12759", "style": "lexical", "text": "Are there any structures depicted within the neck on the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12759", "style": "syntactic", "text": "Do the organs in the image not exist in the neck?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12759", "style": "formal", "text": "Do the organs depicted in the image exist in the neck?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12764", "style": "lexical", "text": "Which technique generates this diagnostic picture?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12764", "style": "syntactic", "text": "What modality is employed to capture this lateral image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12764", "style": "formal", "text": "What imaging modality was employed to acquire this examination, and what is its indication for use in relation to the left knee?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12765", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12765", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12765", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12769", "style": "lexical", "text": "Is there any depiction of brain in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12769", "style": "syntactic", "text": "Does the image show the brain?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12769", "style": "formal", "text": "Does the image demonstrate the presence of brain structures?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12771", "style": "lexical", "text": "Is there evidence of any irregularity in the brain?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12771", "style": "syntactic", "text": "Does the brain exhibit any abnormalities?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12771", "style": "formal", "text": "Does the cerebral region exhibit any signs of abnormality?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12772", "style": "lexical", "text": "Is this scan performed using an MRI technique?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12772", "style": "syntactic", "text": "Is this image not an MRI scan?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12772", "style": "formal", "text": "Is this image an MRI scan, and if so, does it depict the correct laterality and exclude any superimposed artifacts that might affect the interpretation of the anatomical structures involved?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12795", "style": "lexical", "text": "Is this an examination of the belly?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12795", "style": "syntactic", "text": "Is this not a study of the abdomen?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12795", "style": "formal", "text": "Is this a study involving the abdomen, and does it not include images of either the left or right side of the abdomen?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12796", "style": "lexical", "text": "Is the trachea present in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12796", "style": "syntactic", "text": "Does the trachea manifest in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12796", "style": "formal", "text": "Does the trachea manifest in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12810", "style": "lexical", "text": "Which components/components of the digestive tract are visible in this illustration?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12810", "style": "syntactic", "text": "Which organ/organ is part of the digestive system in this image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12810", "style": "formal", "text": "Which organ(s) of the digestive system is/are present in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12818", "style": "lexical", "text": "How many hearts are depicted in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12818", "style": "syntactic", "text": "How many hearts exist in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12818", "style": "formal", "text": "How many hearts are present in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12829", "style": "lexical", "text": "What does the spinal cord appear as in this visual examination?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12829", "style": "syntactic", "text": "What is the shape of the spinal cord depicted in this image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12829", "style": "formal", "text": "What is the shape of the spinal cord on this lateral view?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12832", "style": "lexical", "text": "Is there an organ responsible for breaking down nutrients present in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12832", "style": "syntactic", "text": "Does the image depict the organ that is responsible for breaking down nutrients?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12832", "style": "formal", "text": "Does the image depict the organ responsible for digestion?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12837", "style": "lexical", "text": "Is there a humeral head visible in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12837", "style": "syntactic", "text": "Does the humerus head appear in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12837", "style": "formal", "text": "Does the humeral head exist in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12855", "style": "lexical", "text": "Which parts/structure within the image pertain to the lymphatic system?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12855", "style": "syntactic", "text": "Which organs/organ in the picture do not belong to the lymphatic system?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12855", "style": "formal", "text": "Which organs or organ within the image are part of the lymphatic system?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12859", "style": "lexical", "text": "In which location can the esophagus be identified within this visual depiction?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12859", "style": "syntactic", "text": "Where is the esophagus depicted in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12859", "style": "formal", "text": "Where is the esophagus demonstrated on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12868", "style": "lexical", "text": "Which technique generates this diagnostic picture?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12868", "style": "syntactic", "text": "What modality is employed to capture this lateral image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "slake-test-12868", "style": "formal", "text": "What imaging modality was employed to acquire this examination, and what is its indication for use in relation to the left knee?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12873", "style": "lexical", "text": "Is there any depiction of brain in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12873", "style": "syntactic", "text": "Does the image show the brain?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12873", "style": "formal", "text": "Does the image demonstrate the presence of brain structures?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12876", "style": "lexical", "text": "Where are the abnormalities situated?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "slake-test-12876", "style": "syntactic", "text": "Where are the abnormalities located?", "valid": false}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12876", "style": "formal", "text": "Where are the abnormalities situated?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12880", "style": "lexical", "text": "Is there a depiction of the heart in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12880", "style": "syntactic", "text": "Does the image show the presence of a heart?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12880", "style": "formal", "text": "Does the image demonstrate the presence of the heart?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12920", "style": "lexical", "text": "Is there an organ responsible for detoxification present in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12920", "style": "syntactic", "text": "Does the image exhibit the organ that performs detoxification?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12920", "style": "formal", "text": "Does the image demonstrate the presence of an organ that possesses detoxification capabilities?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12924", "style": "lexical", "text": "Which parts/structure within the image pertain to the urinary system?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12924", "style": "syntactic", "text": "Which organs/organ in the picture do not belong to the urinary system?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12924", "style": "formal", "text": "Which organs/organ in the image are part of the urinary system?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12928", "style": "lexical", "text": "Is there any rectum visible in this image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12928", "style": "syntactic", "text": "Does the rectum manifest in this image?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "slake-test-12928", "style": "formal", "text": "Does the rectum manifest in this image?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12940", "style": "lexical", "text": "Which bodily system is predominantly shown in this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "slake-test-12940", "style": "syntactic", "text": "What organ system is primarily absent from this image?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12940", "style": "formal", "text": "What organ system is predominantly depicted within this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12950", "style": "lexical", "text": "Is there any depiction of brain in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12950", "style": "syntactic", "text": "Does the image show the brain?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12950", "style": "formal", "text": "Does the image demonstrate the presence of brain structures?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12954", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12954", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12954", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12956", "style": "lexical", "text": "Which primary structure can be observed within the depicted area?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12956", "style": "syntactic", "text": "What is the primary organ depicted in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12956", "style": "formal", "text": "What is the primary organ depicted within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12959", "style": "lexical", "text": "Which conditions are depicted within the image?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "slake-test-12959", "style": "syntactic", "text": "What diseases are not included in the picture?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12959", "style": "formal", "text": "What diseases are present within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12973", "style": "lexical", "text": "Which primary structure can be observed within the depicted area?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12973", "style": "syntactic", "text": "What is the primary organ depicted in the image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12973", "style": "formal", "text": "What is the primary organ depicted within the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "slake-test-12981", "style": "lexical", "text": "Which bodily region is depicted in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "slake-test-12981", "style": "syntactic", "text": "Which part of the body does this image pertain to?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "slake-test-12981", "style": "formal", "text": "Which part of the body does this image depict?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-10", "style": "lexical", "text": "Is there indication of an aortic dilation on this side?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-10", "style": "syntactic", "text": "Is an aortic aneurysm evidenced?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-10", "style": "formal", "text": "Is there evidence of an aortic aneurysm on the left side of the thoracic aorta?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-102", "style": "lexical", "text": "Is there indication of peritoneal air in this individual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-102", "style": "syntactic", "text": "Does the patient exhibit signs of pneumoperitoneum?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-102", "style": "formal", "text": "Does this patient exhibit signs of pneumoperitoneum on review of the imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1020", "style": "lexical", "text": "Is this a first-weighted magnetic resonance imaging scan?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-1020", "style": "syntactic", "text": "Is this not a T1-weighted MRI?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1020", "style": "formal", "text": "Is this image a T1-weighted MRI?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-104", "style": "lexical", "text": "Is the heart's outline smaller than half the width of the diaphragm?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-104", "style": "syntactic", "text": "Is the cardiac silhouette not more than half the diameter of the diaphragm?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-104", "style": "formal", "text": "Is the cardiac silhouette less than half the transverse diameter of the diaphragm on the requested imaging study?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1067", "style": "lexical", "text": "What anomaly manifests when the ventricles exhibit enlargement as depicted in this imagery?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1067", "style": "syntactic", "text": "What condition is characterized by enlarged ventricles as observed in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1067", "style": "formal", "text": "What is the condition characterized by ventricular enlargement as depicted in this imaging study?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1068", "style": "lexical", "text": "Which bodily system is depicted within the provided radiographic view?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1068", "style": "syntactic", "text": "What organ system is depicted in the provided image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1068", "style": "formal", "text": "What organ system is depicted within the image?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1072", "style": "lexical", "text": "In which quadrant is there an atypical growth depicted within these visuals?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1072", "style": "syntactic", "text": "In which lobe is there an abnormal mass visible in the provided images?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1072", "style": "formal", "text": "In which lobe does an abnormal mass appear in the provided images?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1073", "style": "lexical", "text": "Where is the deviant growth situated relative to the lungs?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1073", "style": "syntactic", "text": "Where with respect to the lungs is the abnormal mass situated?", "valid": true}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1073", "style": "formal", "text": "Where is the abnormal mass situated with respect to the lungs?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1131", "style": "lexical", "text": "Is the trachea not deviating from the midline?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1131", "style": "syntactic", "text": "Is the trachea not deviated to either side?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1131", "style": "formal", "text": "Is the trachea not deviated to either side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-117", "style": "lexical", "text": "Is there an increase in the size of the pulmonary blood vessels?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-117", "style": "syntactic", "text": "Is enlargement of the pulmonary vasculature not observed?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-117", "style": "formal", "text": "Is there evidence of enlargement of the pulmonary vasculature on the bilateral images?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1172", "style": "lexical", "text": "What are the dark regions at the apex of the photograph?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1172", "style": "syntactic", "text": "What are the black areas at the top of the image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1172", "style": "formal", "text": "What are the areas of density observed at the superior aspect of the image?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1194", "style": "lexical", "text": "Is this a transverse plane?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1194", "style": "syntactic", "text": "Is this a coronal section?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1194", "style": "formal", "text": "Is this image a coronal section?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1213", "style": "lexical", "text": "What are the dense appearances situated at the outer edges?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1213", "style": "syntactic", "text": "What hyperdense opacities are situated around the periphery?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1213", "style": "formal", "text": "What are the hyperdense opacities present at the periphery?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1214", "style": "lexical", "text": "Is there evidence of any cranial injuries?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1214", "style": "syntactic", "text": "Are skull fractures absent?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1214", "style": "formal", "text": "Are there any skull fractures noted on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1215", "style": "lexical", "text": "Is there evidence of a cranial fracture?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1215", "style": "syntactic", "text": "Is there a fracture of the skull?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1215", "style": "formal", "text": "Is there evidence of a fracture to the skull on the lateral view?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1217", "style": "lexical", "text": "Is there evidence of a cranial fracture?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1217", "style": "syntactic", "text": "Is there a fracture of the skull?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1217", "style": "formal", "text": "Is there evidence of a fracture to the skull on the lateral view?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-123", "style": "lexical", "text": "Is the heart outline within expected parameters?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-123", "style": "syntactic", "text": "Is the cardiac contour not abnormal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-123", "style": "formal", "text": "Is the cardiac contour intact and not exhibiting any abnormal dilatation or atrophy on either side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1244", "style": "lexical", "text": "Is there any presence of abnormalities within this visual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1244", "style": "syntactic", "text": "Are lesions present in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1244", "style": "formal", "text": "Are there any lesions present in the image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1277", "style": "lexical", "text": "What anomaly exists within the ventricles?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1277", "style": "syntactic", "text": "What is amiss with the ventricles?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-1277", "style": "formal", "text": "What anomalies, if any, are present in the ventricles, specifically noting their left and right sides for comparison?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1297", "style": "lexical", "text": "Is there airspace present within the anatomy?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1297", "style": "syntactic", "text": "Is air present within the body?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1297", "style": "formal", "text": "Is there airspace present within the body?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1345", "style": "lexical", "text": "In which plane was this photograph captured?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1345", "style": "syntactic", "text": "In which plane was the image captured?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1345", "style": "formal", "text": "In which plane was the imaging acquisition performed?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1358", "style": "lexical", "text": "What are the light flecks within the right gallbladder?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1358", "style": "syntactic", "text": "What are the bright specks within the gallbladder?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1358", "style": "formal", "text": "What are the bright specks observed within the gallbladder?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1359", "style": "lexical", "text": "Can gallstones be discerned?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1359", "style": "syntactic", "text": "Are gallstones detectable?", "valid": true}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-1359", "style": "formal", "text": "Are gallstones present in either the left or right gallbladder lumen on the imaging study?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1370", "style": "lexical", "text": "Is there presence of intestinal gas?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1370", "style": "syntactic", "text": "Is bowel gas absent on this imaging study?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1370", "style": "formal", "text": "Is bowel gas present on the imaging study?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1432", "style": "lexical", "text": "Is the lesion uniform?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1432", "style": "syntactic", "text": "Is the mass not heterogeneous?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1432", "style": "formal", "text": "Is the mass uniformly dense on imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1474", "style": "lexical", "text": "Which bodily system is being examined?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1474", "style": "syntactic", "text": "What organ system is visualized?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1474", "style": "formal", "text": "What organ system is depicted?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1488", "style": "lexical", "text": "Which chamber does the mass reside in?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1488", "style": "syntactic", "text": "Which ventricle is not harbored by the mass?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1488", "style": "formal", "text": "Which ventricle does the mass reside in?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1498", "style": "lexical", "text": "Is utilization of contrast material observed?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1498", "style": "syntactic", "text": "Is contrast utilized?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1498", "style": "formal", "text": "Is contrast material utilized in the imaging study?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1504", "style": "lexical", "text": "Is gas beneath the diaphragm abnormal?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1504", "style": "syntactic", "text": "Is there pathology beneath the diaphragm?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1504", "style": "formal", "text": "Is there any evidence of abnormal air under the diaphragm on the lateral view?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1519", "style": "lexical", "text": "Is there an anomaly in the diameter of the aorta?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1519", "style": "syntactic", "text": "Is the aorta size not normal?", "valid": false}
+{"k": 3, "reasons": ["length_ratio"], "sample_id": "vqa_rad-test-1519", "style": "formal", "text": "Is the diameter of the aorta abnormal when compared to the expected dimensions for the patient's age and sex?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1523", "style": "lexical", "text": "Which portion of the lungs exhibits the fewest areas of opacity?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1523", "style": "syntactic", "text": "Which lung lobe exhibits the fewest opacities?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1523", "style": "formal", "text": "Which lung lobe exhibits the fewest areas of opacity?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1528", "style": "lexical", "text": "Is there any presence of contrast within the patient's small intestine?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1528", "style": "syntactic", "text": "Is contrast absent in the patient's small bowel?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1528", "style": "formal", "text": "Is there evidence of contrast within the patient's small bowel on the imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1534", "style": "lexical", "text": "Is the abdominal aorta within normative dimensions?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1534", "style": "syntactic", "text": "Is the abdominal aorta not outside of normal size limits?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1534", "style": "formal", "text": "Is the abdominal aorta of normal size on both sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1544", "style": "lexical", "text": "Is there visibility of the patient's brain in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1544", "style": "syntactic", "text": "Is the patient's encephalon observable within this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1544", "style": "formal", "text": "Can the encephalon be visualized in this image?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1643", "style": "lexical", "text": "Is this image normative or atypical?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-1643", "style": "syntactic", "text": "Is this image normal or abnormal?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1643", "style": "formal", "text": "Is this image normal or showing any signs of pathology in the left lung parenchyma?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1671", "style": "lexical", "text": "The diminished intensity characteristic of the hemorrhage indicates what regarding its timing?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1671", "style": "syntactic", "text": "In terms of the timeline, what does the hypointense nature of the hemorrhage indicate?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1671", "style": "formal", "text": "The hypointense nature of the hemorrhage indicates what regarding its temporal relationship?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1717", "style": "lexical", "text": "Is the superior portion of the right diaphragm discernible?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-1717", "style": "syntactic", "text": "Is the right diaphragm not visualized?", "valid": false}
+{"k": 3, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-1717", "style": "formal", "text": "Is the right diaphragm not visualized?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed", "foreign_characters"], "sample_id": "vqa_rad-test-1747", "style": "lexical", "text": "Are lung lesions present on the左侧,右侧, or both sides of the lung?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1747", "style": "syntactic", "text": "Are pleural opacities present on either the left, right, or both sides of the lung?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1747", "style": "formal", "text": "Are pleural opacities present on either the left side, the right side, or both sides of the lung?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1798", "style": "lexical", "text": "Is there any area within the liver that shows reduced density?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1798", "style": "syntactic", "text": "Does at least one hypodensity exist within the liver?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1798", "style": "formal", "text": "Does the liver exhibit the presence of at least one area of reduced density?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1802", "style": "lexical", "text": "Was this radiographic study captured via x-ray examination?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-1802", "style": "syntactic", "text": "Was this image not taken by x-ray?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1802", "style": "formal", "text": "Was this image acquired via x-ray examination?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-181", "style": "lexical", "text": "Illustrate the pulmonary anomalies?", "valid": true}
+{"k": 2, "reasons": ["not_a_question", "length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-181", "style": "syntactic", "text": "Describe the lung abnormalities on both sides, excluding any normal findings and noting the presence or absence of consolidation, emphysema, and fibrosis.", "valid": false}
+{"k": 3, "reasons": ["not_a_question", "length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-181", "style": "formal", "text": "Describe the lung findings, including any abnormalities observed, specifying their location (left or right), nature (e.g., consolidation, atelectasis, nodules, masses), and dimensions if measurable.", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1867", "style": "lexical", "text": "What abnormalities are observed at the periphery of the aorta?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1867", "style": "syntactic", "text": "What hyperdense lesions are observed at the aorta's edges?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1867", "style": "formal", "text": "What are the hyperdense lesions observed at the periphery of the aorta?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1873", "style": "lexical", "text": "Is there evidence of over-expanded lungs?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-1873", "style": "syntactic", "text": "Are the lungs not hyperinflated?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1873", "style": "formal", "text": "Are the lungs hyperinflated on both the left and right sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1874", "style": "lexical", "text": "Is there evidence of hypoexpansion or hyperexpansion in the lung?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1874", "style": "syntactic", "text": "Is hyperinflation or hypoinflation present in the lung?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1874", "style": "formal", "text": "Is there evidence of hypo-inflation or hyper-inflation in the lungs?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1878", "style": "lexical", "text": "Are the tiny air bubbles observed considered typical or atypical?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1878", "style": "syntactic", "text": "Are small air bubbles observed normal or abnormal?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1878", "style": "formal", "text": "Are the small air bubbles observed within the examined region considered normal or abnormal?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-1879", "style": "lexical", "text": "Are the tiny air bubbles observed within the cavity indicative of a normal finding or a sign of pathology?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1879", "style": "syntactic", "text": "Are the small air bubbles observed within the lumen considered normal or abnormal?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1879", "style": "formal", "text": "The small bubbles of air observed within the lumen are considered normal or abnormal?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-191", "style": "lexical", "text": "What peculiarities exist within the spleen?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-191", "style": "syntactic", "text": "What abnormalities are present in the spleen?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-191", "style": "formal", "text": "What abnormalities, if any, are present in the spleen?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1914", "style": "lexical", "text": "What additional anatomical detail might be present in the image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1914", "style": "syntactic", "text": "What incidental finding might the image have shown?", "valid": true}
+{"k": 3, "reasons": ["open_form_lost"], "sample_id": "vqa_rad-test-1914", "style": "formal", "text": "The image shows any incidental findings?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1925", "style": "lexical", "text": "In which plane was this scan captured?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1925", "style": "syntactic", "text": "In what plane was this image taken?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-1925", "style": "formal", "text": "In which plane was this image acquired?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-1950", "style": "lexical", "text": "What ailment afflicts the individual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-1950", "style": "syntactic", "text": "What condition does the patient present with?", "valid": true}
+{"k": 3, "reasons": ["not_a_question", "multiple_questions", "length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-1950", "style": "formal", "text": "What is the nature of the lesion observed in the left liver parenchyma on the axial T1-weighted MRI image? Is there any evidence of enhancement post-contrast administration? Additionally, please assess whether there are any metastatic f", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-21", "style": "lexical", "text": "Is there any vascular abnormality visible in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-21", "style": "syntactic", "text": "Is vascular pathology present in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-21", "style": "formal", "text": "Is there evidence of vascular abnormalities in this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-244", "style": "lexical", "text": "How many abnormalities are within the spleen?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-244", "style": "syntactic", "text": "How many lesions are not present in the spleen?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-244", "style": "formal", "text": "How many lesions are present within the spleen?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-278", "style": "lexical", "text": "What characteristic portrayal does one find at the aortopulmonary fissure?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-278", "style": "syntactic", "text": "How could one depict the aortopulmonary window?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-278", "style": "formal", "text": "How do you characterize the aortopulmonary window?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-286", "style": "lexical", "text": "Which respiratory cavity exhibits pathology?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed", "open_form_lost"], "sample_id": "vqa_rad-test-286", "style": "syntactic", "text": "Is there an abnormality in either lung?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-286", "style": "formal", "text": "Which lung demonstrates an abnormality?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-32", "style": "lexical", "text": "Is this indicative of sufficient inhalation exertion?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-32", "style": "syntactic", "text": "Does this indicate sufficient inspiratory effort?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-32", "style": "formal", "text": "Does this demonstrate sufficient inspiratory effort on both the left and right sides?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-35", "style": "lexical", "text": "Are there any parenchymal issues within the lung regions?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-35", "style": "syntactic", "text": "Are there any intraparenchymal abnormalities present within the lung fields?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-35", "style": "formal", "text": "Is there evidence of intraparenchymal lesions within the lung fields on the imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-353", "style": "lexical", "text": "Is there the presence of multiple intussusceptions?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-353", "style": "syntactic", "text": "Is more than one intussusception present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-353", "style": "formal", "text": "Is there more than one case of intussusception observed on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-377", "style": "lexical", "text": "Is there pathological presence of free air beneath the left hemidiaphragm?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-377", "style": "syntactic", "text": "Is there pathologic free air beneath the left hemidiaphragm?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-377", "style": "formal", "text": "Is there free air present beneath the left hemidiaphragm, and if so, is this finding indicative of a pathological condition?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-39", "style": "lexical", "text": "Is there indication of a small bowel obstruction visible in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-39", "style": "syntactic", "text": "Is small bowel obstruction evidenced in this image?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-39", "style": "formal", "text": "Is there evidence of small bowel obstruction on the image, considering both the right and left sides of the bowel?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-391", "style": "lexical", "text": "Is the gallbladder accounted for?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-391", "style": "syntactic", "text": "Is the gallbladder absent on either side?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-391", "style": "formal", "text": "Is the gallbladder present on both sides of the body without any evidence of absence or atypical morphology?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-392", "style": "lexical", "text": "What distinct region is discernible within the hepatic tissue?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-392", "style": "syntactic", "text": "What dense mass is visualized within the liver?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-392", "style": "formal", "text": "What is the described dense mass within the right lobe of the liver?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-40", "style": "lexical", "text": "Is there evidence of thinning in the small intestine?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-40", "style": "syntactic", "text": "Is small bowel thickening absent?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-40", "style": "formal", "text": "Is there evidence of small bowel thickening on the imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-445", "style": "lexical", "text": "What lies within the left upper lung region?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-445", "style": "syntactic", "text": "What is present in the left apex?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-445", "style": "formal", "text": "What structures are present in the left apex?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-446", "style": "lexical", "text": "Is there a pneumothorax detected in the superior region of the left side?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-446", "style": "syntactic", "text": "Is a pneumothorax absent in the left apex?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-446", "style": "formal", "text": "Is there evidence of a pneumothorax in the left apex?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-447", "style": "lexical", "text": "What is the position of the lesion?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-447", "style": "syntactic", "text": "Where is the lesion situated?", "valid": true}
+{"k": 3, "reasons": ["duplicate"], "sample_id": "vqa_rad-test-447", "style": "formal", "text": "Where is the lesion situated?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-451", "style": "lexical", "text": "Is there an occurrence of the kidneys visible within this photograph?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-451", "style": "syntactic", "text": "Are there no kidneys shown in this image?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-451", "style": "formal", "text": "Are both kidneys visualized within the image, without any evidence of absence or atrophy?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-491", "style": "lexical", "text": "Which kind of photograph is this?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-491", "style": "syntactic", "text": "What type of image is this?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-491", "style": "formal", "text": "What kind of image is this?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-498", "style": "lexical", "text": "What are these densities positioned before the right kidney?", "valid": false}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-498", "style": "syntactic", "text": "What are these opacities on the anterior side of the right kidney?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-498", "style": "formal", "text": "What are the opacities present anterior to the right kidney?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-529", "style": "lexical", "text": "Is this a computed tomography scan?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-529", "style": "syntactic", "text": "Is this not a CT image?", "valid": false}
+{"k": 3, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-529", "style": "formal", "text": "Is this a computed tomography (CT) image of the axial plane of the right lower quadrant of the abdomen?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-555", "style": "lexical", "text": "Is this located above or below the tentorium cerebelli?", "valid": false}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-555", "style": "syntactic", "text": "Is this infratentorial or supratentorial?", "valid": true}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-555", "style": "formal", "text": "Is this lesion supratentorial or infratentorial?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-646", "style": "lexical", "text": "Where is the apex located?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-646", "style": "syntactic", "text": "Where is the tip of the line located?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-646", "style": "formal", "text": "Where is the apex of the line located?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-648", "style": "lexical", "text": "Is there evidence of hyaline lymph node enlargement visible in this photograph?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-648", "style": "syntactic", "text": "Is hylar lymphadenopathy visible in this image?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-648", "style": "formal", "text": "Do you observe hystalymphadenopathy on this image?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-650", "style": "lexical", "text": "Is there an expanded mediastinal space?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-650", "style": "syntactic", "text": "Is a widened mediastinum not present?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-650", "style": "formal", "text": "Is there evidence of a widened mediastinum on the imaging studies?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-687", "style": "lexical", "text": "Illustrate the condition", "valid": true}
+{"k": 2, "reasons": ["length_ratio", "protected_terms_changed"], "sample_id": "vqa_rad-test-687", "style": "syntactic", "text": "Describe the pathological findings in the right knee joint, excluding any abnormalities noted on the left side, focusing on three distinct areas: meniscus, cartilage, and ligaments.", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-687", "style": "formal", "text": "Describe the pathological findings.", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-727", "style": "lexical", "text": "Are there elevated vascular indications?", "valid": true}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-727", "style": "syntactic", "text": "are there decreased vascular markings", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-727", "style": "formal", "text": "Are there increased vascular markings on the right adrenal gland?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-791", "style": "lexical", "text": "Is there evidence of a lung collapse on this individual's side?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-791", "style": "syntactic", "text": "Is there no pneumothorax present in this patient?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-791", "style": "formal", "text": "Does this patient exhibit evidence of a pneumothorax on the affected side?", "valid": false}
+{"k": 1, "reasons": ["length_ratio"], "sample_id": "vqa_rad-test-819", "style": "lexical", "text": "Is this a magnetic resonance imaging study or computed tomography examination?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-819", "style": "syntactic", "text": "Is this an MRI or a CT scan?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-819", "style": "formal", "text": "Is this imaging study an MRI of the left knee or a CT scan of the left knee?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-82", "style": "lexical", "text": "Is there presence of hyperdense substances within the arterial structures?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-82", "style": "syntactic", "text": "Are hyperattenuating materials present along the aortic walls?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-82", "style": "formal", "text": "Are there hyperattenuating materials present within the aortic walls on the affected side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-840", "style": "lexical", "text": "Is the optic nerve discernible within this MRI scan?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-840", "style": "syntactic", "text": "Is the optic nerve observable within this MRI scan?", "valid": true}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-840", "style": "formal", "text": "Can the optic nerve be identified in this MRI scan on the right side?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-845", "style": "lexical", "text": "In which two chambers can deposits of calcium be observed on this computed tomography image?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-845", "style": "syntactic", "text": "In which two ventricles are calcifications visible on this CT scan?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-845", "style": "formal", "text": "In which two ventricles are calcifications demonstrated on this computed tomography (CT) scan?", "valid": true}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-846", "style": "lexical", "text": "Which bodily region is being examined in this instance?", "valid": true}
+{"k": 2, "reasons": ["too_similar", "protected_terms_changed"], "sample_id": "vqa_rad-test-846", "style": "syntactic", "text": "What part of the body is not being imaged here?", "valid": false}
+{"k": 3, "reasons": ["length_ratio"], "sample_id": "vqa_rad-test-846", "style": "formal", "text": "What part of the body is being imaged, and what specific anatomical structures or regions are being examined on this imaging study?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-847", "style": "lexical", "text": "Is there evidence of mediastinal air in this individual?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-847", "style": "syntactic", "text": "Is pneumomediastinum present in this patient?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-847", "style": "formal", "text": "Does this patient exhibit pneumomediastinum on imaging studies?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-848", "style": "lexical", "text": "What anomaly manifests on the lateral surface of the anterior portion of the brain?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-848", "style": "syntactic", "text": "What abnormality is present on the left side of the frontal lobe?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-848", "style": "formal", "text": "What specific abnormality is depicted on the left lateral aspect of the frontal lobe?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-857", "style": "lexical", "text": "Which side does the diaphragm rise on?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-857", "style": "syntactic", "text": "On which side is the diaphragm not elevated?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed", "leaks_answer", "open_form_lost"], "sample_id": "vqa_rad-test-857", "style": "formal", "text": "Is the diaphragm elevated on either the left or right side?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-859", "style": "lexical", "text": "Where does the left renal vein terminate?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-859", "style": "syntactic", "text": "Where does the left renal vein empty into?", "valid": false}
+{"k": 3, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-859", "style": "formal", "text": "Where does the left renal vein terminate?", "valid": false}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-875", "style": "lexical", "text": "On which hemisphere of the brain does a lesion reside?", "valid": false}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-875", "style": "syntactic", "text": "What side of the brain is not affected by the lesion?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-875", "style": "formal", "text": "What side of the brain is the lesion located on?", "valid": true}
+{"k": 1, "reasons": ["length_ratio"], "sample_id": "vqa_rad-test-915", "style": "lexical", "text": "Is this a Computed Tomography scan?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-915", "style": "syntactic", "text": "Is this a CT?", "valid": false}
+{"k": 3, "reasons": ["length_ratio"], "sample_id": "vqa_rad-test-915", "style": "formal", "text": "Is this examination a computed tomography (CT) study?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-919", "style": "lexical", "text": "Where are acute infarcts observable?", "valid": true}
+{"k": 2, "reasons": [], "sample_id": "vqa_rad-test-919", "style": "syntactic", "text": "Where do you visualize acute infarcts on imaging studies?", "valid": true}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-919", "style": "formal", "text": "Where do you identify areas of recent myocardial infarction on the images?", "valid": true}
+{"k": 1, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-977", "style": "lexical", "text": "Measurement of the lesion in the superior right region?", "valid": false}
+{"k": 2, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-977", "style": "syntactic", "text": "Size of the mass in the right upper quadrant?", "valid": false}
+{"k": 3, "reasons": ["too_similar"], "sample_id": "vqa_rad-test-977", "style": "formal", "text": "Size of the mass in the right upper quadrant?", "valid": false}
+{"k": 1, "reasons": [], "sample_id": "vqa_rad-test-982", "style": "lexical", "text": "Is the individual of female gender or male gender?", "valid": true}
+{"k": 2, "reasons": ["protected_terms_changed"], "sample_id": "vqa_rad-test-982", "style": "syntactic", "text": "Is the patient neither female nor male?", "valid": false}
+{"k": 3, "reasons": [], "sample_id": "vqa_rad-test-982", "style": "formal", "text": "Is the patient's gender female or male?", "valid": true}

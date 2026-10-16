@@ -1,0 +1,7 @@
+pair,hypothesis,measure,predicted,est,lo,hi,p,n,sign_ok,p_holm,holds,reversal_replicates
+medgemma15_4b - gemma3_4b,H9,R3 follow rate,> 0,0.3651226158038147,0.3064023446641151,0.4206381733021077,0.0,367,True,0.0,True,True
+medgemma15_4b - gemma3_4b,H10,answer changes without the image,< 0,-0.0737976782752902,-0.1117663742968824,-0.0373171891598112,0.0,1206,True,0.0,True,True
+medgemma15_4b - gemma3_4b,H11,refusal without the image,< 0,-0.2868988391376451,-0.3158790726766147,-0.2596863107310515,0.0,1206,True,0.0,True,True
+medvlthinker_3b - qwen25vl_3b,H9,R3 follow rate,> 0,-0.0163487738419618,-0.0488525519350416,0.013891806722689,0.322,367,False,0.644,False,False
+medvlthinker_3b - qwen25vl_3b,H10,answer changes without the image,< 0,0.038971807628524,0.0167564097205775,0.0609660656558161,0.002,1206,False,0.006,False,False
+medvlthinker_3b - qwen25vl_3b,H11,refusal without the image,< 0,0.0,0.0,0.0,1.0,1206,False,1.0,False,False

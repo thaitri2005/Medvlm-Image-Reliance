@@ -1,0 +1,4 @@
+dataset,token_f1_ours,lo,hi,n,model_card,note
+pathvqa,50.30597501913292,47.00905005761981,53.692038679279406,800,,"different prompt and split; a gap > ~15 points means a bug, not a finding"
+slake,53.596084942435795,51.17169649912799,56.009981873021346,1061,72.3,"different prompt and split; a gap > ~15 points means a bug, not a finding"
+vqa_rad,56.88962183418946,51.274343665664325,62.0871621323248,451,49.9,"different prompt and split; a gap > ~15 points means a bug, not a finding"

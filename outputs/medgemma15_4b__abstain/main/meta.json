@@ -1,0 +1,42 @@
+{
+  "model": {
+    "name": "medgemma15_4b__abstain",
+    "hf_id": "google/medgemma-1.5-4b-it",
+    "dtype": "bfloat16",
+    "quantization": null,
+    "device": "auto",
+    "system_prompt": true
+  },
+  "prompt": {
+    "system": "You are an expert medical imaging analyst.",
+    "yesno_suffix": "Answer 'yes' or 'no'. If this cannot be determined without seeing the image, answer 'unknown'.",
+    "open_suffix": "Answer with a single word or short phrase."
+  },
+  "run": {
+    "batch_size": 1,
+    "max_new_tokens": 16,
+    "logits_to_keep": true,
+    "score_gold_logprob": false,
+    "warn_low_mass": false
+  },
+  "conditions": [
+    "orig",
+    "noimg",
+    "shuf"
+  ],
+  "paraphrase": {
+    "n": 8,
+    "backend": "hf",
+    "hf_model": "Qwen/Qwen2.5-3B-Instruct",
+    "batch_size": 16,
+    "exclude_styles": [
+      "plain"
+    ],
+    "min_edit_ratio": 0.1,
+    "judgments": "paraphrase_judgments.csv"
+  },
+  "git_commit": "ef39ebf9cac8b2b89726dce1f0e2d9128e1a55fc",
+  "python": "3.12.10",
+  "host": "DESKTOP-9PLPL10",
+  "started": "2026-10-16 16:07:24"
+}

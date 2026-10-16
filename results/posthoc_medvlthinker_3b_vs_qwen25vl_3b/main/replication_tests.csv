@@ -1,0 +1,4 @@
+pair,hypothesis,measure,predicted,est,lo,hi,p,n,sign_ok
+medvlthinker_3b - qwen25vl_3b,H9,R3 follow rate,> 0,-0.01634877384196185,-0.048852551935041656,0.01389180672268906,0.322,367,False
+medvlthinker_3b - qwen25vl_3b,H10,answer changes without the image,< 0,0.03897180762852405,0.016756409720577514,0.06096606565581617,0.002,1206,False
+medvlthinker_3b - qwen25vl_3b,H11,refusal without the image,< 0,0.0,0.0,0.0,1.0,1206,False

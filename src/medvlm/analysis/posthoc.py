@@ -738,6 +738,68 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
     return written
 
 
+def pairs_figure(results_dir, pairs: list[tuple[str, str]], out_dir, paper_dir, profile: str = "main") -> list:
+    """fig8: the answer-change comparison of fig7 for every model pair, side by side (blue = medical model of the
+    pair, orange = its general base). Pairs without a reversal.csv are skipped."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    tabs = [(a, b, pd.read_csv(results_dir / f"posthoc_{a}_vs_{b}" / profile / "reversal.csv")) for a, b in pairs
+            if (results_dir / f"posthoc_{a}_vs_{b}" / profile / "reversal.csv").exists()]
+    written = []
+    for mode, target in (("web", out_dir), ("paper", paper_dir)):
+        paper = mode == "paper"
+        fs = 7.2 if paper else 9
+        plt.rcParams.update({"font.family": "DejaVu Sans", "figure.facecolor": SURFACE, "savefig.facecolor": SURFACE,
+                             "font.size": fs})
+        fig, axes = plt.subplots(1, len(tabs), figsize=(6.9, 2.25) if paper else (13, 3.9), sharey=True,
+                                 squeeze=False)
+        ms, lw = (4 if paper else 7), (1.3 if paper else 2)
+        probes = [p for p, _ in REVERSAL_PROBES]
+        y = np.arange(len(probes))[::-1].astype(float)
+        for ax, (a, b, rv) in zip(axes[0], tabs):
+            for m, col, off in ((a, BLUE, 0.13), (b, ORANGE, -0.13)):
+                g = rv[rv.model == m].set_index("probe").reindex(probes)
+                ax.errorbar(g.changed, y + off, xerr=[g.changed - g.lo, g.hi - g.changed], fmt="o", ms=ms, color=col,
+                            ecolor=col, elinewidth=lw, mec=SURFACE, mew=1)
+            d = rv[rv.model.str.contains(" - ")].set_index("probe").reindex(probes)
+            for yi, p in zip(y, probes):
+                v = d.loc[p]
+                txt = f"{v.changed * 100:+.0f}".replace("-", "−")
+                sig = (v.lo > 0) or (v.hi < 0)
+                ax.text(1.02, yi, txt, transform=ax.get_yaxis_transform(), ha="left", va="center", fontsize=fs,
+                        color=INK if sig else INK2, fontweight="bold" if sig else "normal")
+            ax.axhline(y[0] - 0.5, color=GRID, lw=0.8)
+            ax.set_xlim(0, 1)
+            ax.set_ylim(y[-1] - 0.5, y[0] + 0.5)
+            ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.25))
+            ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+            ax.grid(axis="x", color=GRID, lw=0.6)
+            ax.set_axisbelow(True)
+            _style(ax, f"{LABEL.get(a, a)}\nvs {LABEL.get(b, b)}", fs)
+            ax.tick_params(axis="y", length=0)
+        axes[0, 0].set_yticks(y, [dict(REVERSAL_PROBES)[p] for p in probes])
+        fig.supxlabel("yes/no answers that change when the image is altered (95% CI); right: medical − general, "
+                      "points (bold: CI excludes 0)", fontsize=fs, color=INK2)
+        fig.legend([Line2D([], [], marker="o", ls="", ms=ms, color=c) for c in (BLUE, ORANGE)],
+                   ["medical model of the pair", "its general-purpose base"], frameon=False, fontsize=fs - 0.5,
+                   loc="upper center", ncol=2, bbox_to_anchor=(0.5, 0.0))
+        fig.tight_layout(w_pad=2.5)
+        target.mkdir(parents=True, exist_ok=True)
+        if not paper:
+            fig.canvas.draw()
+            bb = fig.get_tightbbox(fig.canvas.get_renderer())
+            fig.suptitle("Does image removal rank each pair like the in-format probes?", x=bb.x0 / fig.get_figwidth(),
+                         y=bb.y1 / fig.get_figheight() + 0.015, ha="left", va="bottom", fontsize=fs + 3, color=INK)
+        fig.savefig(target / "fig8_pairs.png", dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+        plt.close(fig)
+        written.append(target / "fig8_pairs.png")
+    return written
+
+
 def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd.DataFrame]:
     profile, B, seed = cfg["profile"], cfg["analysis"]["bootstrap_B"], cfg["seed"]
     items, samples, raws = _tables(cfg, paths, [model_a, model_b])

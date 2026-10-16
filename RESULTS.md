@@ -1,6 +1,7 @@
 # Results: Consistent but Blind?
 
-MedGemma-4B and its architecture-matched general-purpose twin Gemma-3-4B, 3,365 questions × 5.6 conditions on
+MedGemma-4B and its architecture-matched general-purpose twin Gemma-3-4B (plus two replication pairs, §9),
+3,365 questions × 5.6 conditions on
 average = **18,896 model calls per model** in the main run, plus **3,535 per model** for the registered probes;
 all completed (RTX 4080 SUPER, bf16, batch 1). Primary set: the 1,206 yes/no **test** questions on 670 images.
 All intervals are 95% cluster-bootstrap CIs by image (B = 2,000). **Pre-registered** results, **registered
@@ -27,6 +28,9 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
    questions (chance-corrected gap Δκ = +0.11 [0.04, 0.18]), a probe (the ranking flips between probes) and a
    correctness split.
 5. **Image reliance does not flag wrong answers** (§8): AUROC 0.51, below the model's confidence (0.71).
+6. **The reversal replicates where refusal differs** (§9, registered): MedGemma-1.5 vs Gemma-3 reverses again
+   (+36.5 on opposite-answer images, −7.4 under image removal). MedVLThinker vs Qwen2.5-VL, whose models never
+   refuse and do not differ under any in-format probe, does not.
 
 ## 1. Sanity checks
 
@@ -210,7 +214,58 @@ confidence reaches 0.709 and 0.603 (**better by 0.197** [0.145, 0.250] and 0.071
 wrong-image variant is no better (0.52 / 0.54). *Whether a model leaned on the image does not tell you whether
 it was right.*
 
-## 9. Hypotheses
+## 9. Replication on two more pairs (registered, PLAN.md §16)
+
+Registered before any output of these models was seen: **pair A**, MedGemma-1.5-4B vs Gemma-3-4B (same family;
+Gemma-3 outputs reused), and **pair B**, MedVLThinker-3B (Qwen2.5-VL-3B + RL on PMC-VQA) vs Qwen2.5-VL-3B-Instruct
+(its base). Identical protocol: same questions, images, prompts, bf16, batch 1, probes and statistics. All three
+new models passed the registered format check (yes/no mass with the image 0.93-0.999 on the pilot); the fallback
+pair was not needed. 18,896 + 3,535 calls per model, all complete.
+
+![All three pairs](results/replication_main/fig8_pairs.png)
+
+**Registered tests** (medical − general; one Holm family over pairs A and B; `results/replication_main.csv`):
+
+| Pair | H9: follows opposite-answer image (> 0) | H10: answer changes without image (< 0) | H11: refuses without image (< 0) | Reversal replicates |
+|---|---|---|---|---|
+| Primary (reference) | +48.0 [41.9, 53.8] | −6.1 [−9.5, −2.7] | −11.2 [−14.0, −8.6] | |
+| A: MedGemma-1.5 vs Gemma-3 | **+36.5** [30.6, 42.1], p_Holm < 0.001 | **−7.4** [−11.2, −3.7], p_Holm < 0.001 | **−28.7** [−31.6, −26.0], p_Holm < 0.001 | **yes** |
+| B: MedVLThinker vs Qwen2.5-VL | −1.6 [−4.9, 1.4], p_Holm = 0.64 | +3.9 [1.7, 6.1] (wrong sign) | 0.0 (neither refuses) | **no** |
+
+**All probes, all models** (share of test yes/no answers that change; `reversal.csv` per pair):
+
+| | MedGemma-4B | MedGemma-1.5-4B | Gemma-3-4B | MedVLThinker-3B | Qwen2.5-VL-3B |
+|---|---|---|---|---|---|
+| Image removed | 42.0% | 40.6% | 48.0% | 46.4% | 42.5% |
+| Wrong image | 34.4% | 29.7% | 29.4% | 29.7% | 30.8% |
+| Black image | 47.4% | 35.3% | 27.1% | 47.9% | 48.8% |
+| Opposite-answer image (SLAKE) | 72.8% | 61.3% | 24.8% | 47.1% | 48.8% |
+| Refuses without image, forced yes/no | 18.2% | 0.7% | 29.4% | 0% | 0% |
+| Declines with "unknown" allowed | 93.0% | 52.7% | 99.7% | 98.7% | 99.3% |
+| Accuracy with image, SLAKE yes/no | 86.5% | 81.1% | 68.7% | 78.9% | 76.6% |
+
+**Pair A replicates the reversal.** MedGemma-1.5 follows opposite-answer images far more than Gemma-3 and changes
+more under a black image (+8.2 [3.7, 12.6]), but changes *less* when the image is removed, and its Dangerous share
+under image removal is +9.8 [5.8, 13.9] higher. Refusal is even more lopsided than for MedGemma-4B (8 vs 354 of
+1,206 questions), and on the 467 questions both models answer, the Dangerous gap shrinks to +3.0 [−3.6, 9.5]:
+refusal accounts for nearly all of it. Unlike MedGemma-4B, MedGemma-1.5 answers blind even when allowed to decline
+(it declines on 52.7%). Its excess Dangerous answers are again correct (+9.3 [5.7, 12.6] correct, +0.5 [−2.1, 3.2]
+wrong).
+
+**Pair B shows no reversal, because there is nothing to reverse.** MedVLThinker and its base are
+indistinguishable under every in-format probe (opposite-answer −1.6, black −0.8 [−3.0, 1.3], wrong image −1.2
+[−3.3, 1.0]) and in error rate (30.8% vs 31.7%): the RL fine-tune did not change how the model uses the image.
+Neither model ever refuses under the forced format, and both decline on ≥ 98.7% when allowed to. Image removal
+still reports a small difference the in-format probes do not see (+3.9, opposite to H10), because the base's blind
+answers agree more with its image answers (κ 0.16 vs 0.09).
+
+**Reading.** Across three pairs, image removal matched the in-format probes in none. It reversed their ranking in
+both pairs whose models differ in refusal, and not in the pair whose models never refuse. Whether a medical
+checkpoint uses the image more than its base is checkpoint-specific: both MedGemma releases do, MedVLThinker does
+not. The refusal account was formed after the primary results; it fits all three pairs, but three pairs cannot
+test it formally.
+
+## 10. Hypotheses
 
 | | Hypothesis | Outcome |
 |---|---|---|
@@ -222,11 +277,14 @@ it was right.*
 | H6 | κ(real, black image) higher for MedGemma | **Failed, reversed:** −0.22 [−0.30, −0.14] |
 | H7 | With "unknown" allowed, MedGemma still declines less | **Supported**, but both decline on ≥ 93% |
 | H8 | MedGemma follows opposite-answer images more often | **Supported:** +48.0 [41.9, 53.8] |
+| H9 | Replication pairs: the medical model follows opposite-answer images more | **Pair A supported** (+36.5); **pair B not** (−1.6) |
+| H10 | Replication pairs: image removal ranks the pair the other way | **Pair A supported** (−7.4); **pair B not** (+3.9, opposite sign) |
+| H11 | Replication pairs: the general model refuses more without the image | **Pair A supported** (−28.7); **pair B not** (neither refuses) |
 
-## 10. Threats to validity
+## 11. Threats to validity
 
-- One model pair: it shows that image removal *can* misrank models, not how often. The two checkpoints differ in
-  their whole post-training, not only in medical data.
+- Three pairs from two families: they show that image removal *can* misrank models and that refusal predicts
+  when, not how often across the field. Checkpoints differ in their whole post-training, not only in medical data.
 - The probes were registered after the main results were known (before running them); one of three
   predictions failed. R3 is limited to SLAKE, where templated questions recur across images.
 - Refusal is inferred from first-token probability mass, confirmed by free generation on a sample, not annotated
@@ -236,7 +294,7 @@ it was right.*
 - Post-hoc analyses (chance correction, correctness split, refusal split, answer-change comparison, partner
   check) were motivated by the data and are reported as such.
 
-## 11. Audit: leaks, confounds and wrong assumptions
+## 12. Audit: leaks, confounds and wrong assumptions
 
 No model is trained in this study; both are frozen and only queried. After the run we checked every path by
 which the answer, or something correlated with it, could reach a model or a score, and every assumption the

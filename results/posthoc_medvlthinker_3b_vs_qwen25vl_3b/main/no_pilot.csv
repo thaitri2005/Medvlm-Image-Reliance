@@ -1,0 +1,23 @@
+model,endpoint,dataset,est,lo,hi,p_holm,n
+medvlthinker_3b,P1 blind accuracy - majority prior (yes/no),pathvqa,0.05945945945945941,0.02134442134442127,0.09760383816769173,0.006,555
+medvlthinker_3b,P1 blind accuracy - majority prior (yes/no),slake,-0.0035714285714285587,-0.05989756367663345,0.054847600056971896,0.923,280
+medvlthinker_3b,P1 blind accuracy - majority prior (yes/no),vqa_rad,0.06796116504854366,0.004431228746734981,0.13474017807736804,0.074,206
+medvlthinker_3b,"P2 AUROC(image PMI) - AUROC(confidence), yes/no",pooled,0.21155534893331274,0.1710829178990021,0.25336403079750414,0.0,1041
+qwen25vl_3b,P1 blind accuracy - majority prior (yes/no),pathvqa,0.043243243243243246,0.004230854150979585,0.08176347989780819,0.10799999999999998,555
+qwen25vl_3b,P1 blind accuracy - majority prior (yes/no),slake,-0.014285714285714346,-0.07416018793493201,0.04754205689363107,0.657,280
+qwen25vl_3b,P1 blind accuracy - majority prior (yes/no),vqa_rad,0.06796116504854366,-0.004522904719807852,0.14346673123599693,0.144,206
+qwen25vl_3b,"P2 AUROC(image PMI) - AUROC(confidence), yes/no",pooled,0.16628801928783388,0.12506874331486773,0.21065563274593926,0.0,1041
+medvlthinker_3b - qwen25vl_3b,P3,pre-registered (image-removed probe),-0.012514220705346985,-0.03632546366083271,0.012489033260785787,,879
+medvlthinker_3b - qwen25vl_3b,P3,both models answer without image (mass >= 0.9),-0.010514018691588784,-0.03480306275642507,0.01339422153335661,,856
+medvlthinker_3b - qwen25vl_3b,P3,neither model abstains (mass >= 0.5),-0.012514220705346985,-0.03632546366083271,0.012489033260785787,,879
+medvlthinker_3b - qwen25vl_3b,P3,wrong-image probe instead,0.01820250284414107,-0.0066689189189189195,0.04474398190249291,,879
+medvlthinker_3b,AUROC,confidence (baseline),0.6786335382337242,0.6432260453757769,0.7119357423222447,,1041
+medvlthinker_3b,AUROC,log p(gold | image)  [leaks label],1.0,0.9999999999999999,1.0,,1041
+medvlthinker_3b,AUROC,"image PMI, gold answer  [pre-registered P2, leaks label]",0.8901888871670369,0.8673536420882987,0.9113139763521549,,1041
+medvlthinker_3b,AUROC,"image PMI, predicted answer  [label-free]",0.5353883637240215,0.497375768776722,0.5713675160290914,,1041
+medvlthinker_3b,AUROC,"wrong-image PMI, predicted answer  [label-free]",0.5354228007645023,0.4992869767278701,0.5726759242584057,,1041
+qwen25vl_3b,AUROC,confidence (baseline),0.6620393006474237,0.6300485365374542,0.6954049954831176,,1041
+qwen25vl_3b,AUROC,log p(gold | image)  [leaks label],1.0,0.9999999999999999,1.0,,1041
+qwen25vl_3b,AUROC,"image PMI, gold answer  [pre-registered P2, leaks label]",0.8283273199352575,0.8003070971134865,0.8556976718571035,,1041
+qwen25vl_3b,AUROC,"image PMI, predicted answer  [label-free]",0.5599667858106285,0.5233661479870179,0.5963963428490651,,1041
+qwen25vl_3b,AUROC,"wrong-image PMI, predicted answer  [label-free]",0.5433048961424333,0.5072632340056105,0.5781813591647995,,1041

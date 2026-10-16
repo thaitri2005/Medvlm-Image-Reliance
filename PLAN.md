@@ -52,7 +52,9 @@ a modality (reported as exploratory only), training anything, clinical claims.
 - Robustness probes (section 15) registered at commit `44131a5`, then run 2026-10-16 (3,535 calls per model):
   H6 failed (reversed), H7 and H8 supported. The report is in `report/` (CVPR format, `report/main.pdf`).
 - Prior work re-checked 2026-10-16 (section 14) and the paper reframed around the probe comparison.
-  Next: more model pairs; human rating of 50 paraphrases (`manifests/main/paraphrase_audit.csv`); poster.
+- Replication pairs (section 16) registered at commit `ef39ebf`, run 2026-10-16: pair A replicates the reversal,
+  pair B does not (section 16.1).
+  Next: human rating of 50 paraphrases (`manifests/main/paraphrase_audit.csv`); poster.
 
 ## 2. Prior work and our delta
 
@@ -70,7 +72,7 @@ a same-architecture control for medical tuning. **Novelty search still to do** (
 
 ## 3. Hypotheses (directional guesses; nulls are reported as findings)
 
-*Outcomes: [RESULTS.md section 9](RESULTS.md). H1 supported (MedGemma, PathVQA); H2 probe-dependent; H3 not
+*Outcomes: [RESULTS.md section 10](RESULTS.md). H1 supported (MedGemma, PathVQA); H2 probe-dependent; H3 not
 supported (image reliance at chance for flagging errors); H4 supported under the pre-registered probe (image
 removed) only: null under a wrong image, reversed under a black image (section 15); H5 supported. Probe
 hypotheses H6-H8: section 15.*
@@ -327,7 +329,7 @@ after unblinding.
 1,315); fixed to the test split as pre-registered (+13.7, n = 1,012) with a unit test.
 (15) **Wrong-image confound check**: where the partner image carries the same question, compare gold answers
 (112 swaps; exploratory).
-(16) **Post-run audit** (RESULTS.md section 11): no answer reaches a model's input; prompts verified
+(16) **Post-run audit** (RESULTS.md section 12): no answer reaches a model's input; prompts verified
 identical across models; the answer-type instruction is gold-derived but disagrees with question phrasing
 for 4/3,365; **the Dangerous share has a large chance floor on yes/no** (41.5% / 35.8%), so P3 is
 additionally reported chance-corrected (d-kappa +0.11 [0.04, 0.18]); results unchanged without the pilot
@@ -423,3 +425,17 @@ reported whatever they are, including a pair in which the reversal does not repl
 --profile pilot`; check the format rule; `medvlm pipeline --profile main --parts 2`; `medvlm probes`; then
 `medvlm posthoc --model <medical> --model-b <general>`. Replication-pair figures go to
 `report/figures/<medical>_vs_<general>/` and never overwrite the primary pair's.
+
+### 16.1 Outcome (run 2026-10-16; `results/replication_main.csv`, `results/posthoc_<pair>/main/`)
+
+All three new models passed the format rule on the pilot (yes/no mass with the image: MedGemma-1.5 0.93-0.98,
+Qwen2.5-VL 0.998-0.999, MedVLThinker 0.999); the fallback pair C was not needed.
+
+| Pair | H9 (> 0) | H10 (< 0) | H11 (< 0) | Reversal replicates |
+|---|---|---|---|---|
+| A: MedGemma-1.5 - Gemma-3 | +36.5 [30.6, 42.1], p_Holm < 0.001 | -7.4 [-11.2, -3.7], p_Holm < 0.001 | -28.7 [-31.6, -26.0], p_Holm < 0.001 | **yes** |
+| B: MedVLThinker - Qwen2.5-VL | -1.6 [-4.9, 1.4], p_Holm = 0.64 | +3.9 [1.7, 6.1], wrong sign | 0.0 (neither refuses) | **no** |
+
+Reading (post hoc): the reversal appears in both pairs whose models differ in forced-format refusal and not in the
+pair whose models never refuse; in pair B the medical fine-tune does not change image use under any in-format
+probe, so there is no ranking to reverse.

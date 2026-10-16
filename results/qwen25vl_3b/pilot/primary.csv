@@ -1,0 +1,5 @@
+endpoint,dataset,est,lo,hi,p,b_valid,n,n_images,prior,p_holm,significant_0.05,exploratory
+P1 blind accuracy - majority prior (yes/no),pathvqa,-0.08888888888888885,-0.23686868686868684,0.05280522617479066,0.246,2000,45,44,0.5777777777777777,0.48,False,False
+P1 blind accuracy - majority prior (yes/no),slake,-0.06666666666666665,-0.17333333333333328,0.04753623188405798,0.24,2000,75,53,0.5466666666666666,0.48,False,False
+P1 blind accuracy - majority prior (yes/no),vqa_rad,0.20000000000000007,0.05410628019323671,0.33333333333333337,0.006,2000,45,40,0.5111111111111111,0.024,True,False
+"P2 AUROC(image PMI) - AUROC(confidence), yes/no",pooled,0.14276485788113713,0.011346429986135751,0.2774738974598721,0.03,2000,165,137,,0.09,False,False

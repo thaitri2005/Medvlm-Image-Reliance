@@ -1,0 +1,5 @@
+condition,count,mean,median
+noimg,330,0.225,0.218
+orig,330,0.227,0.219
+para,542,0.223,0.219
+shuf,330,0.223,0.218

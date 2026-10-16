@@ -1,0 +1,4 @@
+hypothesis,est,lo,hi,p,p_holm,n
+"H6: kappa(orig, blank), medvlthinker_3b - qwen25vl_3b (> 0 predicted)",0.0026090257745391143,-0.02223829689223907,0.027922740499306545,0.833,0.833,1206
+"H7: abstention with 'unknown' allowed, medvlthinker_3b - qwen25vl_3b (< 0 predicted)",-0.005804311774461028,-0.010612461651327199,-0.0017359609284890434,0.001,0.003,1206
+"H8: follow rate on opposite-answer images, medvlthinker_3b - qwen25vl_3b (> 0 predicted)",-0.01634877384196185,-0.048852551935041656,0.01389180672268906,0.322,0.644,367

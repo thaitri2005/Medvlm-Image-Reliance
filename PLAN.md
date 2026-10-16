@@ -1,6 +1,6 @@
 # Consistent but Blind? Pre-registration and lab notebook
 
-A modality-by-modality audit of image reliance in a small medical VLM. Solo course project, ~2 weeks, all
+A modality-by-modality audit of image reliance in a small medical VLM. Solo project, ~2 weeks, all
 runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
 [README.md](README.md) is the paper-style overview and [docs/REPRODUCE.md](docs/REPRODUCE.md) the how-to-run. Last updated 2026-10-16.
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is

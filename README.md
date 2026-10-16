@@ -151,7 +151,7 @@ flowchart LR
   [VQA-RAD](https://osf.io/89kps/) (radiology), [PathVQA](https://github.com/UCSD-AI4H/PathVQA) (pathology):
   3,365 questions on 907 images, sampled once with SHA-1 seeds and fixed in `manifests/main/`.
 - **Scoring.** Yes/no answers from one forward pass,
-  $P(\text{yes}) = \sigma(\text{LSE}_\text{yes} - \text{LSE}_\text{no})$
+  `P(yes) = sigmoid(logsumexp(yes-token logits) - logsumexp(no-token logits))`
   over token variants; the yes+no probability mass detects refusals. Open answers by
   token-F1 with an opposite-term guard (left/right, upper/lower, … never match).
 - **Paraphrases.** Qwen2.5-3B-Instruct plus content-copying templates, a rule validator, and **every one of
@@ -242,17 +242,7 @@ tests/             fast unit tests and -m slow real-model tests
 - **How Do Medical MLLMs Fail?** ([ICLR 2026](https://arxiv.org/abs/2603.14323)): grounding measured on
   expert-annotated regions.
 
-## Citation and licences
+## Licences
 
 SLAKE (CC-BY-4.0), VQA-RAD (CC0 1.0), PathVQA (MIT); MedGemma and Gemma-3 under Google's terms. Cite the
-original dataset papers in any use of this work. Term project for a computer vision course, VinUniversity,
-2026.
-
-```bibtex
-@misc{thaihuu2026consistentblind,
-  title  = {Consistent but Blind? Image Removal Misranks Image Reliance in Medical Vision-Language Models},
-  author = {Thai Huu, Tri},
-  year   = {2026},
-  url    = {https://github.com/thaitri2005/Medvlm-Image-Reliance}
-}
-```
+original dataset papers in any use of this work.

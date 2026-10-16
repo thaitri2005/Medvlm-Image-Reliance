@@ -1,0 +1,9 @@
+# Random-weight Qwen2.5-VL (a few MB). Used ONLY to exercise the Qwen code path on CPU in tests.
+model:
+  name: qwen_tiny
+  hf_id: optimum-internal-testing/tiny-random-qwen2.5-vl
+  dtype: float32
+  quantization: null
+  device: cpu
+  system_prompt: true
+run: {batch_size: 2}

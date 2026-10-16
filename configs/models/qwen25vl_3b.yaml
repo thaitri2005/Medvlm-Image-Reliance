@@ -1,0 +1,10 @@
+# Replication pair B, general model (PLAN.md section 16): the base that medvlthinker_3b was trained from.
+# Not gated. Native processor settings (dynamic resolution, default pixel limits), as its model card uses them.
+model:
+  name: qwen25vl_3b
+  hf_id: Qwen/Qwen2.5-VL-3B-Instruct
+  dtype: bfloat16
+  quantization: null
+  device: auto
+  system_prompt: true
+run: {batch_size: 1}

@@ -57,3 +57,20 @@ def test_removal_split_counts_forced_answers_on_refused_questions_and_partitions
     # random outputs: about half of the answers "change" and none of it is beyond chance
     assert abs(out.loc["all", "changed_noimg"] - 0.5) < 0.1
     assert abs(out.loc["all", "kappa_orig_noimg"]) < 0.15
+
+
+def test_replication_summary_holm_across_pairs_and_decision_rule(tmp_path):
+    from medvlm.analysis.posthoc import replication_summary
+
+    def write(a, b, rows):
+        d = tmp_path / f"posthoc_{a}_vs_{b}" / "main"
+        d.mkdir(parents=True)
+        pd.DataFrame([{"pair": f"{a} - {b}", "hypothesis": h, "predicted": pr, "est": e, "p": p, "sign_ok": ok}
+                      for h, pr, e, p, ok in rows]).to_csv(d / "replication_tests.csv", index=False)
+
+    write("m1", "g1", [("H9", "> 0", .4, .001, True), ("H10", "< 0", -.05, .004, True), ("H11", "< 0", -.1, .001, True)])
+    write("m2", "g2", [("H9", "> 0", .3, .001, True), ("H10", "< 0", .02, .3, False), ("H11", "< 0", -.1, .02, True)])
+    T = replication_summary(tmp_path, [("m1", "g1"), ("m2", "g2"), ("m3", "g3")])
+    rep = T.groupby("pair").reversal_replicates.first()
+    assert rep["m1 - g1"] and not rep["m2 - g2"]               # m2: image removal does not rank the other way
+    assert (T.p_holm >= T.p).all() and len(T) == 6            # Holm over all six tests; missing pair skipped

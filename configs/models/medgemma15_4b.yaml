@@ -1,0 +1,11 @@
+# Replication pair A (PLAN.md section 16): the 2026 MedGemma release, same Gemma 3 architecture and size as
+# medgemma4b; control is gemma3_4b. Gated: accept the terms at https://huggingface.co/google/medgemma-1.5-4b-it.
+# Model card lists SLAKE and VQA-RAD among its training data (not PathVQA).
+model:
+  name: medgemma15_4b
+  hf_id: google/medgemma-1.5-4b-it
+  dtype: bfloat16
+  quantization: null
+  device: auto
+  system_prompt: true
+run: {batch_size: 1}

@@ -311,7 +311,7 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
                      "kappa_hi": dk["hi"], "p": dk["p"], "dangerous_blank": dd["est"], "dangerous_lo": dd["lo"],
                      "dangerous_hi": dd["hi"], "dangerous_p": dd["p"], "dangerous_n": len(Db)})
         out["probe_blank"] = pd.DataFrame(rows)
-        tests.append(("H6: kappa(orig, blank), MedGemma - Gemma-3 (> 0 predicted)", dk, len(D)))
+        tests.append((f"H6: kappa(orig, blank), {model_a} - {model_b} (> 0 predicted)", dk, len(D)))
 
     if have["abstain"]:                                # R2 / H7
         rows, cols = [], {}
@@ -328,7 +328,7 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
         rows.append({"model": f"{model_a} - {model_b}", "dataset": "all", "abstain_allowed": d["est"], "lo": d["lo"],
                      "hi": d["hi"], "p": d["p"], "n": len(D)})
         out["probe_abstain"] = pd.DataFrame(rows)
-        tests.append(("H7: abstention with 'unknown' allowed, MedGemma - Gemma-3 (< 0 predicted)", d, len(D)))
+        tests.append((f"H7: abstention with 'unknown' allowed, {model_a} - {model_b} (< 0 predicted)", d, len(D)))
 
     if have["opp"]:                                    # R3 / H8
         partners = opposite_partners(items)
@@ -356,7 +356,7 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
         rows.append({"model": f"{model_a} - {model_b}", "modality": "all", "follow_rate": d["est"], "lo": d["lo"],
                      "hi": d["hi"], "p": d["p"], "n": len(D)})
         out["probe_opp"] = pd.DataFrame(rows)
-        tests.append(("H8: follow rate on opposite-answer images, MedGemma - Gemma-3 (> 0 predicted)", d, len(D)))
+        tests.append((f"H8: follow rate on opposite-answer images, {model_a} - {model_b} (> 0 predicted)", d, len(D)))
 
     if tests:
         ph = holm([t[1]["p"] for t in tests])
@@ -383,6 +383,52 @@ def removal_split(samples, raws, B, seed) -> pd.DataFrame:
                          "hi": ch["hi"], "kappa_orig_noimg": k["est"], "kappa_lo": k["lo"], "kappa_hi": k["hi"],
                          "yes_rate_noimg": float(g.n.mean())})
     return pd.DataFrame(rows)
+
+
+def replication_tests(samples, raws, tabs, model_a, model_b, B, seed) -> pd.DataFrame:
+    """H9-H11 (PLAN.md section 16) for one pair, model_a = medical: R3 follow rate (> 0), answer change without
+    the image (< 0), refusal without the image (< 0). Raw p-values; Holm across pairs in `replication_summary`."""
+    rows = []
+    po, rv = tabs.get("probe_opp"), tabs.get("reversal")
+    pair = f"{model_a} - {model_b}"
+    if po is not None:
+        r = po[(po.model == pair) & (po.modality == "all")].iloc[0]
+        rows.append({"hypothesis": "H9", "measure": "R3 follow rate", "predicted": "> 0",
+                     "est": r.follow_rate, "lo": r.lo, "hi": r.hi, "p": r.p, "n": r.n})
+    if rv is not None and not rv.empty:
+        r = rv[(rv.model == pair) & (rv.probe == "noimg")].iloc[0]
+        rows.append({"hypothesis": "H10", "measure": "answer changes without the image", "predicted": "< 0",
+                     "est": r.changed, "lo": r.lo, "hi": r.hi, "p": r.p, "n": r.n})
+    a = samples[model_a]
+    idx = a.index[(a.answer_type == "yesno") & (a.split == "test")]
+    D = pd.DataFrame({"a": (_wide(raws[model_a], "yn_mass")["noimg"].reindex(idx) < ABSTAIN_MASS).astype(float),
+                      "b": (_wide(raws[model_b], "yn_mass")["noimg"].reindex(idx) < ABSTAIN_MASS).astype(float),
+                      "image_id": a.loc[idx, "image_id"]})
+    d = _ci(D, lambda x: float((x.a - x.b).mean()), B, seed)
+    rows.append({"hypothesis": "H11", "measure": "refusal without the image", "predicted": "< 0",
+                 "est": d["est"], "lo": d["lo"], "hi": d["hi"], "p": d["p"], "n": len(D)})
+    out = pd.DataFrame(rows)
+    out.insert(0, "pair", pair)
+    out["sign_ok"] = [(e > 0) if pr == "> 0" else (e < 0) for e, pr in zip(out.est, out.predicted)]
+    return out
+
+
+def replication_summary(results_dir, pairs: list[tuple[str, str]], profile: str = "main") -> pd.DataFrame:
+    """Holm across H9-H11 of the replication pairs; a pair replicates if H9 and H10 hold (PLAN.md section 16)."""
+    from .stats import holm
+
+    frames = []
+    for a, b in pairs:
+        f = results_dir / f"posthoc_{a}_vs_{b}" / profile / "replication_tests.csv"
+        if f.exists():
+            frames.append(pd.read_csv(f))
+    if not frames:
+        raise SystemExit("[replication] no replication_tests.csv found; run `medvlm posthoc` for each pair first")
+    T = pd.concat(frames, ignore_index=True)
+    T["p_holm"] = holm(T.p.tolist())
+    T["holds"] = T.sign_ok & (T.p_holm < 0.05)
+    rep = T[T.hypothesis.isin(["H9", "H10"])].groupby("pair").holds.all().rename("reversal_replicates")
+    return T.merge(rep, left_on="pair", right_index=True, how="left")
 
 
 REVERSAL_PROBES = (("noimg", "Image removed"), ("shuf", "Wrong image"), ("blank", "Black image"),
@@ -428,7 +474,17 @@ def reversal(cfg, paths, samples, raws, items, model_a, model_b, B, seed) -> pd.
 # ------------------------------------------------------------------ figures
 # Each figure is drawn twice: "web" (titled, for README/RESULTS/poster) and "paper" (no title, sized for the
 # CVPR column: 3.25 in single column, 6.9 in full width; the caption lives in LaTeX).
-LABEL = {"medgemma4b": "MedGemma-4B", "gemma3_4b": "Gemma-3-4B"}
+LABEL = {"medgemma4b": "MedGemma-4B", "gemma3_4b": "Gemma-3-4B", "medgemma15_4b": "MedGemma-1.5-4B",
+         "qwen25vl_3b": "Qwen2.5-VL-3B", "medvlthinker_3b": "MedVLThinker-3B"}
+SHORT = {"medgemma4b": "MedGemma", "gemma3_4b": "Gemma-3", "medgemma15_4b": "MedGemma-1.5",
+         "qwen25vl_3b": "Qwen2.5-VL", "medvlthinker_3b": "MedVLThinker"}
+
+
+PRIMARY_PAIR = ("medgemma4b", "gemma3_4b")
+
+
+def _short(m: str) -> str:
+    return SHORT.get(m, m)
 
 
 def _style(ax, title: str | None = None, fs: float = 9):
@@ -514,7 +570,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                             ax.text(left + w / 2, y, f"{w:.0%}", ha="center", va="center", fontsize=fs - 1,
                                     color="white" if q in ("fragile", "dangerous") else INK)
                         left += w
-                    ylabels.append(f"{DS_LABEL[ds]} · {LABEL[m]}")
+                    ylabels.append(f"{DS_LABEL[ds]} · {LABEL.get(m, m)}")
                     y += 1
                 y += 0.4
             ax.set_yticks([0, 1, 2.4, 3.4, 4.8, 5.8])
@@ -551,7 +607,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
             _style(ax, probe, fs)
         axes[0].set_ylabel("Dangerous share", color=INK2, fontsize=fs)
         fig.legend([Line2D([], [], marker="o", ls="", ms=4.5 if paper else 7, color=color[m]) for m in models],
-                   [LABEL[m] for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
+                   [LABEL.get(m, m) for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
                    bbox_to_anchor=(0.55, 0.0))
         fig.tight_layout()
         save(fig, "fig2_modality.png", "Dangerous share by modality (SLAKE yes/no, test+val, 95% CI by image)")
@@ -619,7 +675,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
         ax.set_yticks(y, [f"{nm}  {n}" for nm, *_, n in rows], fontsize=fs - 0.5)
         ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v * 100:+.0f}" if v else "0"))
-        ax.set_xlabel("Dangerous share, MedGemma − Gemma-3 (points, 95% CI)", color=INK2, fontsize=fs)
+        ax.set_xlabel(f"Dangerous share, {_short(models[0])} − {_short(models[1])} (points, 95% CI)", color=INK2, fontsize=fs)
         _style(ax, None, fs)
         fig.tight_layout()
         save(fig, "fig5_p3.png", "The Dangerous gap, by probe and by correctness")
@@ -661,7 +717,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                             textcoords="offset points", fontsize=fs - 1.5, color=INK2, ha="left", va="bottom")
                 ax.text(1.02, yi - 0.13, f"{d.loc[p, 'changed'] * 100:+.0f}".replace("-", "−"),
                         transform=ax.get_yaxis_transform(), ha="left", va="center", fontsize=fs, color=INK)
-            ax.text(1.02, y[0] + 0.55, "MedGemma\n− Gemma-3", transform=ax.get_yaxis_transform(), ha="left",
+            ax.text(1.02, y[0] + 0.55, f"{_short(models[0])}\n− {_short(models[1])}", transform=ax.get_yaxis_transform(), ha="left",
                     va="bottom", fontsize=fs - 1.5, color=INK2, linespacing=1.05)
             ax.axhline(y[0] - 0.55, color=GRID, lw=0.8)
             ax.set_yticks([])
@@ -675,7 +731,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
             _style(ax, None, fs)
             ax.spines["left"].set_visible(False)
             fig.legend([Line2D([], [], marker="o", ls="", ms=ms, color=color[m]) for m in models],
-                       [LABEL[m] for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
+                       [LABEL.get(m, m) for m in models], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=2,
                        bbox_to_anchor=(0.5, 0.0))
             fig.tight_layout()
             save(fig, "fig7_reversal.png", "Which model uses the image? The probes disagree")
@@ -696,11 +752,14 @@ def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd
     out.update(probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed))
     out["reversal"] = reversal(cfg, paths, samples, raws, items, model_a, model_b, B, seed)
     out["removal_split"] = removal_split(samples, raws, B, seed)
+    out["replication_tests"] = replication_tests(samples, raws, out, model_a, model_b, B, seed)
     out_dir = paths.results / f"posthoc_{model_a}_vs_{model_b}" / profile
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, df in out.items():
         df.to_csv(out_dir / f"{name}.csv", index=False)
     paper_dir = paths.root / "report" / "figures"
+    if (model_a, model_b) != PRIMARY_PAIR:          # replication pairs never overwrite the paper's main figures
+        paper_dir = paper_dir / f"{model_a}_vs_{model_b}"
     figs = figures(out_dir, samples, [model_a, model_b], out, paths.results, profile, paper_dir=paper_dir)
     print(f"[posthoc] {len(out)} tables + {len(figs)} figures -> {out_dir} (paper versions -> {paper_dir})")
     for k in ("p3_sensitivity", "harm", "probe_tests"):

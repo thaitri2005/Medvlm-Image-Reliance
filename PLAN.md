@@ -41,7 +41,7 @@ a modality (reported as exploratory only), training anything, clinical claims.
 
 - Built: loaders + deterministic sampler + image hashing, batched paraphrasing + validation, resumable
   runner, scoring, statistics (cluster bootstrap, Holm, kappa), `analyze`, `compare`, `bench`, `regress`,
-  `pipeline`, hardware presets. **96 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
+  `pipeline`, hardware presets. **97 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
@@ -381,3 +381,45 @@ PathVQA/VQA-RAD, reported only as an exploratory "all datasets" row (69.8% vs 24
 MedGemma's yes-rate falls from 58% to 28% and Gemma-3's rises from 64% to 84%, which is why H6 reversed.
 Reading: image removal (the reference probe) ranks the two models opposite to both in-format probes; it
 measures willingness to answer without an image rather than reliance on image content.
+
+## 16. Replication pairs (registered 2026-10-16, BEFORE any output of these models was seen)
+
+**Why.** One pair shows that image removal *can* rank two models opposite to in-format probes, not how often.
+Two more medical-vs-general pairs test whether the reversal and its mechanism repeat.
+
+| Pair | Medical model | General model | Notes |
+|---|---|---|---|
+| A | `medgemma15_4b` (`google/medgemma-1.5-4b-it`, released 2026-01) | `gemma3_4b` (outputs reused, not re-run) | Same family as the primary pair; model card lists SLAKE **and VQA-RAD** as training data |
+| B | `medvlthinker_3b` (`UCSC-VLAA/MedVLThinker-3B-RL_PMC`) | `qwen25vl_3b` (`Qwen/Qwen2.5-VL-3B-Instruct`, its base) | Different family; RL on PMC-VQA only; trained to reason in `<think>` tags |
+| C (fallback) | Med-R1 (Qwen2-VL-2B, RL) | `Qwen/Qwen2-VL-2B-Instruct` | Run only if a pair-B model fails the format rule below |
+
+**Protocol: identical to the primary pair.** Same manifests, images, paraphrases, wrong-image and
+opposite-answer partners, prompts and system line, conditions (main run + probes R1-R3), bf16 without
+quantization, batch size 1, greedy decoding, scoring and statistics. The only per-model parts are the model's
+own Hugging Face processor and chat template (Qwen: native dynamic resolution, default pixel limits). **No
+prompt is changed for any model.**
+
+**Format rule (validity of yes/no scoring), fixed now.** Each new model first runs the `pilot` profile (330
+questions; a design check, not an estimate) and the slow backend tests. Its yes/no scoring is valid only if the
+mean first-token yes+no mass *with the image* is >= 0.9 in every dataset (`results/<model>/pilot/by_dataset.csv`,
+`yn_mass_orig`; the primary run's stop-the-line threshold). A model that fails is reported as incompatible with
+the shared protocol, its pair is reported as not evaluable, and (pair B only) pair C is run under the same rule.
+
+**Hypotheses** (per pair, medical - general, paired, cluster bootstrap by image, B = 2,000):
+
+| | Hypothesis | Measure |
+|---|---|---|
+| H9 | The medical model follows opposite-answer images more | R3 follow rate (SLAKE, 367 questions), > 0 |
+| H10 | Image removal ranks the pair the other way | share of yes/no answers that change without the image (test, 1,206), < 0 |
+| H11 | The general model refuses more without the image | refusal rate, first-token mass < 0.5 (test yes/no), < 0 |
+
+H9-H11 over the evaluable pairs form one Holm family. **Decision rule:** the reversal *replicates* in a pair if
+H9 and H10 both hold (Holm-adjusted p < 0.05, predicted signs). The paper reports, for all three pairs
+(primary, A, B), the four-probe answer-change comparison (`reversal.csv`), P3, the refusal split, the chance
+floor and the correctness split, as for the primary pair; anything beyond H9-H11 is descriptive. Results are
+reported whatever they are, including a pair in which the reversal does not replicate.
+
+**Commands** (per new model; resumable): `pytest -m slow` with `MEDVLM_TEST_MODEL=<model>`; `medvlm pipeline
+--profile pilot`; check the format rule; `medvlm pipeline --profile main --parts 2`; `medvlm probes`; then
+`medvlm posthoc --model <medical> --model-b <general>`. Replication-pair figures go to
+`report/figures/<medical>_vs_<general>/` and never overwrite the primary pair's.

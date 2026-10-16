@@ -10,7 +10,7 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 96 fast tests, no GPU / network needed
+pytest                                                  # 97 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
@@ -55,6 +55,22 @@ and `probe_tests.csv`, the registered H6-H8 tests) and figures twice: titled ver
 
 **Interrupted?** Run the same command again: finished jobs are skipped, a half-written last line is repaired.
 `medvlm status --profile main --model medgemma4b --shards 2` shows progress at any time.
+
+## 3b. Replication pairs (PLAN.md section 16)
+
+Pair A: `medgemma15_4b` vs `gemma3_4b` (Gemma-3 outputs are reused). Pair B: `medvlthinker_3b` vs `qwen25vl_3b`.
+Same protocol as the primary pair. Per new model: slow tests, a pilot run, the pre-registered format check,
+then the main run and the probes.
+
+```bash
+MEDVLM_TEST_MODEL=medvlthinker_3b pytest -m slow tests/test_hf_backend.py
+medvlm pipeline     --profile pilot --model medvlthinker_3b --hardware rtx4080
+medvlm format-check --profile pilot --model medvlthinker_3b          # must PASS before the main run
+medvlm pipeline     --profile main  --model medvlthinker_3b --hardware rtx4080 --parts 2
+medvlm probes       --profile main  --model medvlthinker_3b --hardware rtx4080
+medvlm posthoc      --profile main  --model medvlthinker_3b --model-b qwen25vl_3b
+medvlm replication  --profile main                                   # H9-H11, Holm across pairs
+```
 
 ## 4. Commands
 

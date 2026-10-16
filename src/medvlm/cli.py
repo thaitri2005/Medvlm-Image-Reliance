@@ -182,6 +182,33 @@ def _posthoc(cfg, paths, args):
     posthoc(cfg, paths, cfg["model"]["name"], args.model_b)
 
 
+def _format_check(cfg, paths, args):
+    """PLAN.md section 16 format rule: mean first-token yes+no mass WITH the image >= 0.9 in every dataset."""
+    import pandas as pd
+
+    f = paths.results / cfg["model"]["name"] / cfg["profile"] / "by_dataset.csv"
+    if not f.exists():
+        raise SystemExit(f"[format-check] {f} missing: run `medvlm pipeline --profile {cfg['profile']}` first")
+    t = pd.read_csv(f).groupby("dataset").yn_mass_orig.mean()
+    for ds, m in t.items():
+        print(f"  {ds:8s} yes/no mass with image = {m:.3f}  {'ok' if m >= 0.9 else 'FAIL'}")
+    ok = bool((t >= 0.9).all())
+    print(f"[format-check] {cfg['model']['name']}: {'PASS' if ok else 'FAIL'} (threshold 0.9, PLAN.md section 16)")
+    if not ok:
+        raise SystemExit(1)
+
+
+def _replication(cfg, paths, args):
+    from .analysis.posthoc import replication_summary
+
+    pairs = [("medgemma15_4b", "gemma3_4b"), ("medvlthinker_3b", "qwen25vl_3b")]
+    T = replication_summary(paths.results, pairs, cfg["profile"])
+    out = paths.results / f"replication_{cfg['profile']}.csv"
+    T.to_csv(out, index=False)
+    print(T.round(4).to_string(index=False))
+    print(f"[replication] -> {out}")
+
+
 def _audit_score(cfg, paths, args):
     import json
 
@@ -199,7 +226,8 @@ def _pipeline(cfg, paths, args):
 COMMANDS = {"doctor": _doctor, "prepare": _prepare, "verify": _verify, "paraphrase": _paraphrase,
             "audit-sheet": _audit, "run": _run, "status": _status, "estimate": _estimate, "analyze": _analyze,
             "bench": _bench, "regress": _regress, "pipeline": _pipeline, "compare": _compare,
-            "audit-score": _audit_score, "posthoc": _posthoc, "probes": _probes}
+            "audit-score": _audit_score, "posthoc": _posthoc, "probes": _probes,
+            "format-check": _format_check, "replication": _replication}
 # Long or GPU commands get a logs/*.log file; quick ones only print.
 LOGGED = {"prepare", "paraphrase", "run", "pipeline", "bench", "regress", "analyze", "compare", "posthoc", "probes"}
 

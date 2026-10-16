@@ -182,13 +182,13 @@ pandas · NumPy · scikit-learn · matplotlib · pytest · LaTeX (CVPR kit)
 - **CLI and configs.** `medvlm prepare | paraphrase | pipeline | probes | analyze | compare | posthoc | regress
   | status | doctor`; configs layer base → profile → model → hardware; every command writes a timestamped log
   with progress, ETA and GPU memory.
-- **96 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
+- **97 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
   equivalence and the construction of opposite-answer partners.
 
 ## Reproduce
 
 ```bash
-pip install -e ".[model,dev]" && pytest                         # 96 fast tests, no GPU needed
+pip install -e ".[model,dev]" && pytest                         # 97 fast tests, no GPU needed
 medvlm pipeline --profile main --model medgemma4b --hardware rtx4080 --parts 2
 medvlm pipeline --profile main --model gemma3_4b  --hardware rtx4080 --parts 2
 medvlm probes   --profile main --model medgemma4b --hardware rtx4080      # and gemma3_4b

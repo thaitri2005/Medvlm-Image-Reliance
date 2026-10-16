@@ -1,0 +1,4 @@
+pair,hypothesis,measure,predicted,est,lo,hi,p,n,sign_ok
+medgemma4b - gemma3_4b,H9,R3 follow rate,> 0,0.47956403269754766,0.41943778538812787,0.5375084459459458,0.0,367,True
+medgemma4b - gemma3_4b,H10,answer changes without the image,< 0,-0.06053067993366501,-0.095004095004095,-0.026775722746691124,0.002,1206,True
+medgemma4b - gemma3_4b,H11,refusal without the image,< 0,-0.11194029850746269,-0.1397356672527321,-0.08558779388798948,0.0,1206,True

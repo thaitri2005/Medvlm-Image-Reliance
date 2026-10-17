@@ -64,7 +64,7 @@ medvlm format-check --profile pilot --model medvlthinker_3b          # must PASS
 medvlm pipeline     --profile main  --model medvlthinker_3b --hardware rtx4080 --parts 2
 medvlm probes       --profile main  --model medvlthinker_3b --hardware rtx4080
 medvlm posthoc      --profile main  --model medvlthinker_3b --model-b qwen25vl_3b
-medvlm replication  --profile main                                   # H9-H11, Holm across pairs, figure 8
+medvlm replication  --profile main                                   # H9-H11, figure 8; per-dataset table + figure 10 (run after contrast --analyze)
 ```
 
 ## 5. Probe R4: opposite-answer images outside the training data (PREREGISTRATION.md section 17)

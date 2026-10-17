@@ -800,6 +800,115 @@ def pairs_figure(results_dir, pairs: list[tuple[str, str]], out_dir, paper_dir, 
     return written
 
 
+DATASET_ROLE = {"pathvqa": "PathVQA (no medical model trained on it)",
+                "vqa_rad": "VQA-RAD (MedGemma-4B RL-trained on it)",
+                "slake": "SLAKE (both MedGemmas trained on it)"}
+
+
+def by_dataset(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> pd.DataFrame:
+    """Post hoc: medical - general answer-change gap under each probe, per dataset and pair (test yes/no), plus
+    the opposite-answer probe from `medvlm contrast` (SLAKE: R3; PathVQA: R4) and the refusal gap."""
+    rows = []
+    contrast = paths.results / "contrast" / "contrast_pairs.csv"
+    opp = pd.read_csv(contrast) if contrast.exists() else pd.DataFrame()
+    for a, b in pairs:
+        _, samples, raws = _tables(cfg, paths, [a, b])
+        t = samples[a]
+        idx = t.index[(t.answer_type == "yesno") & (t.split == "test")]
+        ch, rf = {}, {}
+        for m in (a, b):
+            p = _wide(raws[m], "p_yes")
+            o = p["orig"].reindex(idx) >= .5
+            pb = _wide(load_results(paths.run_dir(f"{m}__blank", cfg["profile"])), "p_yes")["blank"].reindex(idx) >= .5
+            ch[m] = {"noimg": (o != (p["noimg"].reindex(idx) >= .5)).astype(float),
+                     "shuf": (o != (p["shuf"].reindex(idx) >= .5)).astype(float), "blank": (o != pb).astype(float)}
+            rf[m] = (_wide(raws[m], "yn_mass")["noimg"].reindex(idx) < ABSTAIN_MASS).astype(float)
+        for ds in ("pathvqa", "vqa_rad", "slake"):
+            sel = idx[t.loc[idx, "dataset"] == ds]
+            for probe in ("noimg", "shuf", "blank"):
+                D = pd.DataFrame({"d": ch[a][probe][sel] - ch[b][probe][sel], "image_id": t.loc[sel, "image_id"]})
+                r = _ci(D, lambda x: float(x.d.mean()), B, seed)
+                rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe": probe, "n": len(sel),
+                             "medical": float(ch[a][probe][sel].mean()), "general": float(ch[b][probe][sel].mean()),
+                             "d": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"]})
+            D = pd.DataFrame({"d": rf[a][sel] - rf[b][sel], "image_id": t.loc[sel, "image_id"]})
+            r = _ci(D, lambda x: float(x.d.mean()), B, seed)
+            rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe": "refusal", "n": len(sel),
+                         "medical": float(rf[a][sel].mean()), "general": float(rf[b][sel].mean()),
+                         "d": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"]})
+        for s, ds in (("r3_slake", "slake"), ("r4_pathvqa", "pathvqa")):
+            g = opp[(opp.get("set") == s) & (opp.get("pair") == f"{a} - {b}")] if not opp.empty else opp
+            if len(g):
+                g = g.iloc[0]
+                rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe": "opp", "n": int(g.n), "d": g.d_follow,
+                             "lo": g.d_follow_lo, "hi": g.d_follow_hi, "p": g.d_follow_p})
+    return pd.DataFrame(rows)
+
+
+def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
+    """fig10: medical - general difference under each probe, by dataset (marker) and pair (panel)."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    probes = ["noimg", "shuf", "blank", "opp"]
+    names = {"noimg": "Image removed", "shuf": "Wrong image", "blank": "Black image", "opp": "Opposite-answer image"}
+    style = {"pathvqa": dict(marker="o", color=INK, mfc=INK), "vqa_rad": dict(marker="s", color="#8a8984", mfc="#8a8984"),
+             "slake": dict(marker="D", color=INK2, mfc=SURFACE)}
+    off = {"pathvqa": 0.22, "vqa_rad": 0.0, "slake": -0.22}
+    written = []
+    for mode, target in (("web", out_dir), ("paper", paper_dir)):
+        paper = mode == "paper"
+        fs = 7.2 if paper else 9
+        plt.rcParams.update({"font.family": "DejaVu Sans", "figure.facecolor": SURFACE, "savefig.facecolor": SURFACE,
+                             "font.size": fs})
+        fig, axes = plt.subplots(1, len(pairs), figsize=(6.9, 2.3) if paper else (13, 4.0), sharey=True, squeeze=False)
+        y = np.arange(len(probes))[::-1].astype(float)
+        ms, lw = (3.8 if paper else 6.5), (1.1 if paper else 1.8)
+        for ax, (a, b) in zip(axes[0], pairs):
+            g = tab[tab.pair == f"{a} - {b}"]
+            for ds in ("pathvqa", "vqa_rad", "slake"):
+                for yi, p in zip(y, probes):
+                    r = g[(g.dataset == ds) & (g.probe == p)]
+                    if r.empty:
+                        continue
+                    r = r.iloc[0]
+                    st = style[ds]
+                    ax.errorbar(r.d, yi + off[ds], xerr=[[r.d - r.lo], [r.hi - r.d]], fmt=st["marker"], ms=ms,
+                                color=st["color"], ecolor=st["color"], mfc=st["mfc"], elinewidth=lw, mew=1)
+            ax.axvline(0, color=INK2, lw=0.9, ls=(0, (3, 3)))
+            ax.axhline(y[0] - 0.5, color=GRID, lw=0.8)
+            ax.set_xlim(-0.35, 0.55)
+            ax.set_ylim(y[-1] - 0.5, y[0] + 0.5)
+            ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.2))
+            ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(
+                lambda v, _: f"{v * 100:+.0f}".replace("-", "−") if abs(v) > 1e-9 else "0"))
+            ax.grid(axis="x", color=GRID, lw=0.6)
+            ax.set_axisbelow(True)
+            _style(ax, f"{LABEL.get(a, a)}\nvs {LABEL.get(b, b)}", fs)
+            ax.tick_params(axis="y", length=0)
+        axes[0, 0].set_yticks(y, [names[p] for p in probes])
+        fig.supxlabel("medical − general: change in answer-change rate when the image is altered (points, 95% CI)",
+                      fontsize=fs, color=INK2)
+        fig.legend([Line2D([], [], ls="", ms=ms, **{k: v for k, v in style[d].items()}) for d in style],
+                   [DATASET_ROLE[d] for d in style], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=3,
+                   bbox_to_anchor=(0.5, 0.0))
+        fig.tight_layout(w_pad=2.0)
+        target.mkdir(parents=True, exist_ok=True)
+        if not paper:
+            fig.canvas.draw()
+            bb = fig.get_tightbbox(fig.canvas.get_renderer())
+            fig.suptitle("Which model relies on the image more? It depends on the probe and on the training data",
+                         x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015, ha="left", va="bottom",
+                         fontsize=fs + 3, color=INK)
+        fig.savefig(target / "fig10_by_dataset.png", dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+        plt.close(fig)
+        written.append(target / "fig10_by_dataset.png")
+    return written
+
+
 def posthoc(cfg: dict, paths: Paths, model_a: str, model_b: str) -> dict[str, pd.DataFrame]:
     profile, B, seed = cfg["profile"], cfg["analysis"]["bootstrap_B"], cfg["seed"]
     items, samples, raws = _tables(cfg, paths, [model_a, model_b])

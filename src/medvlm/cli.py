@@ -231,6 +231,13 @@ def _replication(cfg, paths, args):
     print(T.round(4).to_string(index=False))
     figs = pairs_figure(paths.results, [PRIMARY_PAIR] + pairs, paths.results / f"replication_{cfg['profile']}",
                         paths.root / "report" / "figures", cfg["profile"])
+    from .analysis.posthoc import by_dataset, by_dataset_figure
+
+    all_pairs = [PRIMARY_PAIR] + pairs
+    bd = by_dataset(cfg, paths, all_pairs, cfg["analysis"]["bootstrap_B"], cfg["seed"])
+    bd_dir = paths.results / f"replication_{cfg['profile']}"
+    bd.to_csv(bd_dir / "by_dataset.csv", index=False)
+    figs += by_dataset_figure(bd, all_pairs, bd_dir, paths.root / "report" / "figures")
     print(f"[replication] -> {out}; figures: {', '.join(str(f) for f in figs)}")
 
 

@@ -47,7 +47,7 @@ a modality (reported as exploratory only), training anything, clinical claims.
 
 - Built: loaders + deterministic sampler + image hashing, batched paraphrasing + validation, resumable
   runner, scoring, statistics (cluster bootstrap, Holm, kappa), `analyze`, `compare`, `bench`, `regress`,
-  `pipeline`, hardware presets. **97 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
+  `pipeline`, hardware presets. **103 fast tests + 7 real-model tests pass** (CPU stand-ins and MedGemma on the RTX 4080), including
   a simulation showing the clustered intervals reach nominal coverage where naive ones do not.
 - Pilot done (330 questions, Colab T4, 1,510 jobs). Its role was to test the pipeline and to tune the design
   (section 13), **not** to estimate effects.
@@ -60,7 +60,11 @@ a modality (reported as exploratory only), training anything, clinical claims.
 - Prior work re-checked 2026-10-16 (section 14) and the paper reframed around the probe comparison.
 - Replication pairs (section 16) registered at commit `ef39ebf`, run 2026-10-16: pair A replicates the reversal,
   pair B does not (section 16.1).
-  Next: human rating of 50 paraphrases (`manifests/main/paraphrase_audit.csv`); poster.
+- Probe R4 (section 17) registered at tag `prereg-contrast`, run 2026-10-17 for all five models: H12a not
+  supported, H12b reversed, H12c supported (section 17.1). Under the registered decision rule the claim that the
+  MedGemmas use the image more is withdrawn; the paper's claim is the disagreement between probes.
+- **Final (2026-10-17): no further experiments.** Remaining work is presentation only (poster). The 50-row human
+  paraphrase rating (`manifests/main/paraphrase_audit.csv`) was not done; the paper says so.
 
 ## 2. Prior work and our delta
 
@@ -493,6 +497,24 @@ sensitivity analysis that resamples question templates instead of images are des
 [-5.1, 32.5], MedVLThinker 0.0 [-16.7, 17.1] (`results/contrast/contrast_pairs.csv`, set `main_other`). 108
 of the 667 PathVQA test questions in R4 are also in the main run, so their with-image answers (not their partner
 answers) have been seen.
+
+### 17.1 Outcome (run 2026-10-17; `results/contrast/`)
+
+| | Pair | Predicted | Follow-rate difference [95% CI] | p_Holm | Outcome |
+|---|---|---|---|---|---|
+| H12a | MedGemma-4B - Gemma-3 | > 0 | +0.8 [-2.7, 4.2] | 0.87 | not supported |
+| H12b | MedGemma-1.5 - Gemma-3 | > 0 | -5.6 [-9.1, -2.0] | 0.003 | reversed |
+| H12c | MedVLThinker - Qwen2.5-VL | within +-5 | -0.9 [-3.0, 1.3] | | supported |
+
+Template-clustered sensitivity (154 templates): +0.8 [-6.8, 7.3], -5.6 [-12.0, -0.2], -0.9 [-5.3, 2.9]; same
+conclusions. Per-model follow rates 42.7-49.3%, pair accuracy 35.7-43.0% (0 for a model that ignores the image).
+
+**Decision rule applied as registered.** (ii) for MedGemma-4B: the SLAKE gap (+48.0) is reported as possibly a
+training-distribution effect and the claim is restricted to the disagreement between probes on the same
+questions. (iii) for MedGemma-1.5: the claim that it uses the image more is withdrawn. A per-dataset breakdown of
+every probe (RESULTS.md section 15, `results/replication_main/by_dataset.csv`) was added after this outcome and is
+post hoc: image removal separates the medical model from its base in 5 of 9 pair-dataset cells, and in none of
+them does an in-format probe agree.
 
 ## 18. Errata (found 2026-10-16 when re-checking training-data documentation)
 

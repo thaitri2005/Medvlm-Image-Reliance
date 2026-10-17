@@ -275,7 +275,9 @@ tests/                   fast unit tests and -m slow real-model tests
   medical data.
 - **Training exposure.** MedGemma-4B trained on SLAKE and VQA-RAD (whose test images mostly occur in its train
   split), and MedGemma-1.5 on SLAKE. The general models' training data are not published.
-- **Paraphrases** were judged by an LLM and not validated by human raters. Quadrant results cover questions with
+- **Paraphrases** were judged by an LLM and not validated by independent human raters. A second check of 50
+  used paraphrases, rated by the author with AI assistance, accepted 88% (target 85%;
+  `manifests/main/paraphrase_audit.csv`). The probe comparison does not use paraphrases. Quadrant results cover questions with
   at least two valid paraphrases (84% of the primary set).
 - PathVQA questions are auto-generated from captions. Benchmark VQA is not clinical use, and nothing here is a
   clinical claim.

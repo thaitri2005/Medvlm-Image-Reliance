@@ -63,8 +63,10 @@ a modality (reported as exploratory only), training anything, clinical claims.
 - Probe R4 (section 17) registered at tag `prereg-contrast`, run 2026-10-17 for all five models: H12a not
   supported, H12b reversed, H12c supported (section 17.1). Under the registered decision rule the claim that the
   MedGemmas use the image more is withdrawn; the paper's claim is the disagreement between probes.
-- **Final (2026-10-17): no further experiments.** Remaining work is presentation only (poster). The 50-row human
-  paraphrase rating (`manifests/main/paraphrase_audit.csv`) was not done; the paper says so.
+- **Final (2026-10-17): no further experiments.** Remaining work is presentation only (poster). The 50-row
+  paraphrase audit sheet (`manifests/main/paraphrase_audit.csv`) was rated by the author **with AI assistance**:
+  44/50 accepted (88%, pre-specified threshold 85%). It is reported as an AI-assisted check, not as independent human
+  validation; pass B (re-rating) was not done.
 
 ## 2. Prior work and our delta
 

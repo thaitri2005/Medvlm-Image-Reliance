@@ -324,7 +324,13 @@ but three pairs cannot test it formally.
 - R4 covers one modality, pathology, on which every model is weak (pair accuracy 36–43%); the absence of a gap
   there is evidence against a general "uses the image more", not proof that no domain shows one.
 - The per-dataset breakdown (§15) is post hoc; only R4 among the dataset-specific comparisons was registered.
-- Paraphrase equivalence was judged by an LLM (PREREGISTRATION.md §4.5) and not validated by human raters.
+- Paraphrase equivalence was judged by an LLM (PREREGISTRATION.md §4.5) and not validated by independent human
+  raters. A second check of 50 paraphrases used in the analysis (a seeded random sample of valid paraphrases not rated in earlier rounds,
+  `manifests/main/paraphrase_audit.csv`), rated by the author with AI assistance on 2026-10-17, accepted 44 of 50
+  (88%, above the pre-specified 85%; by style 78-100%). Its six rejections: a choice question turned into a yes/no
+  question (T1 or T2), scanning plane to imaging orientation, liver to liver tissue, an added "clear photograph"
+  qualifier, and two malformed PathVQA source questions carried through. Because AI assisted the ratings, this is a
+  consistency check, not independent human validation. Only the quadrant analyses use paraphrases.
 - Post-hoc analyses (chance correction, correctness split, refusal split, answer-change comparison, partner
   check) were motivated by the data and are reported as such.
 

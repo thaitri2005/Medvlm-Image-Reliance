@@ -459,8 +459,10 @@ results rest on templated questions that recur across images; resampling templat
 conclusions unchanged. MedGemma-4B was also trained on VQA-RAD, whose test images almost all occur in its train
 split, so its VQA-RAD results may reflect exposure; the general models' training data are not published. Checkpoints
 differ in their whole post-training, not only in medical data. Refusal is inferred from first-token mass and
-confirmed on a sample by free generation. Paraphrase equivalence was judged by an LLM and \textbf{was not validated
-by human raters}; this is the main limitation of the consistency measure. PathVQA questions are auto-generated and
+confirmed on a sample by free generation. Paraphrase equivalence was judged by an LLM and \textbf{was not validated by
+independent human raters}; a second check of 50 used paraphrases, rated by the author with AI assistance,
+accepted 88\% (above the pre-specified 85\%), but it is not independent of AI judgment. This is the main
+limitation of the consistency measure; the probe comparison does not use paraphrases. PathVQA questions are auto-generated and
 often ungrammatical. The chance correction, correctness split and refusal split were added after seeing the
 results. Excluding the 330 pilot questions used to tune the design leaves every conclusion unchanged (P1a
 +6.3\ci{2.4}{10.6}, P3 +12.9\ci{8.9}{17.1}). Benchmark VQA is not clinical use, and nothing here is a clinical

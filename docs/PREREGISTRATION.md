@@ -284,7 +284,7 @@ re-running the same command. Commit `results/` and `git add -f outputs/<model>/m
 | 5-6 | Error analysis: read 30 Dangerous + 30 Ideal cases per dataset with images; write Results skeleton | failure taxonomy |
 | 7-8 | Figures: Dangerous share by modality under both probes; risk-coverage with CIs; probe agreement; sensitivity | 4 figures |
 | 9-11 | Report (problem, related work, method, results, limitations, implementation) | full draft |
-| 12-13 | Poster, code zip, README | submitted material |
+| 12-13 | Poster, README, code release | public repository |
 | 14 | Buffer | |
 
 **Stop-the-line rules:** a failed pre-flight check, audit acceptance < 85%, or `yn_mass` < 0.9 in any dataset

@@ -21,6 +21,8 @@ qualifies them.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -38,6 +40,14 @@ BLUE, ORANGE = "#2a78d6", "#eb6834"                                  # MedGemma,
 QUAD_COLORS = {"ideal": "#1baf7a", "fragile": "#6250d6", "dangerous": "#e34948", "worst": "#eda100"}
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 DS_LABEL = {"pathvqa": "PathVQA", "slake": "SLAKE", "vqa_rad": "VQA-RAD"}
+
+
+def save_figure(fig, path, paper: bool) -> None:
+    """PNG (300 dpi paper, 200 dpi web); paper figures also as a vector PDF for print (the poster)."""
+    fig.savefig(path, dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+    if paper:
+        fig.savefig(Path(path).with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.03,
+                    metadata={"CreationDate": None, "ModDate": None})
 
 
 def _auroc(c: np.ndarray, s: np.ndarray) -> float:
@@ -548,7 +558,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                 bb = fig.get_tightbbox(fig.canvas.get_renderer())
                 fig.suptitle(title, x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015,
                              ha="left", va="bottom", fontsize=fs + 3, color=INK)
-            fig.savefig(target / name, dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+            save_figure(fig, target / name, paper)
             plt.close(fig)
             written.append(target / name)
 
@@ -794,7 +804,7 @@ def pairs_figure(results_dir, pairs: list[tuple[str, str]], out_dir, paper_dir, 
             bb = fig.get_tightbbox(fig.canvas.get_renderer())
             fig.suptitle("Does image removal rank each pair like the in-format probes?", x=bb.x0 / fig.get_figwidth(),
                          y=bb.y1 / fig.get_figheight() + 0.015, ha="left", va="bottom", fontsize=fs + 3, color=INK)
-        fig.savefig(target / "fig8_pairs.png", dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+        save_figure(fig, target / "fig8_pairs.png", paper)
         plt.close(fig)
         written.append(target / "fig8_pairs.png")
     return written
@@ -903,7 +913,7 @@ def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
             fig.suptitle("Which model relies on the image more? It depends on the probe and on the training data",
                          x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015, ha="left", va="bottom",
                          fontsize=fs + 3, color=INK)
-        fig.savefig(target / "fig10_by_dataset.png", dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+        save_figure(fig, target / "fig10_by_dataset.png", paper)
         plt.close(fig)
         written.append(target / "fig10_by_dataset.png")
     return written

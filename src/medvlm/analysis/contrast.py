@@ -159,7 +159,7 @@ def contrast_figure(per_model: pd.DataFrame, pairs, out_dir, paper_dir=None) -> 
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
 
-    from .posthoc import BLUE, GRID, INK, INK2, LABEL, ORANGE, SURFACE, _style
+    from .posthoc import save_figure, BLUE, GRID, INK, INK2, LABEL, ORANGE, SURFACE, _style
 
     sets = [s for s in ("r3_slake", "r4_pathvqa") if s in set(per_model.set)]
     pairs = [(a, b) for a, b in pairs if {a, b} <= set(per_model.model)]
@@ -213,7 +213,7 @@ def contrast_figure(per_model: pd.DataFrame, pairs, out_dir, paper_dir=None) -> 
             fig.suptitle(title,
                          x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015, ha="left",
                          va="bottom", fontsize=fs + 3, color=INK)
-        fig.savefig(target / "fig9_contrast.png", dpi=300 if paper else 200, bbox_inches="tight", pad_inches=0.03)
+        save_figure(fig, target / "fig9_contrast.png", paper)
         plt.close(fig)
         written.append(target / "fig9_contrast.png")
     return written

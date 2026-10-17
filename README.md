@@ -4,7 +4,7 @@
 3 medical VLMs vs their general-purpose bases &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
 <p align="center">
-<a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="docs/RESULTS.md">All results</a> &nbsp;·&nbsp;
+<a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="report/poster/poster.pdf">Poster (A0)</a> &nbsp;·&nbsp; <a href="docs/RESULTS.md">All results</a> &nbsp;·&nbsp;
 <a href="docs/PREREGISTRATION.md">Pre-registration &amp; lab notebook</a> &nbsp;·&nbsp; <a href="docs/REPRODUCE.md">Reproduce</a>
 </p>
 
@@ -252,7 +252,7 @@ Full instructions, including gated-model access and pre-flight checks: [docs/REP
 docs/RESULTS.md          every result with its CI, the hypotheses, threats to validity and a post-run audit
 docs/PREREGISTRATION.md  the registrations (frozen sections, tagged in git), change log, errata
 docs/REPRODUCE.md        how to run everything from a fresh clone
-report/                  the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/
+report/                  the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/; poster/ (A0 poster)
 src/medvlm/              data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, probes.py,
                          scoring.py, analysis/ (stats, tables, post-hoc, contrast, contamination), cli.py
 configs/                 base -> profile -> model -> hardware layering

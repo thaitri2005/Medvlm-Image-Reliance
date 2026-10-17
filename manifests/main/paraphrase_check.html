@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paraphrase Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: one question pair at a time, a 50-cell progress strip above, the rubric beside it (below on phones). */
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #17202b;
+  --ink-2: #4c5866;
+  --line: #d8dee6;
+  --accent: #2c5bc7;
+  --accent-soft: #e3eafa;
+  --yes: #17794c;
+  --yes-soft: #dcf1e6;
+  --no: #b5381f;
+  --no-soft: #f8e1db;
+  --ins: #fff0b8;
+  --del: #ece7f7;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-q: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161d; --panel: #18202a; --ink: #e6ebf1; --ink-2: #9aa7b6; --line: #2b3644;
+    --accent: #7ea2f2; --accent-soft: #1f2c44; --yes: #4fc28a; --yes-soft: #15332a;
+    --no: #f0866c; --no-soft: #3a211b; --ins: #4a3f12; --del: #2e2843; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161d; --panel: #18202a; --ink: #e6ebf1; --ink-2: #9aa7b6; --line: #2b3644;
+  --accent: #7ea2f2; --accent-soft: #1f2c44; --yes: #4fc28a; --yes-soft: #15332a;
+  --no: #f0866c; --no-soft: #3a211b; --ins: #4a3f12; --del: #2e2843; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 20px; }
+h1 { font-size: 1.35rem; font-weight: 600; margin: 0; text-wrap: balance; }
+.sub { color: var(--ink-2); margin: 2px 0 0; font-size: 0.92rem; }
+.status { font-family: var(--f-mono); font-size: 0.8rem; color: var(--ink-2); }
+.status b { color: var(--ink); font-weight: 500; }
+
+.passes { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.passes button { border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 0.88rem; padding: 7px 14px; cursor: pointer; }
+.passes button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.passes button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.strip { display: grid; grid-template-columns: repeat(25, minmax(0, 1fr)); gap: 3px; }
+.strip button {
+  height: 22px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); cursor: pointer; padding: 0;
+  font-family: var(--f-mono); font-size: 0.62rem; color: var(--ink-2);
+}
+.strip button.y { background: var(--yes-soft); border-color: var(--yes); color: var(--yes); }
+.strip button.n { background: var(--no-soft); border-color: var(--no); color: var(--no); }
+.strip button.done { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.strip button.cur { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } .strip { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: grid; gap: 18px; min-width: 0; }
+.meta { display: flex; justify-content: space-between; gap: 12px; font-family: var(--f-mono); font-size: 0.78rem; color: var(--ink-2); flex-wrap: wrap; }
+.q { display: grid; gap: 6px; }
+.q .lbl { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+.q .txt { font-family: var(--f-q); font-size: 1.32rem; line-height: 1.45; overflow-wrap: anywhere; }
+.q .txt mark { background: var(--ins); color: inherit; border-radius: 2px; padding: 0 1px; }
+.q .txt .del { background: var(--del); border-radius: 2px; padding: 0 1px; }
+.legend { font-size: 0.8rem; color: var(--ink-2); display: flex; gap: 14px; flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.legend .l-del::before { background: var(--del); }
+.legend .l-ins::before { background: var(--ins); }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .choices { grid-template-columns: 1fr; } }
+.choice {
+  border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 12px 14px;
+  font: inherit; text-align: left; cursor: pointer; display: grid; gap: 2px;
+}
+.choice small { color: var(--ink-2); font-size: 0.82rem; }
+.choice kbd { font-family: var(--f-mono); font-size: 0.72rem; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; margin-right: 6px; color: var(--ink-2); }
+.choice.yes[aria-pressed="true"] { border-color: var(--yes); background: var(--yes-soft); }
+.choice.no[aria-pressed="true"] { border-color: var(--no); background: var(--no-soft); }
+.choice:focus-visible, .nav button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choice strong { font-weight: 600; }
+
+textarea {
+  width: 100%; min-height: 60px; resize: vertical; font: inherit; font-size: 0.92rem; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+}
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.nav button {
+  font: inherit; font-size: 0.9rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px;
+  padding: 6px 12px; cursor: pointer;
+}
+.nav button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.save { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink-2); }
+
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; font-size: 0.88rem; display: grid; gap: 12px; min-width: 0; }
+aside h2 { font-size: 0.95rem; margin: 0; }
+aside h3 { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 4px; }
+aside ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+aside p { margin: 0; color: var(--ink-2); }
+.ok h3 { color: var(--yes); }
+.bad h3 { color: var(--no); }
+
+.done-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px; }
+.done-panel h2 { margin: 0; font-size: 1.05rem; }
+.done-panel p { margin: 0; color: var(--ink-2); }
+.done-panel .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.done-panel button.primary-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+.done-panel code { font-family: var(--f-mono); font-size: 0.85em; }
+.done-panel button { font: inherit; font-size: 0.9rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+pre#csv { max-height: 200px; overflow: auto; font-family: var(--f-mono); font-size: 0.72rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin: 0; white-space: pre; }
+.notice { font-size: 0.85rem; color: var(--no); }
+@media (prefers-reduced-motion: no-preference) { .choice, .strip button { transition: background-color .12s, border-color .12s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Paraphrase Check</h1>
+      <p class="sub">50 paraphrases the audit used. For each, decide whether it asks exactly the same thing as the original.</p>
+    </div>
+    <div class="passes" role="group" aria-label="Rating pass">
+      <button id="passA" type="button" aria-pressed="true">Pass A</button>
+      <button id="passB" type="button" aria-pressed="false">Pass B (blind re-rate)</button>
+    </div>
+  </header>
+
+  <div class="status" id="status">Loading saved ratings...</div>
+  <nav class="strip" id="strip" aria-label="Jump to item"></nav>
+
+  <div class="main">
+    <section class="card" aria-live="polite">
+      <div class="meta"><span id="pos"></span><span id="sid"></span></div>
+      <div class="q"><span class="lbl">Original question</span><div class="txt" id="orig"></div></div>
+      <div class="q"><span class="lbl">Paraphrase</span><div class="txt" id="para"></div></div>
+      <div class="legend"><span class="l-del">only in the original</span><span class="l-ins">only in the paraphrase</span></div>
+      <div class="choices">
+        <button class="choice yes" id="btnY" type="button" aria-pressed="false"><span><kbd>Y</kbd><strong>Same meaning</strong></span><small>The correct answer cannot differ.</small></button>
+        <button class="choice no" id="btnN" type="button" aria-pressed="false"><span><kbd>N</kbd><strong>Could change the answer</strong></span><small>Any shift in scope, term, relation or certainty.</small></button>
+      </div>
+      <label for="note" class="q"><span class="lbl">Note (optional, useful for N)</span></label>
+      <textarea id="note" placeholder="e.g. mass → lesion broadens the term"></textarea>
+      <div class="nav">
+        <button id="prev" type="button">← Previous</button>
+        <span class="save" id="save"></span>
+        <button id="next" type="button" class="primary">Next unrated →</button>
+      </div>
+    </section>
+
+    <aside>
+      <h2>How to judge</h2>
+      <p>Read only the two questions. Don't think about the image or the model. When unsure, choose N.</p>
+      <div class="ok"><h3>Same meaning (Y)</h3>
+        <ul>
+          <li>Perception framing: “is X seen”, “is X visible”, “can X be seen to be enlarged”</li>
+          <li>Exact synonyms: clavicle / collarbone, encephalon / brain</li>
+          <li>Reordering with the same content</li>
+        </ul></div>
+      <div class="bad"><h3>Could change the answer (N)</h3>
+        <ul>
+          <li>Fact turned into possibility: “Is the heart enlarged?” → “Can the heart be enlarged?”</li>
+          <li>Broader or narrower term: mass → lesion, organs → structures</li>
+          <li>Changed relation: “does A show B” → “is A associated with B”</li>
+          <li>Added or dropped scope: “bilaterally”, left / right, a modality</li>
+          <li>Antonyms or a different plane: coronal → transverse</li>
+          <li>Two questions in one, or malformed text</li>
+        </ul></div>
+      <p><b>Keys:</b> Y, N, ← →. Ratings save as you go.</p>
+      <p><b>Pass B</b> is optional: re-rate all 50 a few days later without seeing pass A. It measures how consistent your own judgement is.</p>
+    </aside>
+  </div>
+
+  <section class="done-panel" id="donePanel" hidden>
+    <h2 id="doneTitle">All 50 rated</h2>
+    <p id="doneText">Download the filled sheet and save it over <code>manifests/main/paraphrase_audit.csv</code>
+    (keep the file name), then run <code>medvlm audit-score --profile main</code> or tell Claude you're done.</p>
+    <div class="actions"><button id="dl" type="button" class="primary-btn">Download CSV</button><button id="copy" type="button">Copy as CSV</button><span class="save" id="copyMsg"></span></div>
+    <pre id="csv" hidden></pre>
+  </section>
+</div>
+
+<script>
+// The 50 rows of manifests/main/paraphrase_audit.csv, embedded so the page works offline.
+const ROWS = [{"sample_id": "slake-validation-10141", "k": 3, "style": "formal", "original": "Which type of modality is shown about this image, MRI, CT or X-Ray?", "paraphrase": "Which type of imaging modality is depicted in this image: MRI, CT scan, or X-ray?"}, {"sample_id": "slake-test-12208", "k": 2, "style": "syntactic", "original": "Which part of the body does this image belong to?", "paraphrase": "Which part of the body does this image pertain to?"}, {"sample_id": "slake-validation-10597", "k": 6, "style": "frame", "original": "Is/Are there abnormalities in the patient's left brain lobe?", "paraphrase": "Can abnormalities be seen in the patient's left brain lobe?"}, {"sample_id": "pathvqa-test-593", "k": 7, "style": "template_a", "original": "is myocardium present?", "paraphrase": "Is there myocardium?"}, {"sample_id": "pathvqa-test-3643", "k": 6, "style": "frame", "original": "what is present?", "paraphrase": "What can be seen?"}, {"sample_id": "vqa_rad-test-1067", "k": 5, "style": "concise", "original": "What is the condition in which the ventricles are enlarged as seen in this image?", "paraphrase": "What condition shows enlarged ventricles in this image?"}, {"sample_id": "slake-validation-10593", "k": 2, "style": "syntactic", "original": "What scanning plane does this image belong to?", "paraphrase": "What scanning plane does this image pertain to?"}, {"sample_id": "slake-test-12651", "k": 6, "style": "frame", "original": "Is this a T1 weighted or T2 weighted MRI image?", "paraphrase": "Can this MRI image be classified as a T1 weighted or T2 weighted sequence?"}, {"sample_id": "slake-validation-10577", "k": 6, "style": "frame", "original": "What organ system is pictured?", "paraphrase": "Which organ system can be seen?"}, {"sample_id": "slake-test-12378", "k": 6, "style": "frame", "original": "Can nodule be observed on the lower left lung in this picture?", "paraphrase": "Can a nodule be observed in the lower left lung on this image?"}, {"sample_id": "slake-test-12677", "k": 2, "style": "syntactic", "original": "How was this image taken?", "paraphrase": "How was this image acquired?"}, {"sample_id": "slake-validation-10491", "k": 3, "style": "formal", "original": "Which part of the human body is the organ located in the image?", "paraphrase": "Which part of the human body does the organ reside in the provided image?"}, {"sample_id": "pathvqa-test-5444", "k": 8, "style": "template_b", "original": "does pus in test tube show cemento-ossifying fibroma?", "paraphrase": "Can cemento-ossifying fibroma be seen in pus in test tube?"}, {"sample_id": "slake-test-12227", "k": 1, "style": "lexical", "original": "Does the picture contain lung?", "paraphrase": "Is there any depiction of the lungs in the image?"}, {"sample_id": "slake-validation-10055", "k": 1, "style": "lexical", "original": "What is the scanning plane of this image?", "paraphrase": "What is the imaging orientation in this photograph?"}, {"sample_id": "slake-test-12832", "k": 8, "style": "template_b", "original": "Does the picture contain the organ which has the effect of digesting food?", "paraphrase": "Can the organ which has the effect of digesting food be seen in the image?"}, {"sample_id": "slake-test-12811", "k": 3, "style": "formal", "original": "Which organs/organ in the picture belong to the urinary system?", "paraphrase": "Which organs/organ in the image are part of the urinary system?"}, {"sample_id": "slake-validation-10765", "k": 5, "style": "concise", "original": "Does the picture contain bladder?", "paraphrase": "Is the bladder present in the image?"}, {"sample_id": "pathvqa-test-1563", "k": 6, "style": "frame", "original": "is adrenal present?", "paraphrase": "Can the adrenal be seen?"}, {"sample_id": "slake-validation-10520", "k": 7, "style": "template_a", "original": "Does the spinal cord appear in this image?", "paraphrase": "Is the spinal cord visible in the image?"}, {"sample_id": "pathvqa-test-139", "k": 6, "style": "frame", "original": "what is present?", "paraphrase": "What can be seen?"}, {"sample_id": "pathvqa-test-4424", "k": 7, "style": "template_a", "original": "does marfans syndrome show typical area of caseous necrosis with nearby early granuloma quite good source unknown?", "paraphrase": "Is typical area of caseous necrosis with nearby early granuloma quite good source unknown shown in marfans syndrome?"}, {"sample_id": "slake-test-12241", "k": 7, "style": "template_a", "original": "Does the picture contain lung?", "paraphrase": "Is lung shown in the image?"}, {"sample_id": "slake-validation-10818", "k": 1, "style": "lexical", "original": "Do any of the organs in the picture belong to the circulatory system?", "paraphrase": "Are there any of the depicted organs classified within the circulatory system?"}, {"sample_id": "slake-validation-10833", "k": 7, "style": "template_a", "original": "Does the picture contain brian?", "paraphrase": "Is brian shown in the image?"}, {"sample_id": "slake-validation-10586", "k": 3, "style": "formal", "original": "Where is the brain tumor?", "paraphrase": "Where is the brain tumor located?"}, {"sample_id": "slake-test-12094", "k": 2, "style": "syntactic", "original": "What is the largest organ in the picture?", "paraphrase": "What organ is depicted as being the largest in the image?"}, {"sample_id": "slake-validation-10078", "k": 7, "style": "template_a", "original": "Does the picture contain heart?", "paraphrase": "Is heart shown in the image?"}, {"sample_id": "pathvqa-test-508", "k": 2, "style": "syntactic", "original": "does polycystic disease show skeletal muscle?", "paraphrase": "Does polycystic disease demonstrate skeletal muscle?"}, {"sample_id": "slake-test-12502", "k": 2, "style": "syntactic", "original": "What kind of symptoms will the disease on the lower left of lung bring to the patient?", "paraphrase": "What kind of symptoms will the disease located in the lower left lung present to the patient?"}, {"sample_id": "vqa_rad-test-1256", "k": 6, "style": "frame", "original": "Are there clearly defined cardiac borders in this image?", "paraphrase": "Can clearly defined cardiac borders be seen in this image?"}, {"sample_id": "slake-validation-10008", "k": 2, "style": "syntactic", "original": "What is the organ on the lower right of the body in this image?", "paraphrase": "What organ resides in the lower right part of the body as observed in this image?"}, {"sample_id": "slake-validation-10106", "k": 1, "style": "lexical", "original": "Does the picture contain lung?", "paraphrase": "Is there any depiction of the lungs in the image?"}, {"sample_id": "slake-test-12573", "k": 6, "style": "frame", "original": "How many mandibles in this image?", "paraphrase": "How many mandibles can be seen in this image?"}, {"sample_id": "slake-validation-10412", "k": 5, "style": "concise", "original": "Can cardiomegaly be observed in this picture?", "paraphrase": "Is cardiomegaly visible in this image?"}, {"sample_id": "slake-validation-10654", "k": 6, "style": "frame", "original": "Is this an MRI image with T2 weighted?", "paraphrase": "Can this be identified as an MRI image with T2 weighting?"}, {"sample_id": "vqa_rad-test-1632", "k": 6, "style": "frame", "original": "Are the nodules well circumscribed?", "paraphrase": "Can the nodules be seen as well circumscribed?"}, {"sample_id": "pathvqa-test-3166", "k": 7, "style": "template_a", "original": "is case of dic not bad photo present?", "paraphrase": "Is there case of dic not bad photo?"}, {"sample_id": "slake-validation-9867", "k": 3, "style": "formal", "original": "Does the picture contain liver?", "paraphrase": "Does the image demonstrate the presence of liver tissue?"}, {"sample_id": "slake-validation-10496", "k": 3, "style": "formal", "original": "Does the temporal lobe appear in this image?", "paraphrase": "Does the temporal lobe manifest in this image?"}, {"sample_id": "vqa_rad-test-34", "k": 2, "style": "syntactic", "original": "Is there evidence of any fractures of the ribs?", "paraphrase": "Are there any fractures of the ribs noted?"}, {"sample_id": "slake-validation-10475", "k": 1, "style": "lexical", "original": "Does the rectum appear in this picture?", "paraphrase": "Is the rectum discernible within this image?"}, {"sample_id": "slake-validation-9971", "k": 7, "style": "template_a", "original": "Does the picture contain spleen?", "paraphrase": "Is spleen shown in the image?"}, {"sample_id": "slake-test-12146", "k": 2, "style": "syntactic", "original": "How many kidneys in this image?", "paraphrase": "How many kidneys can be observed in this image?"}, {"sample_id": "slake-test-12711", "k": 1, "style": "lexical", "original": "Is this a CT scan?", "paraphrase": "Is this a computed tomography image?"}, {"sample_id": "pathvqa-test-3198", "k": 8, "style": "template_b", "original": "does this image show external view bilateral cleft palate?", "paraphrase": "Can external view bilateral cleft palate be seen in this image?"}, {"sample_id": "slake-test-12943", "k": 6, "style": "frame", "original": "Which organs/organ is part of the digestive system in this image?", "paraphrase": "Which organ(s) belonging to the digestive system can be seen in this image?"}, {"sample_id": "slake-validation-10620", "k": 3, "style": "formal", "original": "Is this a coronal section?", "paraphrase": "Is this image a coronal section?"}, {"sample_id": "slake-validation-9957", "k": 7, "style": "template_a", "original": "Does the picture contain heart?", "paraphrase": "Is heart shown in the image?"}, {"sample_id": "pathvqa-test-1765", "k": 2, "style": "syntactic", "original": "does this image show nice photo of parotid on one side with tumor capsule and obvious invasive tumor?", "paraphrase": "Does this image display a clear photograph of the parotid gland on one side, featuring a visible tumor capsule and an evident invasive tumor?"}];
+const state = { pass: "A", i: 0, r: {} };   // r[id] = {a, b, note_a, note_b}
+let db = null, store = "local";
+const LS = "paraphrase-check-v1";
+const $ = (id) => document.getElementById(id);
+const rid = (i) => "r" + String(i + 1).padStart(2, "0");
+
+function lsLoad() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { return {}; } }
+function lsSave() { try { localStorage.setItem(LS, JSON.stringify(state.r)); } catch (e) {} }
+
+function words(s) { return s.match(/[\w'-]+|[^\s\w]/g) || []; }
+function norm(w) { return w.toLowerCase(); }
+function diff(a, b) {           // LCS over word tokens; returns marked HTML for both strings
+  const A = words(a), B = words(b), n = A.length, m = B.length;
+  const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+    L[i][j] = norm(A[i]) === norm(B[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const keepA = new Array(n).fill(false), keepB = new Array(m).fill(false);
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (norm(A[i]) === norm(B[j])) { keepA[i] = keepB[j] = true; i++; j++; }
+    else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++;
+  }
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const join = (T, keep, tag) => T.map((t, k) => {
+    const sp = k && !/^[^\w]$/.test(t) ? " " : (k && /^[(]$/.test(t) ? " " : "");
+    const w = esc(t);
+    return sp + (keep[k] || /^[^\w]$/.test(t) ? w : (tag === "ins" ? "<mark>" + w + "</mark>" : '<span class="del">' + w + "</span>"));
+  }).join("");
+  return [join(A, keepA, "del"), join(B, keepB, "ins")];
+}
+
+function key() { return state.pass === "A" ? "a" : "b"; }
+function val(i) { const r = state.r[rid(i)]; return r ? r[key()] : undefined; }
+function counts() { let n = 0; ROWS.forEach((_, i) => { if (val(i)) n++; }); return n; }
+
+function render() {
+  const i = state.i, row = ROWS[i], r = state.r[rid(i)] || {};
+  const [o, p] = diff(row.original, row.paraphrase);
+  $("orig").innerHTML = o; $("para").innerHTML = p;
+  $("pos").textContent = "Item " + (i + 1) + " of " + ROWS.length;
+  $("sid").textContent = row.sample_id;
+  const v = r[key()];
+  $("btnY").setAttribute("aria-pressed", v === "y"); $("btnN").setAttribute("aria-pressed", v === "n");
+  $("note").value = r["note_" + key()] || "";
+  $("passA").setAttribute("aria-pressed", state.pass === "A"); $("passB").setAttribute("aria-pressed", state.pass === "B");
+  const s = $("strip");
+  [...s.children].forEach((b, k) => {
+    const x = val(k);
+    b.className = (state.pass === "A" ? (x || "") : (x ? "done" : "")) + (k === i ? " cur" : "");
+    b.setAttribute("aria-label", "Item " + (k + 1) + (x ? ", rated" : ", not rated"));
+  });
+  const c = counts();
+  $("status").innerHTML = "Pass " + state.pass + ": <b>" + c + "</b> of " + ROWS.length + " rated · " +
+    "saved in this browser as you go";
+  const done = c === ROWS.length;
+  $("donePanel").hidden = !done;
+  $("doneTitle").textContent = "All " + ROWS.length + " rated in pass " + state.pass;
+}
+
+let pending = Promise.resolve();
+function persist(i) {
+  lsSave();
+  if (!db) { $("save").textContent = "Saved in this browser"; return; }
+  const id = rid(i), body = Object.assign({ sample_id: ROWS[i].sample_id, k: ROWS[i].k, row: i + 1 }, state.r[id]);
+  $("save").textContent = "Saving...";
+  pending = pending.then(() => db.collection("ratings").doc(id).set(body))
+    .then(() => { $("save").textContent = "Saved"; })
+    .catch((e) => { $("save").textContent = "Not saved to the page (" + (e && e.code || "error") + "); kept in this browser"; });
+}
+
+function rate(v) {
+  const id = rid(state.i);
+  state.r[id] = Object.assign({}, state.r[id], { [key()]: v });
+  persist(state.i); render();
+  setTimeout(() => goNext(), 180);
+}
+function goNext() {
+  for (let k = 1; k <= ROWS.length; k++) { const j = (state.i + k) % ROWS.length; if (!val(j)) { state.i = j; render(); return; } }
+  if (state.i < ROWS.length - 1) { state.i++; render(); }
+}
+let noteTimer = null;
+$("note").addEventListener("input", () => {
+  const id = rid(state.i), i = state.i, v = $("note").value;
+  state.r[id] = Object.assign({}, state.r[id], { ["note_" + key()]: v });
+  clearTimeout(noteTimer); noteTimer = setTimeout(() => persist(i), 600);
+});
+$("btnY").onclick = () => rate("y");
+$("btnN").onclick = () => rate("n");
+$("prev").onclick = () => { state.i = (state.i - 1 + ROWS.length) % ROWS.length; render(); };
+$("next").onclick = goNext;
+$("passA").onclick = () => { state.pass = "A"; render(); };
+$("passB").onclick = () => { state.pass = "B"; state.i = 0; goNext(); if (val(state.i)) state.i = 0; render(); };
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "y") rate("y"); else if (k === "n") rate("n");
+  else if (e.key === "ArrowRight") { state.i = (state.i + 1) % ROWS.length; render(); }
+  else if (e.key === "ArrowLeft") { state.i = (state.i - 1 + ROWS.length) % ROWS.length; render(); }
+});
+
+function csv() {
+  const q = (s) => { s = s == null ? "" : String(s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const lines = ["sample_id,k,style,original,paraphrase,same_meaning_A,same_meaning_B,notes"];
+  ROWS.forEach((row, i) => {
+    const r = state.r[rid(i)] || {};
+    const notes = [r.note_a, r.note_b ? "B: " + r.note_b : ""].filter(Boolean).join(" | ");
+    lines.push([row.sample_id, row.k, row.style, row.original, row.paraphrase, r.a || "", r.b || "", notes].map(q).join(","));
+  });
+  return lines.join("\n") + "\n";
+}
+$("copy").onclick = () => {
+  const text = csv(), pre = $("csv");
+  pre.textContent = text; pre.hidden = false;
+  const done = () => { $("copyMsg").textContent = "Copied"; };
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("copyMsg").textContent = "Selected; press Ctrl+C"; };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+};
+
+(function init() {
+  const s = $("strip");
+  ROWS.forEach((_, k) => { const b = document.createElement("button"); b.type = "button"; b.textContent = k + 1; b.onclick = () => { state.i = k; render(); }; s.appendChild(b); });
+  state.r = lsLoad();
+  render();
+  if (val(state.i)) goNext();
+  render();
+})();
+$("dl").onclick = () => {
+  const blob = new Blob([csv()], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "paraphrase_audit.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $("copyMsg").textContent = "Downloaded paraphrase_audit.csv";
+};
+</script>
+</body>
+</html>

@@ -376,7 +376,7 @@ def probe_tables(cfg, paths, samples, raws, items, model_a, model_b, B, seed) ->
 
 
 def removal_split(samples, raws, B, seed) -> pd.DataFrame:
-    """Why image removal misranks: split 'answer changes without the image' (test yes/no) by whether the model
+    """What image removal picks up: split 'answer changes without the image' (test yes/no) by whether the model
     would rather refuse (first-token yes/no mass < 0.5). Forced answers on refused questions are unrelated to the
     with-image answer (kappa ~ 0), so they count as 'image-reliant' about half the time."""
     rows = []

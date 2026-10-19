@@ -12,11 +12,11 @@ listed in section 13 with its reason.
 > `git show prereg-main:PLAN.md`. Corrections of facts found later are listed in section 18, never edited into
 > the frozen text.
 
-> **Framing after the results (2026-10-16).** Sections 0 and 3 keep the framing the study was planned with
-> (a cross-modality audit of MedGemma, with Gemma-3 as control). The results changed the headline: image removal,
-> the taxonomy's reference probe, ranks the two models opposite to every in-format probe (section 15.1), so the
-> paper and README are now framed around that comparison ("Image Removal Misranks Image Reliance"). No frozen
-> section was edited; the new summaries are post hoc and listed in section 13, item 17.
+> **Framing after the results.** Sections 0 and 3 keep the framing the study was planned with (a cross-modality
+> audit of MedGemma, with Gemma-3 as control). The probe results (section 15.1) moved the headline to the comparison
+> between probes; the held-out probe R4 (section 17.1) then withdrew the claim that the MedGemmas rely on the image
+> more. The final title is "Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models". No
+> frozen section was edited; post-hoc summaries are listed in section 13, item 17, and section 17.1.
 
 ## 0. Objective, target, scope
 

@@ -312,8 +312,8 @@ but three pairs cannot test it formally.
 
 ## 11. Threats to validity
 
-- Three pairs from two families: they show that image removal *can* misrank models and that refusal predicts
-  when, not how often across the field. Checkpoints differ in their whole post-training, not only in medical data.
+- Three pairs from two families: they show that image removal *can* disagree with in-format probes and that refusal
+  predicts where, not how often across the field. Checkpoints differ in their whole post-training, not only in medical data.
 - The probes were registered after the main results were known (before running them); one of three
   predictions failed. R3 is limited to SLAKE, where templated questions recur across images.
 - Refusal is inferred from first-token probability mass, confirmed by free generation on a sample, not annotated

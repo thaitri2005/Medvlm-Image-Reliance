@@ -8,4 +8,4 @@ os.environ.setdefault("USE_FLAX", "0")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

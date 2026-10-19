@@ -95,143 +95,144 @@
 \begin{columns}
 \column{0.5}
 
-\block{Background: is the model looking at the image?}{
-Medical VQA benchmarks score whether an answer is right, not whether the model looked at the image. A model can
-answer ``yes, there is a nodule'' from language priors alone, and then fail exactly on the patients whose images
-are unusual. Paraphrase consistency does not help: a model that ignores the image is often \emph{more}
-consistent, because nothing visual perturbs it.
+\block{Background}{
+Medical VQA benchmarks measure whether an answer is correct, not whether the model used the image. An answer
+derived from language priors can be correct on typical cases and fail precisely on atypical images. Consistency
+under rephrasing does not resolve this: a model that ignores the image can be \emph{more} consistent, since no
+visual signal perturbs it.
 
 \vspace{4mm}
-The \emph{consistent-but-dangerous} taxonomy (Sadanandan \& Behzadan, CVPR-W 2026) therefore crosses two
-per-answer tests: is the answer stable under paraphrase, and does it change when the image is removed?
+The \emph{consistent-but-dangerous} taxonomy (Sadanandan \& Behzadan, CVPR-W 2026) therefore combines two
+per-answer criteria: stability under paraphrase, and whether the answer changes when the image is removed.
 
 \vspace{5mm}
 \begin{center}\renewcommand{\arraystretch}{1.35}
 \begin{tabular}{@{}lcc@{}}
- & \textbf{changes} without the image & \textbf{same} without the image\\
+ & \textbf{changes} without the image & \textbf{unchanged} without the image\\
 \midrule
 \textbf{stable} under paraphrase & \textsc{Ideal} & \dng\\
-\textbf{flips} under paraphrase & \textsc{Fragile} & \textsc{Worst}\\
+\textbf{unstable} under paraphrase & \textsc{Fragile} & \textsc{Worst}\\
 \end{tabular}
 \end{center}
 \vspace{3mm}
-A \dng{} answer looks trustworthy but does not depend on the image.
+A \dng{} answer appears reliable but does not depend on the image.
 
 \vspace{5mm}
-\innerblock{}{A taxonomy like this invites comparisons between models. We ask whether its reliance test,
-\textbf{removing the image}, ranks models the same way as probes that \textbf{keep an image in the input}.}
+\innerblock{}{\textbf{Question.} Does the taxonomy's reliance criterion, \textbf{image removal}, rank models in the
+same order as \textbf{in-format probes}, which keep an image in the input?}
 }
 
 \column{0.5}
 
 \block{Method}{
-\textbf{Three model pairs}, each a medical model and the general model it was trained from (same architecture
-and size): \med{MedGemma-4B} and \med{MedGemma-1.5-4B} vs.\ \gen{Gemma-3-4B}; \med{MedVLThinker-3B} vs.\
-its base \gen{Qwen2.5-VL-3B}.
+\textbf{Models.} Three pairs, each a medical model and the general-purpose model it was derived from (same
+architecture and size): \med{MedGemma-4B} and \med{MedGemma-1.5-4B} vs.\ \gen{Gemma-3-4B}; \med{MedVLThinker-3B}
+vs.\ \gen{Qwen2.5-VL-3B}.
 
 \vspace{4mm}
 \textbf{Data.} 3,365 questions on 907 images from SLAKE (CT, MRI, X-ray), VQA-RAD (radiology) and PathVQA
-(pathology); 1,206 yes/no test questions are the primary set.
+(pathology); the primary set comprises 1,206 yes/no test questions.
 
 \vspace{4mm}
-\textbf{Probes.} Each changes only the image or the instruction. A model that uses the image should change its
-answer when the image changes, so for each probe we measure the share of yes/no answers that change.
+\textbf{Probes.} Each probe alters only the image or the instruction. A model that uses the image should change its
+answer when the image changes; for each probe we report the \emph{answer-change rate}.
 
 \vspace{3mm}
 {\renewcommand{\arraystretch}{1.25}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.66\linewidth}@{}}
 \toprule
-\textbf{Image removed} & image tokens omitted: the taxonomy's own test\\
-Wrong image & a random image, same dataset and modality\\
-Black image & a black image: format kept, content removed\\
-\textbf{Opposite-answer image} & an image where the \emph{same question} has the opposite answer: the most direct
-test\\
-``Unknown'' allowed & image removed; the model may decline\\
+\textbf{Image removed} & image tokens omitted; the taxonomy's criterion\\
+Different image & a random image of the same dataset and modality\\
+Black image & format preserved, content removed\\
+\textbf{Opposite-answer image} & an image for which the \emph{same question} has the opposite answer; the most
+direct test\\
+Abstention permitted & image removed; the model may answer ``unknown''\\
 \bottomrule
 \end{tabular}}
 
 \vspace{4mm}
-\textbf{Scoring and setup.} P(yes) from the yes/no token logits in one forward pass; the total yes+no probability
-shows when a model would rather say something else (``please provide the image''). Five models, identical
-prompts, bf16, greedy; about 120,000 calls on one 16\,GB GPU; 95\% CIs from a bootstrap over images.
+\textbf{Scoring.} P(yes) from the yes/no token logits in a single forward pass; the total yes/no probability
+identifies refusals (``please provide the image''). Identical prompts, bf16, greedy decoding; about 120,000 model
+calls on one 16\,GB GPU; 95\% CIs from a bootstrap over images.
 
 \vspace{4mm}
-\innerblock{}{\textbf{Pre-registered.} Endpoints frozen before the main run; every later probe and model pair
-registered (a dated git tag) before it ran. Failed predictions are reported.}
+\innerblock{}{\textbf{Pre-registration.} Endpoints were fixed before the main run, and each subsequent probe and
+model pair was registered (as a dated git tag) before it was run. Unsupported predictions are reported.}
 }
 
 \end{columns}
 
 % ================================================================== row 2: finding 1 (full width)
-\block{Finding 1: image removal agrees with no probe that keeps the image}{
+\block{Finding 1: no in-format probe corroborates image removal}{
 \begin{minipage}[t]{0.64\linewidth}\vspace{0pt}
 \includegraphics[width=\linewidth]{../figures/fig10_by_dataset.pdf}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.33\linewidth}\vspace{0pt}
-\textbf{How to read it.} Each point is the medical model minus its general base: the difference in how often a
-yes/no answer changes under one probe. Right of 0: the medical model reacts to the image more.
+\textbf{Reading the figure.} Each point is the medical model minus its general-purpose base: the difference in
+answer-change rate under one probe. Values above zero indicate that the medical model responds more to the image.
 
 \vspace{4mm}
-\textbf{What it shows.} Image removal (top row) separates the medical model from its base in five of the nine
-pair\,$\times$\,dataset cells. In four, no probe that keeps an image finds any difference; in the fifth
-(MedGemma-4B on SLAKE), every such probe points the other way.
+\textbf{Result.} Image removal (top row) separates the two models in five of nine model-pair\,$\times$\,dataset
+cells. In four of these, no in-format probe detects a difference; in the fifth (MedGemma-4B on SLAKE), every
+in-format probe shows a difference in the opposite direction.
 
 \vspace{5mm}
 \begin{center}
 \begin{tabular}{@{}c@{\hspace{1.2cm}}c@{}}
 \bignum{5 of 9} & \bignum{0 of 5}\\[1mm]
-\begin{minipage}[t]{0.45\linewidth}\centering\small cells where image removal separates the models\end{minipage}
+\begin{minipage}[t]{0.45\linewidth}\centering\small cells in which image removal separates the models\end{minipage}
 &
-\begin{minipage}[t]{0.45\linewidth}\centering\small of those confirmed by any in-format probe\end{minipage}\\
+\begin{minipage}[t]{0.45\linewidth}\centering\small of these corroborated by any in-format probe\end{minipage}\\
 \end{tabular}
 \end{center}
 \end{minipage}
 }
 
-% ================================================================== row 3: why + take-aways | finding 2 + corrections + limits
+% ================================================================== row 3
 \begin{columns}
 \column{0.5}
 
-\block{Why: what image removal picks up instead}{
+\block{Sources of the image-removal differences}{
 \begin{minipage}[t]{0.55\linewidth}\vspace{0pt}
-\textbf{Refusal.} Asked yes or no about an image it was not given, \gen{Gemma-3} would rather ask for it on
-\textbf{29\%} of questions, \med{MedGemma-4B} on 18\%, \med{MedGemma-1.5} on 0.7\%, the Qwen models never. Forced
-answers there are unrelated to the answers with the image ($\kappa \approx 0$), so half count as
-``image-reliant'': refusing more looks like relying on the image more.
+\textbf{Refusal.} Without the image, \gen{Gemma-3} declines on \textbf{29\%} of questions, \med{MedGemma-4B} on 18\%,
+\med{MedGemma-1.5} on 0.7\%, and the Qwen-based models on none. Forced answers on declined questions are unrelated
+to the answers given with the image ($\kappa \approx 0$), so about half are classified as image-reliant: a higher
+refusal rate inflates apparent reliance.
 \end{minipage}\hfill
 \begin{minipage}[t]{0.42\linewidth}\vspace{0pt}
 \includegraphics[width=\linewidth]{../figures/fig4_abstention.pdf}
 \end{minipage}
-\figcap{Right: questions declined without the image. Forced yes/no (top): Gemma-3 declines far more. ``Unknown''
-allowed (bottom): both decline on $\ge$93\%.}
+\figcap{Right: questions declined without the image. Forced yes/no format (top): Gemma-3 declines far more often.
+Abstention permitted (bottom): both models decline on $\ge$93\%.}
 
 \vspace{4mm}
-\textbf{Priors that match the image.} If a blind guess matches what the image shows, the answer does not change
-and image removal calls it blind. This explains the Qwen pair, where nobody refuses, and MedGemma-4B's extra
-\dng{} answers, which are \textbf{correct}: +14.1 points \dng-and-correct, \mn0.4 \dng-and-wrong.
+\textbf{Agreement between prior and image.} When a model's prior matches the image content, its answer does not
+change without the image, and image removal classifies it as image-independent. This accounts for the differences
+in the Qwen pair, in which neither model declines, and for MedGemma-4B's additional \dng{} answers, which are
+\textbf{correct}: +14.1 points \dng-and-correct, \mn0.4 \dng-and-incorrect.
 }
 
-\block{Take-aways for reliance audits}{
+\block{Recommendations for reliance audits}{
 \begin{enumerate}
-\item Don't compare models by a \dng{} share from image removal: it tracks refusal and priors.
-\item Probe in format, ideally with an image whose correct answer is the opposite.
-\item Run that probe on data outside each model's training set.
-\item Report the chance floor, split by correctness, let models abstain.
+\item Do not compare models by a \dng{} share obtained by image removal; it reflects refusal and priors.
+\item Assess reliance with in-format probes, preferably an image that requires the opposite answer.
+\item Evaluate those probes on data outside each model's training set.
+\item Report the chance floor, decompose by correctness, and permit abstention.
 \end{enumerate}
 }
 
 \column{0.5}
 
-\block{Finding 2: the in-format advantage stays in the training data}{
-Both MedGemmas were trained on SLAKE, where the in-format probes favoured them. We registered a test on
-\textbf{PathVQA}, which no medical model was trained on, before running it:
+\block{Finding 2: the in-format advantage is confined to training data}{
+Both MedGemma models were trained on SLAKE, where the in-format probes favoured them. We registered a test on
+\textbf{PathVQA}, which none of the medical models was trained on, before running it:
 
 \vspace{3mm}
 \begin{center}\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{@{}lrr@{}}
 \toprule
 Follows the opposite-answer image & \textbf{SLAKE} & \textbf{PathVQA}\\
-medical \mn{} general, points & \muted{trained on} & \muted{held out}\\
+medical \mn{} general, points & \muted{training data} & \muted{held out}\\
 \midrule
 \med{MedGemma-4B} \mn{} \gen{Gemma-3} & +48.0 & +0.8 \muted{[\mn2.7, 4.2]}\\
 \med{MedGemma-1.5} \mn{} \gen{Gemma-3} & +36.5 & \mn5.6 \muted{[\mn9.1, \mn2.0]}\\
@@ -241,24 +242,24 @@ medical \mn{} general, points & \muted{trained on} & \muted{held out}\\
 \end{center}
 
 \vspace{3mm}
-Both MedGemma predictions failed, so under the rule fixed in advance the claim that they use the image more was
-\textbf{withdrawn}: the SLAKE gap reflects training data. All five models do read pathology images, to a similar
-degree (right on both images of a swap 36--43\% of the time; a model ignoring the image: 0\%).
+Both MedGemma predictions were unsupported, so under the decision rule fixed in advance the hypothesis that they
+rely on the image more was \textbf{withdrawn}: the SLAKE difference reflects training exposure.
 }
 
-\block{The \dng{} share needs correcting}{
+\block{Corrections to the \dng{} share}{
 \begin{itemize}
-\item \textbf{Chance floor:} 36--42\% of yes/no answers look image-independent even if unrelated to the image.
-\item \textbf{Correctness:} the extra \dng{} answers are mostly correct, from good priors.
-\item \textbf{No warning signal:} image reliance flags wrong answers at chance (AUROC \textbf{0.51}; confidence
-0.71).
+\item \textbf{Chance floor:} 36--42\% of yes/no answers appear image-independent by chance alone.
+\item \textbf{Correctness:} the additional \dng{} answers are predominantly correct.
+\item \textbf{Error detection:} image reliance identifies errors at chance level (AUROC \textbf{0.51}; model
+confidence 0.71).
 \end{itemize}
 }
 
-\block{Limits}{
-\small Three pairs from two families: the problem exists, how common it is we cannot say. The explanations were
-formed after the data. The held-out test is pathology only. Paraphrases were LLM-judged (a 50-item check by the
-author, with AI assistance: 88\%). Not a clinical claim.\\[2mm]
+\block{Limitations}{
+\small Three model pairs establish that the disagreement occurs, not how often. The mechanistic accounts are post hoc;
+the held-out test covers pathology only. Paraphrase
+equivalence was judged by an LLM (a 50-item check by the author, with AI assistance, accepted 88\%). No clinical
+claims are made.\\[2mm]
 \muted{\footnotesize Sadanandan \& Behzadan, CVPR-W 2026; Zafar et al.\ 2026; Lotfinia et al.\ 2026; Sellergren
 et al.\ (MedGemma) 2025.}
 }

@@ -1,13 +1,8 @@
-% Consistent but Blind? -- poster in the CVPR workshop format: 42 x 21 in landscape (2:1), 4 columns, PDF with
-% vector figures, minimal text (CVPR poster printing guidance). Compile from this folder: `tectonic poster.tex`.
+% Consistent but Blind? -- A0 portrait poster (84.1 x 118.9 cm; the MICCAI format), vector figures.
+% Compile from this folder: `tectonic poster.tex` (or latexmk -pdf).
 % Figures are the vector PDFs written by `medvlm posthoc`, `medvlm contrast --analyze` and `medvlm replication`.
-\documentclass[20pt, margin=0mm, innermargin=13mm, blockverticalspace=7mm, colspace=12mm, subcolspace=6mm]{tikzposter}
-\geometry{paperwidth=42in, paperheight=21in, margin=0mm}
-\makeatletter   % tikzposter sizes its layout at class load; redo it for the custom paper size
-\setlength{\textwidth}{\paperwidth}\setlength{\textheight}{\paperheight}
-\setlength{\TP@visibletextwidth}{\dimexpr\textwidth-2\TP@innermargin\relax}
-\setlength{\TP@visibletextheight}{\dimexpr\textheight-2\TP@innermargin\relax}
-\makeatother
+\documentclass[25pt, a0paper, portrait, margin=0mm, innermargin=16mm, blockverticalspace=10mm, colspace=14mm,
+  subcolspace=8mm]{tikzposter}
 
 \usepackage[T1]{fontenc}
 \usepackage[scaled=0.95]{helvet}
@@ -18,7 +13,7 @@
 \usepackage{qrcode}
 \usepackage{enumitem}
 \usepackage{textcomp}
-\setlist{leftmargin=1.0em, itemsep=0.15em, topsep=0.2em}
+\setlist{leftmargin=1.1em, itemsep=0.25em, topsep=0.3em}
 \newcommand{\mn}{\textminus}
 
 % Palette shared with the paper's figures
@@ -48,210 +43,226 @@
 \defineblockstyle{cbb}{
   titlewidthscale=1, bodywidthscale=1, titlecenter=false, titleoffsetx=0pt, titleoffsety=0pt,
   bodyoffsetx=0pt, bodyoffsety=0pt, bodyverticalshift=0pt, roundedcorners=0, linewidth=0pt,
-  titleinnersep=4mm, bodyinnersep=4mm
+  titleinnersep=5mm, bodyinnersep=5mm
 }{
   \draw[draw=none, fill=blockbodybgcolor] (blockbody.south west) rectangle (blockbody.north east);
   \ifBlockHasTitle
     \draw[draw=none, fill=blocktitlebgcolor] (blocktitle.south west) rectangle (blocktitle.north east);
-    \draw[color=med, line width=2mm] (blocktitle.south west) -- (blocktitle.south east);
+    \draw[color=med, line width=2.5mm] (blocktitle.south west) -- (blocktitle.south east);
   \fi
 }
 \useblockstyle{cbb}
 \usebackgroundstyle{Empty}
 
 \definetitlestyle{cbb}{
-  width=\paperwidth, roundedcorners=0, linewidth=0pt, innersep=8mm, titletotopverticalspace=0mm,
+  width=\paperwidth, roundedcorners=0, linewidth=0pt, innersep=12mm, titletotopverticalspace=0mm,
   titlegraphictotitledistance=10pt
 }{
   \draw[draw=none, fill=titlebgcolor] (\titleposleft, \titleposbottom) rectangle (\titleposright, \titlepostop);
-  \draw[color=rule, line width=1.2mm] (\titleposleft, \titleposbottom) -- (\titleposright, \titleposbottom);
+  \draw[color=rule, line width=1.5mm] (\titleposleft, \titleposbottom) -- (\titleposright, \titleposbottom);
 }
 \usetitlestyle{cbb}
 
 \settitle{%
-  \begin{minipage}[c]{0.88\linewidth}\raggedright
-    {\color{ink}\fontsize{76}{84}\selectfont\bfseries Consistent but Blind?\par}
-    \vspace{3mm}
-    {\color{ink}\fontsize{44}{52}\selectfont Image removal does not measure image reliance in medical
-     vision-language models\par}
-    \vspace{5mm}
-    {\color{ink2}\fontsize{28}{34}\selectfont \textbf{Tri Thai Huu} \;\textperiodcentered\; VinUniversity, Hanoi,
+  \begin{minipage}[c]{0.80\linewidth}\raggedright
+    {\color{ink}\fontsize{100}{110}\selectfont\bfseries Consistent but Blind?\par}
+    \vspace{6mm}
+    {\color{ink}\fontsize{54}{64}\selectfont Image removal does not measure image reliance\\
+     in medical vision-language models\par}
+    \vspace{10mm}
+    {\color{ink2}\fontsize{34}{40}\selectfont \textbf{Tri Thai Huu} \;\textperiodcentered\; VinUniversity, Hanoi,
      Vietnam \;\textperiodcentered\; thaitri2005@gmail.com\par}
   \end{minipage}\hfill
-  \begin{minipage}[c]{0.09\linewidth}\centering
-    \qrcode[height=7.5cm]{https://github.com/thaitri2005/Medvlm-Image-Reliance}\\[1mm]
-    {\color{ink2}\fontsize{18}{22}\selectfont paper, code, data}
+  \begin{minipage}[c]{0.16\linewidth}\centering
+    \qrcode[height=11cm]{https://github.com/thaitri2005/Medvlm-Image-Reliance}\\[3mm]
+    {\color{ink2}\fontsize{24}{28}\selectfont Paper, code, data\\and every number}
   \end{minipage}%
 }
 
-\newcommand{\bignum}[1]{{\fontsize{50}{54}\selectfont\bfseries #1}}
+\newcommand{\bignum}[1]{{\fontsize{70}{76}\selectfont\bfseries #1}}
 \newcommand{\med}[1]{\textcolor{med}{\textbf{#1}}}
 \newcommand{\gen}[1]{\textcolor{gen}{\textbf{#1}}}
 \newcommand{\dng}{\textcolor{dang}{\textsc{Dangerous}}}
 \newcommand{\muted}[1]{\textcolor{ink2}{#1}}
-\newcommand{\figcap}[1]{\par\vspace{1mm}{\muted{\small #1}}\par}
+\newcommand{\figcap}[1]{\par\vspace{2mm}{\muted{\small #1}}\par}
 
 \tikzposterlatexaffectionproofoff
 
 \begin{document}
 \maketitle
 
+% ================================================================== row 1: background | method
 \begin{columns}
-% ================================================================== 1: problem
-\column{0.23}
+\column{0.5}
 
-\block{The problem}{
-A medical VLM can answer correctly from priors without looking at the image. The \emph{consistent-but-dangerous}
-taxonomy flags such answers:
+\block{Background: is the model looking at the image?}{
+Medical VQA benchmarks score whether an answer is right, not whether the model looked at the image. A model can
+answer ``yes, there is a nodule'' from language priors alone, and then fail exactly on the patients whose images
+are unusual. Paraphrase consistency does not help: a model that ignores the image is often \emph{more}
+consistent, because nothing visual perturbs it.
 
-\vspace{3mm}
-\begin{center}\small\renewcommand{\arraystretch}{1.25}
+\vspace{4mm}
+The \emph{consistent-but-dangerous} taxonomy (Sadanandan \& Behzadan, CVPR-W 2026) therefore crosses two
+per-answer tests: is the answer stable under paraphrase, and does it change when the image is removed?
+
+\vspace{5mm}
+\begin{center}\renewcommand{\arraystretch}{1.35}
 \begin{tabular}{@{}lcc@{}}
- & \textbf{changes} & \textbf{same}\\[-1mm]
- & \muted{without image} & \muted{without image}\\
+ & \textbf{changes} without the image & \textbf{same} without the image\\
 \midrule
 \textbf{stable} under paraphrase & \textsc{Ideal} & \dng\\
 \textbf{flips} under paraphrase & \textsc{Fragile} & \textsc{Worst}\\
 \end{tabular}
 \end{center}
-\vspace{2mm}
-\innerblock{}{Its reliance test is \textbf{removing the image}. Can it tell us \textbf{which model} relies on the
-image more?}
+\vspace{3mm}
+A \dng{} answer looks trustworthy but does not depend on the image.
+
+\vspace{5mm}
+\innerblock{}{A taxonomy like this invites comparisons between models. We ask whether its reliance test,
+\textbf{removing the image}, ranks models the same way as probes that \textbf{keep an image in the input}.}
 }
 
-\block{Two models, one question}{
-\includegraphics[width=\linewidth]{../figures/fig0_teaser.png}
-\figcap{Without the image MedGemma answers (\dng) and Gemma-3 asks for the image (\textsc{Ideal}). A wrong image
-gives the opposite verdict.}
-}
-
-\block{Contributions}{
-\begin{itemize}
-\item Four reliance probes compared on the same questions, 3 medical/general pairs.
-\item What image removal measures instead: \textbf{refusal} and \textbf{priors}.
-\item A pre-registered test \textbf{outside the training data}.
-\end{itemize}
-}
-
-% ================================================================== 2: method
-\column{0.23}
+\column{0.5}
 
 \block{Method}{
-\textbf{Three pairs}, each a medical model and its general base:\\
-\med{MedGemma-4B}, \med{MedGemma-1.5-4B} vs.\ \gen{Gemma-3-4B}\\
-\med{MedVLThinker-3B} vs.\ \gen{Qwen2.5-VL-3B}
+\textbf{Three model pairs}, each a medical model and the general model it was trained from (same architecture
+and size): \med{MedGemma-4B} and \med{MedGemma-1.5-4B} vs.\ \gen{Gemma-3-4B}; \med{MedVLThinker-3B} vs.\
+its base \gen{Qwen2.5-VL-3B}.
 
 \vspace{4mm}
-\textbf{Data}: SLAKE (CT, MRI, X-ray), VQA-RAD, PathVQA; 3,365 questions, 907 images.
+\textbf{Data.} 3,365 questions on 907 images from SLAKE (CT, MRI, X-ray), VQA-RAD (radiology) and PathVQA
+(pathology); 1,206 yes/no test questions are the primary set.
 
 \vspace{4mm}
-\textbf{Probes} change only the image; we count how often the yes/no answer changes.
+\textbf{Probes.} Each changes only the image or the instruction. A model that uses the image should change its
+answer when the image changes, so for each probe we measure the share of yes/no answers that change.
 
-\vspace{2mm}
-{\small\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.36\linewidth}>{\raggedright\arraybackslash}p{0.58\linewidth}@{}}
+\vspace{3mm}
+{\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.66\linewidth}@{}}
 \toprule
-\textbf{Image removed} & image tokens omitted (the taxonomy's test)\\
-Wrong image & another image, same modality\\
-Black image & black image in the image slot\\
-\textbf{Opposite-answer} & same question, an image where the answer is the opposite\\
-``Unknown'' allowed & image removed, may decline\\
+\textbf{Image removed} & image tokens omitted: the taxonomy's own test\\
+Wrong image & a random image, same dataset and modality\\
+Black image & a black image: format kept, content removed\\
+\textbf{Opposite-answer image} & an image where the \emph{same question} has the opposite answer: the most direct
+test\\
+``Unknown'' allowed & image removed; the model may decline\\
 \bottomrule
 \end{tabular}}
 
 \vspace{4mm}
-\textbf{Scoring}: P(yes) from the yes/no token logits in one forward pass; the yes+no mass detects refusals.
-bf16, greedy, identical prompts; about 120,000 calls on one 16\,GB GPU.
+\textbf{Scoring and setup.} P(yes) from the yes/no token logits in one forward pass; the total yes+no probability
+shows when a model would rather say something else (``please provide the image''). Five models, identical
+prompts, bf16, greedy; about 120,000 calls on one 16\,GB GPU; 95\% CIs from a bootstrap over images.
 
 \vspace{4mm}
-\innerblock{}{\textbf{Pre-registered}: endpoints frozen before the main run; each later probe and model pair
-registered (dated git tag) before it ran. 95\% CIs by image.}
-}
-
-\block{Who answers without the image?}{
-\begin{center}\includegraphics[width=0.44\linewidth]{../figures/fig4_abstention.pdf}\end{center}
-\figcap{Share of questions declined without the image. Forced to say yes or no (top), Gemma-3 declines far more;
-allowed to say ``unknown'' (bottom), both decline on $\ge$93\%.}
-}
-
-% ================================================================== 3: finding 1
-\column{0.31}
-
-\block{Finding 1: image removal agrees with no in-format probe}{
-\includegraphics[width=\linewidth]{../figures/fig10_by_dataset.pdf}
-\figcap{Medical \mn{} general difference in how often a yes/no answer changes when the image is altered.}
-
-\vspace{3mm}
-\begin{tikzfigure}
-\begin{tabular}{@{}c@{\hspace{1.4cm}}c@{\hspace{1.4cm}}c@{}}
-\bignum{5 of 9} & \bignum{0 of 5} & \bignum{+13.7}\\[1mm]
-\begin{minipage}[t]{0.28\linewidth}\centering\small cells where image removal separates the models\end{minipage} &
-\begin{minipage}[t]{0.28\linewidth}\centering\small of those confirmed by an in-format probe\end{minipage} &
-\begin{minipage}[t]{0.28\linewidth}\centering\small points more \dng{} for MedGemma-4B, image removed\end{minipage}\\
-\end{tabular}
-\end{tikzfigure}
-}
-
-\block{Why: what image removal picks up}{
-\begin{minipage}[t]{0.48\linewidth}\vspace{0pt}
-\textbf{Refusal.} Without an image, \gen{Gemma-3} asks for it on \textbf{29\%} of questions, \med{MedGemma-4B} on
-18\%, \med{MedGemma-1.5} on 0.7\%. Its forced answers there are unrelated to its image answers, so they count
-as ``image-reliant''.
-\end{minipage}\hfill
-\begin{minipage}[t]{0.48\linewidth}\vspace{0pt}
-\textbf{Priors.} A blind guess that matches the image leaves the answer unchanged, so image removal calls it
-blind. MedGemma's extra \dng{} answers are \textbf{all correct} (+14.1 correct, \mn0.4 wrong).
-\end{minipage}
-}
-
-% ================================================================== 4: finding 2, take-aways
-\column{0.23}
-
-\block{Finding 2: the in-format advantage stays in the training data}{
-Follows the opposite-answer image, medical \mn{} general (points):
-
-\vspace{2mm}
-\begin{center}\renewcommand{\arraystretch}{1.25}
-\begin{tabular}{@{}lrr@{}}
-\toprule
-& \textbf{SLAKE} & \textbf{PathVQA}\\[-1mm]
-& \muted{\small trained on} & \muted{\small held out}\\
-\midrule
-\med{MedGemma-4B} & +48.0 & +0.8\\
-\med{MedGemma-1.5} & +36.5 & \mn5.6\\
-\med{MedVLThinker} & \mn1.6 & \mn0.9\\
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{1mm}
-The PathVQA test was \textbf{registered before it ran}. The MedGemma predictions failed, so ``MedGemma uses the
-image more'' was \textbf{withdrawn}.
-}
-
-\block{The \dng{} share, corrected}{
-\begin{itemize}
-\item 36--42\% of yes/no answers look image-independent \textbf{by chance}.
-\item Its excess is mostly \textbf{correct} answers.
-\item Reliance flags errors at chance (AUROC \textbf{0.51}).
-\end{itemize}
-}
-
-\block{Take-aways}{
-\begin{enumerate}
-\item Don't rank models by image removal.
-\item Probe in format, with an opposite-answer image.
-\item Test outside each model's training data.
-\end{enumerate}
-}
-
-\block{Limits}{
-\small Three pairs; the explanations are post hoc; the held-out test is pathology only; paraphrases LLM-judged
-(AI-assisted 50-item check: 88\%). Not a clinical claim.
-
-\vspace{2mm}
-\muted{\footnotesize Sadanandan \& Behzadan, CVPR-W 2026; Zafar et al.\ 2026; Lotfinia et al.\ 2026;
-Sellergren et al., MedGemma, 2025.}
+\innerblock{}{\textbf{Pre-registered.} Endpoints frozen before the main run; every later probe and model pair
+registered (a dated git tag) before it ran. Failed predictions are reported.}
 }
 
 \end{columns}
+
+% ================================================================== row 2: finding 1 (full width)
+\block{Finding 1: image removal agrees with no probe that keeps the image}{
+\begin{minipage}[t]{0.64\linewidth}\vspace{0pt}
+\includegraphics[width=\linewidth]{../figures/fig10_by_dataset.pdf}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.33\linewidth}\vspace{0pt}
+\textbf{How to read it.} Each point is the medical model minus its general base: the difference in how often a
+yes/no answer changes under one probe. Right of 0: the medical model reacts to the image more.
+
+\vspace{4mm}
+\textbf{What it shows.} Image removal (top row) separates the medical model from its base in five of the nine
+pair\,$\times$\,dataset cells. In four, no probe that keeps an image finds any difference; in the fifth
+(MedGemma-4B on SLAKE), every such probe points the other way.
+
+\vspace{5mm}
+\begin{center}
+\begin{tabular}{@{}c@{\hspace{1.2cm}}c@{}}
+\bignum{5 of 9} & \bignum{0 of 5}\\[1mm]
+\begin{minipage}[t]{0.45\linewidth}\centering\small cells where image removal separates the models\end{minipage}
+&
+\begin{minipage}[t]{0.45\linewidth}\centering\small of those confirmed by any in-format probe\end{minipage}\\
+\end{tabular}
+\end{center}
+\end{minipage}
+}
+
+% ================================================================== row 3: why + take-aways | finding 2 + corrections + limits
+\begin{columns}
+\column{0.5}
+
+\block{Why: what image removal picks up instead}{
+\begin{minipage}[t]{0.55\linewidth}\vspace{0pt}
+\textbf{Refusal.} Asked yes or no about an image it was not given, \gen{Gemma-3} would rather ask for it on
+\textbf{29\%} of questions, \med{MedGemma-4B} on 18\%, \med{MedGemma-1.5} on 0.7\%, the Qwen models never. Forced
+answers there are unrelated to the answers with the image ($\kappa \approx 0$), so half count as
+``image-reliant'': refusing more looks like relying on the image more.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.42\linewidth}\vspace{0pt}
+\includegraphics[width=\linewidth]{../figures/fig4_abstention.pdf}
+\end{minipage}
+\figcap{Right: questions declined without the image. Forced yes/no (top): Gemma-3 declines far more. ``Unknown''
+allowed (bottom): both decline on $\ge$93\%.}
+
+\vspace{4mm}
+\textbf{Priors that match the image.} If a blind guess matches what the image shows, the answer does not change
+and image removal calls it blind. This explains the Qwen pair, where nobody refuses, and MedGemma-4B's extra
+\dng{} answers, which are \textbf{correct}: +14.1 points \dng-and-correct, \mn0.4 \dng-and-wrong.
+}
+
+\block{Take-aways for reliance audits}{
+\begin{enumerate}
+\item Don't compare models by a \dng{} share from image removal: it tracks refusal and priors.
+\item Probe in format, ideally with an image whose correct answer is the opposite.
+\item Run that probe on data outside each model's training set.
+\item Report the chance floor, split by correctness, let models abstain.
+\end{enumerate}
+}
+
+\column{0.5}
+
+\block{Finding 2: the in-format advantage stays in the training data}{
+Both MedGemmas were trained on SLAKE, where the in-format probes favoured them. We registered a test on
+\textbf{PathVQA}, which no medical model was trained on, before running it:
+
+\vspace{3mm}
+\begin{center}\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Follows the opposite-answer image & \textbf{SLAKE} & \textbf{PathVQA}\\
+medical \mn{} general, points & \muted{trained on} & \muted{held out}\\
+\midrule
+\med{MedGemma-4B} \mn{} \gen{Gemma-3} & +48.0 & +0.8 \muted{[\mn2.7, 4.2]}\\
+\med{MedGemma-1.5} \mn{} \gen{Gemma-3} & +36.5 & \mn5.6 \muted{[\mn9.1, \mn2.0]}\\
+\med{MedVLThinker} \mn{} \gen{Qwen2.5-VL} & \mn1.6 & \mn0.9 \muted{[\mn3.0, 1.3]}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{3mm}
+Both MedGemma predictions failed, so under the rule fixed in advance the claim that they use the image more was
+\textbf{withdrawn}: the SLAKE gap reflects training data. All five models do read pathology images, to a similar
+degree (right on both images of a swap 36--43\% of the time; a model ignoring the image: 0\%).
+}
+
+\block{The \dng{} share needs correcting}{
+\begin{itemize}
+\item \textbf{Chance floor:} 36--42\% of yes/no answers look image-independent even if unrelated to the image.
+\item \textbf{Correctness:} the extra \dng{} answers are mostly correct, from good priors.
+\item \textbf{No warning signal:} image reliance flags wrong answers at chance (AUROC \textbf{0.51}; confidence
+0.71).
+\end{itemize}
+}
+
+\block{Limits}{
+\small Three pairs from two families: the problem exists, how common it is we cannot say. The explanations were
+formed after the data. The held-out test is pathology only. Paraphrases were LLM-judged (a 50-item check by the
+author, with AI assistance: 88\%). Not a clinical claim.\\[2mm]
+\muted{\footnotesize Sadanandan \& Behzadan, CVPR-W 2026; Zafar et al.\ 2026; Lotfinia et al.\ 2026; Sellergren
+et al.\ (MedGemma) 2025.}
+}
+
+\end{columns}
+
 \end{document}

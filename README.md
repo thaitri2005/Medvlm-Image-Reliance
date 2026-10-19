@@ -252,7 +252,7 @@ Full instructions, including gated-model access and pre-flight checks: [docs/REP
 docs/RESULTS.md          every result with its CI, the hypotheses, threats to validity and a post-run audit
 docs/PREREGISTRATION.md  the registrations (frozen sections, tagged in git), change log, errata
 docs/REPRODUCE.md        how to run everything from a fresh clone
-report/                  the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/; poster/ (CVPR workshop format, 42 x 21 in)
+report/                  the paper (CVPR author kit): main.tex, main.pdf, refs.bib, figures/; poster/ (A0 portrait poster)
 src/medvlm/              data/ (loaders, sampler), models/ (HF backend), paraphrase.py, run.py, probes.py,
                          scoring.py, analysis/ (stats, tables, post-hoc, contrast, contamination), cli.py
 configs/                 base -> profile -> model -> hardware layering

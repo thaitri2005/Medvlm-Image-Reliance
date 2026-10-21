@@ -1,7 +1,7 @@
 <h1 align="center">Consistent but Blind?</h1>
 <p align="center"><b>Image removal does not measure image reliance in medical vision-language models</b></p>
 <p align="center">
-3 medical VLMs vs their general-purpose bases &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
+5 models: 3 medical VLMs vs the 2 general-purpose models they derive from &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
 <p align="center">
 <a href="report/main.pdf"><b>Paper (PDF)</b></a> &nbsp;·&nbsp; <a href="report/poster/poster.pdf">Poster</a> &nbsp;·&nbsp; <a href="docs/RESULTS.md">All results</a> &nbsp;·&nbsp;
@@ -12,7 +12,8 @@
 
 > **TL;DR.** A recent taxonomy flags a medical VLM answer as *consistent but dangerous* when it survives
 > rephrasing **and** survives removing the image. We ran that test next to three tests that keep an image in
-> the input, on the same questions, for three medical VLMs and their general-purpose bases. **Image removal and
+> the input, on the same questions, for five models: three medical VLMs (MedGemma-4B, MedGemma-1.5-4B, MedVLThinker-3B) and the two
+> general-purpose models they were built from (Gemma-3-4B, Qwen2.5-VL-3B). **Image removal and
 > the in-format tests never agree:** wherever image removal says a medical model ignores the image more or less
 > than its base, no in-format test confirms it. What image removal picks up is whether a model refuses to answer
 > without an image and whether its guesses happen to match the image. The in-format tests have their own trap:
@@ -57,7 +58,7 @@ cannot.
 
 The quadrant taxonomy, the individual probes and the observation that VLMs answer medical questions without
 images all predate this project. Our contribution is to run the probes **side by side** on the same questions,
-for three medical/general model pairs and three datasets, **inside and outside the medical models' training
+for five models in three medical/general pairs (Gemma-3 is the base of both MedGemmas) and three datasets, **inside and outside the medical models' training
 data**, and to explain why they disagree.
 
 | | Prior work | This project |

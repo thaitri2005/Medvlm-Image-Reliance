@@ -45,23 +45,22 @@ answer is \emph{no}) yield opposite labels for both models. Actual model outputs
 \end{strip}
 
 \begin{abstract}
-Whether a medical vision-language model (VLM) uses the image is commonly assessed by removing the image: the
+Whether a medical vision-language model (VLM) uses the image is commonly assessed by removing it: the
 consistent-but-dangerous taxonomy labels an answer \dang{} when it is stable under paraphrase and unchanged
-without the image. We ask whether this criterion supports comparisons between models. Three medical VLMs and
-the general-purpose models they were derived from (MedGemma-4B and MedGemma-1.5-4B \vs Gemma-3-4B;
-MedVLThinker-3B \vs Qwen2.5-VL-3B) answer 3,365 questions on 907 CT, MRI, X-ray and pathology images, both
-without the image and under three \emph{in-format} probes that keep an image in the input: a different image, a
-black image, and an image for which the same question has the opposite answer. The analysis was pre-registered,
-and each subsequent probe and model pair was registered before it was run. Under image removal, MedGemma-4B has
-a 13.7-point\ci{10.0}{17.5} higher \dang{} share than Gemma-3-4B. No in-format probe corroborates this: of the
-nine model-pair~$\times$~dataset comparisons, image removal separates the two models in five, and in none of these
-does an in-format probe agree. The image-removal differences instead track refusal (without an image, Gemma-3
-declines on 29\% of questions, and its forced answers there are unrelated to its answers with the image) and the
-agreement between a model's priors and the image. In-format probes have their own confound: both MedGemma models
-follow opposite-answer images far more than Gemma-3 on SLAKE, which they were trained on (+48.0 and +36.5
-points), but not on held-out PathVQA (+0.8 and $-5.6$). We conclude that image removal does not measure image
-reliance, and that comparisons of image reliance require in-format probes on data outside each model's training
-set.
+without the image. We ask whether this criterion can rank models. Three medical VLMs and the general-purpose
+models they were built from (MedGemma-4B and MedGemma-1.5-4B \vs Gemma-3-4B; MedVLThinker-3B \vs Qwen2.5-VL-3B)
+answer 3,365 questions on 907 CT, MRI, X-ray and pathology images without the image and under three
+\emph{in-format} probes that keep an image in the input: a different image, a black image, and an image for which
+the same question has the opposite answer. The main analysis was pre-registered, and every later probe and model
+pair was registered before it was run. Under image removal, MedGemma-4B has a 13.7-point\ci{10.0}{17.5} higher
+\dang{} share than Gemma-3-4B. No in-format probe corroborates this or any other image-removal difference: of nine
+model-pair~$\times$~dataset comparisons, image removal separates the two models in five, and an in-format probe
+agrees in none. The image-removal differences track refusal (without an image, Gemma-3 declines on 29\% of
+questions, and its forced answers there are unrelated to its answers with the image) and the agreement between a
+model's priors and the image. In-format probes have a confound of their own: both MedGemma models follow
+opposite-answer images far more than Gemma-3 on SLAKE, which they were trained on (+48.0 and +36.5 points), but
+not on held-out PathVQA (+0.8 and $-5.6$). Image removal should therefore not be used to compare image reliance
+between models; such comparisons require in-format probes on data outside each model's training set.
 \end{abstract}
 
 \section{Introduction}
@@ -82,7 +81,10 @@ consistency moves most answers into \dang{}.
 
 Such a taxonomy invites comparisons between models, and these comparisons are only as valid as the reliance
 criterion. Removing the image changes the input format: a model asked about an absent image may decline, answer
-from priors, or guess, and none of these responses is equivalent to ignoring an image that is present. We
+from priors, or guess, and none of these responses is equivalent to ignoring an image that is present. For chest
+radiography, Lotfinia~\etal~\cite{lotfinia2026cxr} accordingly treat performance without the image as a model's
+default answer rather than as evidence of image use. Whether this matters for comparisons between models, which is
+how a taxonomy is typically used, has not been tested. We
 therefore compare image removal with probes that keep an image in the input, on the same questions, for three
 medical VLMs and the general-purpose models they were derived from: MedGemma-4B~\cite{sellergren2025medgemma} and
 MedGemma-1.5-4B against Gemma-3-4B~\cite{gemma2025gemma3}, and MedVLThinker-3B against Qwen2.5-VL-3B, on CT,
@@ -110,9 +112,10 @@ no MedGemma advantage.}
 \paragraph{Contributions.}
 \begin{itemize}[leftmargin=*,nosep]
 \item A comparison of four reliance probes on identical questions for three medical/general model pairs and three
-datasets, showing that between-model differences under image removal are not corroborated by any in-format probe.
-The individual probes have precedent~\cite{sadanandan2026consistent,zafar2026see,lotfinia2026cxr}; to our
-knowledge, their conclusions about the same models have not been compared.
+datasets, showing that no between-model difference found by image removal is corroborated by an in-format probe,
+and that the largest points the opposite way. The individual probes have
+precedent~\cite{sadanandan2026consistent,zafar2026see,lotfinia2026cxr}; to our knowledge, their conclusions about
+the same models have not been compared.
 \item Evidence for two mechanisms behind the image-removal differences: refusal under a forced yes/no format, and
 agreement between a model's prior and the image content.
 \item A pre-registered held-out test showing that the in-format advantage of two medical models on their
@@ -126,28 +129,36 @@ log-probabilities by up to 1~nat.
 
 \section{Related Work}
 \label{sec:related}
-\paragraph{Language priors in VQA.} Balanced pairs~\cite{goyal2017vqav2} and changing-prior
-splits~\cite{agrawal2018dont} showed that general VQA models exploit answer priors; text-only baselines are the
-corresponding control in medical VQA.
+\paragraph{Language priors and modality reliance.} Balanced pairs~\cite{goyal2017vqav2} and changing-prior
+splits~\cite{agrawal2018dont} showed that general VQA models exploit answer priors. MMStar~\cite{chen2024mmstar}
+measures the gain from the image and the leakage of benchmark items into training data, the general-domain
+counterpart of the exposure we test with held-out data. MM-SHAP~\cite{parcalabescu2023mmshap} and the perceptual
+score~\cite{gat2021perceptual} quantify modality contributions by masking or permuting inputs. Contrast
+sets~\cite{gardner2020contrast} and NaturalBench~\cite{li2024naturalbench} score inputs with different answers
+jointly, which a model that ignores the image cannot pass; our pair accuracy applies this to medical images.
 
 \paragraph{Image use in medical VLMs.} PSF-Med~\cite{sadanandan2026psfmed} measured paraphrase flip rates across
 medical VLMs on chest X-rays and noted that low flip rates frequently co-occur with high text-only agreement. The
 quadrant taxonomy~\cite{sadanandan2026consistent} defines reliance by image removal and corroborates it with a
 KL-divergence score, a black image and random image swaps, which agreed with image removal on their models.
 Zafar~\etal~\cite{zafar2026see} construct blank, pixel-shuffled, absent and CLIP-retrieved hard-negative images
-to define reliance metrics and train a model against them. Lotfinia~\etal~\cite{lotfinia2026cxr} swap and
-occlude chest radiographs and find that model class (medical or general) does not predict image use. Pathology
+to define reliance metrics and train a model against them. Lotfinia~\etal~\cite{lotfinia2026cxr} swap, occlude and
+remove chest radiographs, take the opposite-label swap as the primary test because accuracy without the image
+reflects a model's default answer and the label distribution, and find that model class (medical or general) does
+not predict image use. ProbMed~\cite{yan2025probmed} pairs medical questions with adversarial counterparts and finds
+large models below chance. Pathology
 VLMs reach high accuracy without the image~\cite{zhang2026pathology}, and medical MLLMs frequently attend to
 irrelevant regions~\cite{liu2026medmllmfail}. Grounding inputs can even reduce closed-ended
 accuracy~\cite{chen2026grounding}; HEAL-MedVQA~\cite{nguyen2025heal} and MedHEval~\cite{chang2025medheval}
-benchmark localization and hallucination. These studies use a single probe or treat several as interchangeable;
-we compare the conclusions of different probes about the same models, inside and outside the models' training
-data.
+benchmark localization and hallucination. These studies use a single probe, treat several as interchangeable, or
+argue against removal on conceptual grounds; we measure how the conclusions of different probes about the same
+models diverge, explain the divergence, and test it inside and outside the models' training data.
 
 \paragraph{Answering without evidence.} MedVIGIL~\cite{jiang2026medvigil} tests whether models abstain when
 visual evidence is corrupted, and Vohra~\cite{vohra2026hearsay} reports that frontier VLMs produce diagnoses for
-images that were never provided. Four of our five open models decline almost always when permitted to; we show how
-enforcing an answer affects a reliance criterion.
+images that were never provided, and attaching even a blank image shifts refusal behavior~\cite{zhang2026uncontrolled},
+so neither an absent nor a blank image is a neutral control. Four of our five open models decline almost always
+when permitted to; we show how enforcing an answer affects a reliance criterion.
 
 \paragraph{Selective prediction.} Ranking answers by a score and abstaining on the lowest-ranked ones is evaluated
 by AUROC and risk--coverage~\cite{geifman2017selective}; we use this framework to test whether image reliance
@@ -203,7 +214,10 @@ Partners exist for 367 SLAKE yes/no questions (130 images), whose templated ques
 medical model.
 \end{itemize}
 We refer to the wrong-image, black-image and opposite-answer probes as \emph{in-format} probes, since an image is
-present in the input. The first two probes belong to the pre-registered main run; R1--R4 and the two additional
+present in the input. They are not equally informative. Only the opposite-answer image fixes what an image-reliant
+model must do, namely change its answer, and change it to the correct one; a black image is not a neutral
+input~\cite{zhang2026uncontrolled}, and a random image often has the same correct answer. We therefore treat R3
+and R4 as the reference and report the other probes alongside them. The first two probes belong to the pre-registered main run; R1--R4 and the two additional
 model pairs were each registered after the results that motivated them and before they were run.
 
 \subsection{Measures}
@@ -331,7 +345,8 @@ separates the medical model from its base in five of the nine cells: lower chang
 on VQA-RAD ($-19.1$\ci{$-27.6$}{$-10.4$} and $-18.7$\ci{$-27.3$}{$-9.4$}) and for MedGemma-4B on SLAKE
 ($-9.9$\ci{$-14.9$}{$-4.4$}), and higher rates for MedVLThinker on PathVQA and VQA-RAD (+4.5\ci{1.7}{7.2} and
 +11.2\ci{5.3}{17.4}). In four of these cells, no in-format probe detects a difference, and their intervals
-exclude a difference as large as the one image removal reports; in the fifth, MedGemma-4B on SLAKE, every in-format probe shows a
+exclude a difference as large as the one image removal reports (a statement about effect size, not merely a
+non-significant test; this analysis is post hoc and the nine cells are not corrected for multiplicity); in the fifth, MedGemma-4B on SLAKE, every in-format probe shows a
 difference in the opposite direction (wrong image +11.8, black image +33.0, opposite-answer image +48.0 points).
 Pooled over datasets, the primary pair shows the same divergence: image removal $-6.1$\ci{$-9.5$}{$-2.7$}, wrong
 image +5.1\ci{1.7}{8.5}, black image +20.3\ci{15.9}{24.6}. The two main-run probes also agree poorly at the
@@ -405,8 +420,11 @@ model that ignores the image: all five models use pathology images, to a similar
 from Gemma-3 (H12a: +0.8\ci{$-2.7$}{4.2}), MedGemma-1.5 follows the image \emph{less} often (H12b:
 $-5.6$\ci{$-9.1$}{$-2.0$}, $p_{\text{Holm}}=0.003$), and MedVLThinker matches its base as predicted (H12c).
 Resampling PathVQA's 154 question templates instead of images leads to the same conclusions. Under the decision rule
-fixed before the run, the SLAKE difference is attributed to the training distribution, and the hypothesis that
-either MedGemma model relies on the image more than Gemma-3 is withdrawn. Accuracy shows the same pattern:
+fixed before the run, the SLAKE difference is reported as possibly reflecting the training distribution (H12a),
+and the claim of greater image reliance is withdrawn for MedGemma-1.5 (H12b). R4 cannot separate training exposure
+from a difference between domains. It is not, however, a domain new to MedGemma: its training included 32.5 million
+histopathology patch--caption pairs~\cite{sellergren2025medgemma}; only the PathVQA questions and images are held
+out. Despite this training, the advantage seen on SLAKE does not appear. Accuracy shows the same pattern:
 MedGemma-4B's advantage over Gemma-3 is 18 points on SLAKE yes/no questions and 2 points on PathVQA
 (\cref{tab:acc}). On PathVQA, only the black-image probe separates MedGemma-4B from Gemma-3 (+19.2), consistent with
 its response to an empty image rather than with greater use of image content; the content-based probes (different
@@ -445,14 +463,18 @@ whether it would have used the image. Across three model pairs and three dataset
 removal reported between a medical model and its base was uncorroborated by the in-format probes, and the largest
 differences coincided with the largest differences in refusal. The corroborating checks of the original study
 (black image, random swaps) agreed with image removal on its chest X-ray models~\cite{sadanandan2026consistent};
-on our models and data they do not. A \dang{} share is therefore underspecified without its probe, and a
+on our models and data they do not, in line with the conceptual argument against removal for chest
+radiography~\cite{lotfinia2026cxr}. A \dang{} share is therefore underspecified without its probe, and a
 comparison of \dang{} shares obtained by image removal may reflect refusal policy more than image use.
 
 \paragraph{What the in-format probes measure.} The in-format probes are not free of confounds either. On SLAKE,
 they indicate that both MedGemma models rely on the image far more than Gemma-3; on PathVQA, outside their training
 data, they do not. Image reliance is a property of a model \emph{and} a data distribution, and in-format probes
 evaluated on a model's training distribution may reflect what the model learned there rather than how it uses
-images in general. For the three pairs studied, no general claim of greater image reliance by the medical model
+images in general. On opposite-answer swaps, following the image and answering correctly largely coincide: pair
+accuracy is 83--99\% of the follow rate for every model and set, so the probe measures the \emph{correct} use of
+the image, which is the property that matters for a diagnostic answer, rather than sensitivity to arbitrary
+changes. For the three pairs studied, no general claim of greater image reliance by the medical model
 survives evaluation on held-out data.
 
 \paragraph{Residual risk.} MedGemma-4B's additional \dang{} answers are correct, and the share of stable,
@@ -479,7 +501,12 @@ domain. R3 and the SLAKE results rest on templated questions that recur across i
 of images leaves the conclusions unchanged. MedGemma-4B was also trained on VQA-RAD, nearly all of whose test images
 appear in its training split, so its VQA-RAD results may reflect exposure; the training data of the general models
 are not published. A medical model and its base differ in their entire post-training, not only in medical data.
-Refusal is inferred from first-token probability mass and confirmed on a sample by free generation. Paraphrase
+Refusal is inferred from first-token probability mass and confirmed on a sample by free generation. All
+models answer in a forced format from the first token; MedVLThinker was trained to reason before answering, so its
+results describe the model without its reasoning step. A single instruction template was used, and refusal depends
+on the instruction (R2). The opposite-answer pairs inherit the label noise of their datasets (PathVQA's labels are
+generated automatically), which lowers attainable pair accuracy equally for both models of a pair. Only open models
+of 3--4B parameters were studied; larger and proprietary models may behave differently. Paraphrase
 equivalence was judged by an LLM and \textbf{was not validated by independent human raters}; a check of 50
 paraphrases, rated by the author with AI assistance, accepted 88\% (above the pre-specified 85\%) but is not
 independent of AI judgment. This is the principal limitation of the consistency measure; the probe comparison does
@@ -495,7 +522,8 @@ counterpart. No probe that keeps an image in the input corroborates this differe
 we examined. Image removal measures whether a model answers without an image and whether its priors agree with the
 image, rather than how much it relies on the image; probes that keep the image indicate greater reliance for the
 medical models only on data they were trained on. Comparisons of image reliance between models therefore require
-in-format probes on held-out data, together with chance correction and a decomposition by correctness.
+in-format probes, preferably images that call for a different answer, on held-out data, together with chance
+correction and a decomposition by correctness.
 
 {
     \small

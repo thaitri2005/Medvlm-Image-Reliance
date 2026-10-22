@@ -24,3 +24,7 @@ On Overleaf, upload this folder and compile with pdfLaTeX.
 Each analysis figure is written as a 300 dpi PNG and a vector PDF; the paper and the poster use the PDFs. Titled
 versions for the README and RESULTS go to `results/`. Every number in the text comes from the committed tables
 under `results/` ([docs/RESULTS.md](../docs/RESULTS.md)).
+
+## arXiv
+
+`python make_arxiv.py` builds the upload bundle `arxiv.zip` (needs `main.bbl`: compile with `tectonic --keep-intermediates main.tex`). Submission metadata and steps: [ARXIV.md](ARXIV.md).

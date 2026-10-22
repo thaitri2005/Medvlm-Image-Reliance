@@ -26,3 +26,10 @@ configs/local.yaml
 
 # Session logs (logs/*.log); attach one when reporting a problem
 /logs/
+
+# LaTeX intermediates (report/): keep main.pdf only
+report/*.aux
+report/*.bbl
+report/*.brf
+report/*.out
+report/*.log

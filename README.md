@@ -1,6 +1,6 @@
 <h1 align="center">Consistent but Blind?</h1>
 <p align="center"><b>Image removal does not measure image reliance in medical vision-language models</b></p>
-<p align="center"><b>Tri Thai Huu</b> · VinUniversity · <a href="mailto:23tri.th@vinuni.edu.vn">23tri.th@vinuni.edu.vn</a></p>
+<p align="center"><b>Tri Thai Huu</b>, <b>Hung Nguyen Le</b> · VinUniversity · <a href="mailto:23tri.th@vinuni.edu.vn">23tri.th@vinuni.edu.vn</a>, <a href="mailto:23hung.nl@vinuni.edu.vn">23hung.nl@vinuni.edu.vn</a></p>
 <p align="center">
 5 models: 3 medical VLMs vs the 2 general-purpose models they derive from &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
@@ -278,7 +278,7 @@ tests/                   fast unit tests and -m slow real-model tests
 - **Training exposure.** MedGemma-4B trained on SLAKE and VQA-RAD (whose test images mostly occur in its train
   split), and MedGemma-1.5 on SLAKE. The general models' training data are not published.
 - **Paraphrases** were judged by an LLM and not validated by independent human raters. A second check of 50
-  used paraphrases, rated by the author with AI assistance, accepted 88% (target 85%;
+  used paraphrases, rated by the first author with AI assistance, accepted 88% (target 85%;
   `manifests/main/paraphrase_audit.csv`). The probe comparison does not use paraphrases. Quadrant results cover questions with
   at least two valid paraphrases (84% of the primary set).
 - PathVQA questions are auto-generated from captions. Benchmark VQA is not clinical use, and nothing here is a
@@ -308,12 +308,12 @@ papers in any use of this work.
 
 ## Citation and contact
 
-Tri Thai Huu, VinUniversity · 23tri.th@vinuni.edu.vn. For questions, open a GitHub issue or write by email.
+Tri Thai Huu and Hung Nguyen Le, VinUniversity · 23tri.th@vinuni.edu.vn, 23hung.nl@vinuni.edu.vn. For questions, open a GitHub issue or write by email.
 
 ```bibtex
 @misc{thaihuu2026consistentblind,
   title  = {Consistent but Blind? Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models},
-  author = {Thai Huu, Tri},
+  author = {Thai Huu, Tri and Nguyen Le, Hung},
   year   = {2026},
   note   = {VinUniversity. https://github.com/thaitri2005/Medvlm-Image-Reliance}
 }

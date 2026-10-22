@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "medvlm"
 version = "1.0.0"
 license = {text = "MIT"}
-authors = [{name = "Tri Thai Huu", email = "23tri.th@vinuni.edu.vn"}]
+authors = [{name = "Tri Thai Huu", email = "23tri.th@vinuni.edu.vn"},
+           {name = "Hung Nguyen Le", email = "23hung.nl@vinuni.edu.vn"}]
 description = "Probing image reliance in medical vision-language models: image removal vs in-format probes"
 requires-python = ">=3.10"
 dependencies = [

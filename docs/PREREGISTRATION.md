@@ -64,7 +64,7 @@ a modality (reported as exploratory only), training anything, clinical claims.
   supported, H12b reversed, H12c supported (section 17.1). Under the registered decision rule the claim that the
   MedGemmas use the image more is withdrawn; the paper's claim is the disagreement between probes.
 - **Final (2026-10-17): no further experiments.** Remaining work is presentation only (poster). The 50-row
-  paraphrase audit sheet (`manifests/main/paraphrase_audit.csv`) was rated by the author **with AI assistance**:
+  paraphrase audit sheet (`manifests/main/paraphrase_audit.csv`) was rated by the first author **with AI assistance**:
   44/50 accepted (88%, pre-specified threshold 85%). It is reported as an AI-assisted check, not as independent human
   validation; pass B (re-rating) was not done.
 
@@ -147,7 +147,7 @@ column A), then rated again **at least 48 h later with column A hidden** (column
 since there is no second person. `medvlm audit-score` gives acceptance and kappa. **Gate: acceptance >= 90%**;
 below 85%, tighten the validator and regenerate before running.
 
-**What actually happened (main, 2026-10-15; the rater was an LLM, Claude, at the author's request).**
+**What actually happened (main, 2026-10-15; the rater was an LLM, Claude, at the first author's request).**
 Round 1 (100 rows): 81% accepted, below the 85% line, so the validator was tightened as pre-specified
 (absence words, side/extent words counted as a multiset, open->yes/no form loss, foreign characters; the
 `plain` style excluded, 18/28). Round 2 (300 fresh rows, none seen before): 82.7%; `lexical` 70% and a new

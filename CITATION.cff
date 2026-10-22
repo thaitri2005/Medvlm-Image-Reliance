@@ -6,6 +6,10 @@ authors:
     given-names: "Tri"
     affiliation: "VinUniversity"
     email: "23tri.th@vinuni.edu.vn"
+  - family-names: "Nguyen Le"
+    given-names: "Hung"
+    affiliation: "VinUniversity"
+    email: "23hung.nl@vinuni.edu.vn"
 version: "1.0.0"
 date-released: "2026-10-22"
 license: MIT

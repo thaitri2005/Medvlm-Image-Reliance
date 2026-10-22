@@ -1,5 +1,6 @@
 <h1 align="center">Consistent but Blind?</h1>
 <p align="center"><b>Image removal does not measure image reliance in medical vision-language models</b></p>
+<p align="center"><b>Tri Thai Huu</b> · VinUniversity · <a href="mailto:23tri.th@vinuni.edu.vn">23tri.th@vinuni.edu.vn</a></p>
 <p align="center">
 5 models: 3 medical VLMs vs the 2 general-purpose models they derive from &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
 </p>
@@ -304,3 +305,16 @@ tests/                   fast unit tests and -m slow real-model tests
 Code: MIT ([LICENSE](LICENSE)). Data: SLAKE (CC-BY-4.0), VQA-RAD (CC0 1.0), PathVQA (MIT). Models: MedGemma and
 Gemma-3 under Google's terms, Qwen2.5-VL and MedVLThinker under their own licences. Cite the original dataset
 papers in any use of this work.
+
+## Citation and contact
+
+Tri Thai Huu, VinUniversity · 23tri.th@vinuni.edu.vn. For questions, open a GitHub issue or write by email.
+
+```bibtex
+@misc{thaihuu2026consistentblind,
+  title  = {Consistent but Blind? Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models},
+  author = {Thai Huu, Tri},
+  year   = {2026},
+  note   = {VinUniversity. https://github.com/thaitri2005/Medvlm-Image-Reliance}
+}
+```

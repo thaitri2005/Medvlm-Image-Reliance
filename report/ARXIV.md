@@ -25,7 +25,7 @@ Consistent but Blind? Image Removal Does Not Measure Image Reliance in Medical V
 
 **Authors**
 
-Tri Thai Huu
+Tri Thai Huu (VinUniversity; 23tri.th@vinuni.edu.vn)
 
 **Abstract**
 

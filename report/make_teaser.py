@@ -69,8 +69,8 @@ def row(y_top, title, imgs, cells, quads, footnote):
     imgs[0](0.02, y_img)
     imgs[1](0.02 + S + 0.1, y_img)
     y_h = y_top - 0.3
-    heads = {"orig": "with image", "para": "2 paraphrases", "noimg": "image removed", "shuf": "wrong image",
-             "q_noimg": "quadrant\n(removed)", "q_shuf": "quadrant\n(wrong)"}
+    heads = {"orig": "with image", "para": "2 paraphrases", "noimg": "image removed", "shuf": "different image",
+             "q_noimg": "quadrant\n(removed)", "q_shuf": "quadrant\n(different)"}
     for k, h in heads.items():
         if k in cells["MedGemma-4B"] or k in quads["MedGemma-4B"]:
             text(COL[k] if not k.startswith("q_") else COL[k], y_h, h, 6.0, INK2,
@@ -103,7 +103,7 @@ row(H - 0.12, f"(a)  “{A['question']}”   (SLAKE CT, gold: {A['gold'].lower()
 
 row(H - 1.62, f"(b)  “{B['question']}”   (SLAKE CT, gold: {B['gold'].lower()})",
     [lambda x, y: thumb(x, y, B["image"], "with image"),
-     lambda x, y: thumb(x, y, B["partner"], "wrong image", "its answer: no")],
+     lambda x, y: thumb(x, y, B["partner"], "different image", "its answer: no")],
     {"MedGemma-4B": {"orig": ans(mb, "orig"), "para": "yes, yes", "noimg": ans(mb, "noimg"), "shuf": ans(mb, "shuf")},
      "Gemma-3-4B": {"orig": ans(gb, "orig"), "para": "yes, yes", "noimg": ans(gb, "noimg"), "shuf": ans(gb, "shuf")}},
     {"MedGemma-4B": {"q_noimg": "Dangerous", "q_shuf": "Ideal"}, "Gemma-3-4B": {"q_noimg": "Ideal", "q_shuf": "Dangerous"}},

@@ -9,7 +9,7 @@ All intervals are 95% cluster-bootstrap CIs by image (B = 2,000). **Pre-register
 probes** and **post-hoc** analyses are labelled as such; every change after the analysis plan was frozen is
 logged in [PREREGISTRATION.md §13](PREREGISTRATION.md), and the probes were registered in [PREREGISTRATION.md §15](PREREGISTRATION.md) before they were run.
 Identifiers (P1–P3, H6–H12, R1–R4) are those of the pre-registration; the paper describes the same tests in words
-and lists the identifiers in its Appendix D. "Wrong image" and "different image" name the same probe.
+and lists the identifiers in its Appendix D. The "different image" probe is called "wrong image" in the pre-registration and `shuf` in file names.
 Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`,
 `results/posthoc_medgemma4b_vs_gemma3_4b/main/`, `results/contrast/`, `results/contamination/` (`medvlm analyze`,
 `compare`, `posthoc`, `contrast --analyze`, `contamination`; index in [results/README.md](../results/README.md)). Paper:
@@ -21,7 +21,7 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
    more than Gemma-3.** Its Dangerous share is +13.7 points higher [10.0, 17.5] (P3), in every dataset and every
    cell of the pre-registered sensitivity grid.
 2. **Probes that keep an image in the input rank the models differently** (§5, §15). Tested directly as a
-   difference of differences on the same questions, image removal disagrees with a wrong, black or
+   difference of differences on the same questions, image removal disagrees with a different, black or
    opposite-answer image about a medical model and its base in 13 of 21 comparisons after Holm correction, in 6
    of 9 pair × dataset cells, and by −60.5 points [−68.8, −51.3] against the opposite-answer image on SLAKE. The
    probes agree in 3 cells, all with small differences. No probe is treated as ground truth; the opposite-answer
@@ -54,7 +54,7 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
 The pipeline reproduces MedGemma's published SLAKE score within 2.1 points. VQA-RAD is higher than the card,
 which evaluates a harder "balanced" split. Both were anticipated in the pre-registration.
 
-## 2. Accuracy with, without and with the wrong image (test)
+## 2. Accuracy with, without and with a different image (test)
 
 Yes/no accuracy (%) with the image / without it / with a different image; open answers: token-F1 ≥ 0.5 with the
 image (`results/<model>/main/by_dataset_type.csv`). Majority-answer prior: PathVQA 52.2, SLAKE 50.7, VQA-RAD 53.0.
@@ -97,8 +97,8 @@ answers (§6), so a share near 50% is not "half the answers ignore the image".
 |---|---|---|---|
 | MedGemma, image-removed probe | 50.6 | 46.8 | 56.5 |
 | Gemma-3, image-removed probe | 43.2 | 28.1 | 31.0 |
-| MedGemma, wrong-image probe | 46.6 | 64.7 | 61.9 |
-| Gemma-3, wrong-image probe | 44.1 | 70.8 | 63.7 |
+| MedGemma, different-image probe | 46.6 | 64.7 | 61.9 |
+| Gemma-3, different-image probe | 44.1 | 70.8 | 63.7 |
 
 **P3.** MedGemma's Dangerous share is +13.7 points higher [10.0, 17.5], in every dataset (PathVQA +7.5
 [2.6, 12.3], SLAKE +18.6 [12.2, 24.9], VQA-RAD +25.6 [14.7, 36.5]) and in every cell of the pre-registered
@@ -118,7 +118,7 @@ a dataset MedGemma was trained on; on PathVQA the in-format gaps are close to 0.
 | Probe | n | MedGemma | Gemma-3 | MedGemma − Gemma-3 |
 |---|---|---|---|---|
 | Image removed (reference) | 1,206 | 42.0% [39.0, 44.9] | 48.0% [45.0, 50.8] | **−6.1** [−9.5, −2.7] |
-| Wrong image, same modality | 1,206 | 34.4% [31.6, 37.4] | 29.4% [26.7, 32.3] | **+5.1** [1.7, 8.5] |
+| Different image, same modality | 1,206 | 34.4% [31.6, 37.4] | 29.4% [26.7, 32.3] | **+5.1** [1.7, 8.5] |
 | Black image (R1) | 1,206 | 47.4% [44.3, 50.5] | 27.1% [24.4, 29.8] | **+20.3** [15.9, 24.6] |
 | Opposite-answer image (R3, SLAKE) | 367 | 72.8% [68.1, 77.0] | 24.8% [20.4, 29.3] | **+48.0** [41.9, 53.8] |
 
@@ -153,7 +153,7 @@ is the more Dangerous model by 14.0 points [9.4, 18.6] (44.2% vs 58.2%). The ans
 MedGemma's yes-rate drops from 58% to 28% (it reads an empty image as absent findings), while Gemma-3's rises
 from 64% to 84%; its answers track the question rather than the image. H6 predicted the opposite.
 
-**Wrong image.** A random image of the same modality changes MedGemma's answer more often (+5.1), while the
+**Different image.** A random image of the same modality changes MedGemma's answer more often (+5.1), while the
 Dangerous share under this probe does not differ (−0.7 [−4.4, 3.2]). It is the weakest probe because a random
 partner often has the same correct answer: where the partner image carries the same question, **all 23 chest
 X-ray partners had the same correct answer** (CT 58%, MRI 60%), so an unchanged answer there is correct, not
@@ -162,7 +162,7 @@ blind. This is why the modality ordering reverses between probes:
 ![Dangerous share by modality](../results/posthoc_medgemma4b_vs_gemma3_4b/main/fig2_modality.png)
 
 Under image removal MedGemma's Dangerous share is ~50% for CT (50.8 [46.6, 55.6]) and MRI (50.0 [42.6, 57.4])
-and lower for X-ray (33.1 [24.8, 41.2]); under a wrong image X-ray becomes the most "Dangerous" (75.4%). The two
+and lower for X-ray (33.1 [24.8, 41.2]); under a different image X-ray becomes the most "Dangerous" (75.4%). The two
 main-run probes agree poorly (κ between their reliance labels: MedGemma 0.23, −0.11, 0.18; Gemma-3 0.07, 0.03,
 0.07 for PathVQA, SLAKE, VQA-RAD), so a Dangerous share without its probe is underspecified.
 
@@ -249,7 +249,7 @@ Each yes/no answer is scored by its image PMI, log p(answer | image) − log p(a
 the model gave: how much the image raised the probability of that answer. It ranks correct above incorrect
 answers at chance (AUROC **0.513** [0.473, 0.552] for MedGemma, 0.532 for Gemma-3), while the model's own
 confidence reaches 0.709 and 0.603 (**better by 0.197** [0.145, 0.250] and 0.071 [0.026, 0.116]). The
-wrong-image variant is no better (0.52 / 0.54). *Whether a model leaned on the image does not tell you whether
+different-image variant is no better (0.52 / 0.54). *Whether a model leaned on the image does not tell you whether
 it was right.*
 
 ## 9. Replication on two more pairs (registered, PREREGISTRATION.md §16)
@@ -275,7 +275,7 @@ pair was not needed. 18,896 + 3,535 calls per model, all complete.
 | | MedGemma-4B | MedGemma-1.5-4B | Gemma-3-4B | MedVLThinker-3B | Qwen2.5-VL-3B |
 |---|---|---|---|---|---|
 | Image removed | 42.0% | 40.6% | 48.0% | 46.4% | 42.5% |
-| Wrong image | 34.4% | 29.7% | 29.4% | 29.7% | 30.8% |
+| Different image | 34.4% | 29.7% | 29.4% | 29.7% | 30.8% |
 | Black image | 47.4% | 35.3% | 27.1% | 47.9% | 48.8% |
 | Opposite-answer image (SLAKE) | 72.8% | 61.3% | 24.8% | 47.1% | 48.8% |
 | Refuses without image, forced yes/no | 18.2% | 0.7% | 29.4% | 0% | 0% |
@@ -291,7 +291,7 @@ refusal accounts for nearly all of it. Unlike MedGemma-4B, MedGemma-1.5 answers 
 wrong).
 
 **Pair B shows no reversal, because there is nothing to reverse.** MedVLThinker and its base are
-indistinguishable under every in-format probe (opposite-answer −1.6, black −0.8 [−3.0, 1.3], wrong image −1.2
+indistinguishable under every in-format probe (opposite-answer −1.6, black −0.8 [−3.0, 1.3], different image −1.2
 [−3.3, 1.0]) and in error rate (30.8% vs 31.7%): the RL fine-tune did not change how the model uses the image.
 Neither model ever refuses under the forced format, and both decline on ≥ 98.7% when allowed to. Image removal
 still reports a small difference the in-format probes do not see (+3.9, opposite to H10), because the base's blind
@@ -309,9 +309,9 @@ but three pairs cannot test it formally.
 | | Hypothesis | Outcome |
 |---|---|---|
 | H1 | Blind accuracy exceeds the prior somewhere, most likely PathVQA | **Supported** for MedGemma on PathVQA (P1a); not for Gemma-3 |
-| H2 | Dangerous share differs by modality | **Probe-dependent:** X-ray is lowest under image removal and highest under wrong image, explained by answer-preserving swaps |
+| H2 | Dangerous share differs by modality | **Probe-dependent:** X-ray is lowest under image removal and highest under different image, explained by answer-preserving swaps |
 | H3 | Image PMI flags errors better than confidence | **Not supported:** at chance, below confidence |
-| H4 | MedGemma has a larger Dangerous share than Gemma-3 | **Supported only under image removal** (robust to the grid and to refusals); null under a wrong image, **reversed** under a black image; the excess is correct answers |
+| H4 | MedGemma has a larger Dangerous share than Gemma-3 | **Supported only under image removal** (robust to the grid and to refusals); null under a different image, **reversed** under a black image; the excess is correct answers |
 | H5 | The two main-run probes agree only weakly | **Supported** (κ −0.11 to 0.23) |
 | H6 | κ(real, black image) higher for MedGemma | **Failed, reversed:** −0.22 [−0.30, −0.14] |
 | H7 | With "unknown" allowed, MedGemma still declines less | **Supported**, but both decline on ≥ 93% |
@@ -369,7 +369,7 @@ conclusions rest on:
 | P2 formula | The registered version used the gold answer (log p(gold \| image) alone has AUROC 1.0); recomputed on the model's answer from stored outputs, no rerun needed | P2 reported on the model's answer |
 | Dangerous share is not chance-corrected | On yes/no, 49% / 46% of answers would be "unchanged without the image" by chance | corrected with κ (§7) |
 | Dangerous mixes correct and wrong answers | 78% of MedGemma's Dangerous answers are correct | split by correctness (§6) |
-| Pilot questions (design tuned on them) are part of `main` | Without them: P1 PathVQA +6.3 [2.4, 10.6], p_Holm = 0.003; P3 +12.9 [8.9, 17.1]; wrong-image P3 −0.3 | none (`no_pilot.csv`) |
+| Pilot questions (design tuned on them) are part of `main` | Without them: P1 PathVQA +6.3 [2.4, 10.6], p_Holm = 0.003; P3 +12.9 [8.9, 17.1]; different-image P3 −0.3 | none (`no_pilot.csv`) |
 | Training-data contamination | MedGemma-4B: SLAKE (train split) and VQA-RAD (RL) per its technical report; PathVQA removed. 202/203 VQA-RAD test images are also VQA-RAD train images (`results/contamination/`) | P1c (VQA-RAD) may reflect exposure; R3 is on a trained-on distribution, so R4 was registered (§13). Corrected 2026-10-16 |
 | Answer capitalisation, duplicates, prior | Case normalised; 5 duplicate pairs with conflicting gold (dataset noise); the test-set prior is the strongest constant baseline | none |
 | `compare` pooled the validation split into P3 | Bug, fixed before reporting (+14.1 → +13.7) | fixed |
@@ -496,7 +496,7 @@ CIs by image).
 
 ![By dataset](../results/replication_main/fig10_by_dataset.png)
 
-| Pair | Dataset | Image removed | Wrong image | Black image | Opposite-answer | Refusal gap |
+| Pair | Dataset | Image removed | Different image | Black image | Opposite-answer | Refusal gap |
 |---|---|---|---|---|---|---|
 | MedGemma-4B − Gemma-3 | PathVQA | +1.7 [−3.0, 6.6] | +2.3 [−2.6, 7.4] | **+19.2** [13.8, 24.5] | +0.8 [−2.7, 4.2] | −4.3 |
 | | VQA-RAD | **−19.1** [−27.6, −10.4] | +2.0 [−7.0, 10.9] | +5.2 [−5.8, 16.2] | | −23.1 |
@@ -514,7 +514,7 @@ in-format probe points the other way. Its three negative cells are cells where t
 (VQA-RAD: 23 and 48 points); its two positive cells are in the Qwen pair, where neither model ever refuses and the
 difference comes from how well each model's blind guesses match its image answers. But "significant under one
 probe and not under another" is not by itself evidence that two probes disagree, and one cell reads the other
-way: for MedGemma-1.5 on PathVQA image removal (−4.3), a wrong image (−6.0) and the opposite-answer image (−5.6)
+way: for MedGemma-1.5 on PathVQA image removal (−4.3), a different image (−6.0) and the opposite-answer image (−5.6)
 agree in direction. The next table tests the disagreement itself.
 
 ### Do the probes disagree? A direct test (post hoc)
@@ -527,7 +527,7 @@ over all 21 rows. Wrong and black image: test yes/no questions. Opposite-answer 
 questions (image-removal difference on that set: −12.5, −9.0, 0.0); R4 on PathVQA has no image-removed condition,
 so it has no row.
 
-| Image removal − in-format probe | Dataset | Wrong image | Black image | Opposite-answer image |
+| Image removal − in-format probe | Dataset | Different image | Black image | Opposite-answer image |
 |---|---|---|---|---|
 | MedGemma-4B − Gemma-3 | PathVQA | −0.7 [−7.1, 5.9] | **−17.5** [−23.8, −10.8] | |
 | | VQA-RAD | **−21.1** [−32.2, −9.6] | **−24.3** [−36.3, −11.7] | |

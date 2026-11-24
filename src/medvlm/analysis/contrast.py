@@ -177,7 +177,7 @@ def contrast_figure(per_model: pd.DataFrame, pairs, out_dir, paper_dir=None) -> 
     pairs = [(a, b) for a, b in pairs if {a, b} <= set(per_model.model)]
     if not sets or not pairs:
         return []
-    short = {"r3_slake": "SLAKE (R3)", "r4_pathvqa": "PathVQA (R4)"}
+    short = {"r3_slake": "SLAKE", "r4_pathvqa": "PathVQA (held out)"}
     rows = [(m, s) for m in ("follow", "both_right") for s in sets]
     names = {"follow": "follows the image", "both_right": "pair accuracy"}
     written = []
@@ -210,8 +210,8 @@ def contrast_figure(per_model: pd.DataFrame, pairs, out_dir, paper_dir=None) -> 
             _style(ax, f"{LABEL.get(a, a)}\nvs {LABEL.get(b, b)}", fs)
             ax.tick_params(axis="y", length=0)
         axes[0, 0].set_yticks(y, [f"{names[m]}, {short[s]}" for m, s in rows])
-        fig.supxlabel("share of opposite-answer pairs (95% CI). Pair accuracy = right on both images; "
-                      "0% for a model that ignores the image", fontsize=fs, color=INK2)
+        fig.supxlabel("share of opposite-answer pairs (95% CI). Pair accuracy = right on both images: "
+                      "0% if the image is ignored, 25% if answers are uninformative", fontsize=fs, color=INK2)
         fig.legend([Line2D([], [], marker="o", ls="", ms=ms, color=c) for c in (BLUE, ORANGE)],
                    ["medical model of the pair", "its general-purpose base"], frameon=False, fontsize=fs - 0.5,
                    loc="upper center", ncol=2, bbox_to_anchor=(0.5, 0.0))

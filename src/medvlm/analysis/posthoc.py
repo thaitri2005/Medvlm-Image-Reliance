@@ -441,7 +441,7 @@ def replication_summary(results_dir, pairs: list[tuple[str, str]], profile: str 
     return T.merge(rep, left_on="pair", right_index=True, how="left")
 
 
-REVERSAL_PROBES = (("noimg", "Image removed"), ("shuf", "Wrong image"), ("blank", "Black image"),
+REVERSAL_PROBES = (("noimg", "Image removed"), ("shuf", "Different image"), ("blank", "Black image"),
                    ("opp", "Opposite-answer image"))
 
 
@@ -565,7 +565,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         # 1: quadrant composition (full width)
         fig, axes = plt.subplots(1, 2, figsize=(full, 2.35) if paper else (11, 3.9), sharey=True)
         ylabels = []
-        for ax, (probe, c) in zip(axes, [("image removed", "quadrant"), ("wrong image", "quadrant_shuf")]):
+        for ax, (probe, c) in zip(axes, [("image removed", "quadrant"), ("different image", "quadrant_shuf")]):
             ylabels, y = [], 0
             for ds in ("pathvqa", "slake", "vqa_rad"):
                 for m in models:
@@ -601,7 +601,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         # 2: Dangerous share by SLAKE modality, both probes (single column in the paper)
         fig, axes = plt.subplots(1, 2, figsize=(col, 1.85) if paper else (9.5, 3.4), sharey=True)
         mods = ["ct", "mri", "xray"]
-        for ax, (probe, c) in zip(axes, [("image removed", "q_dangerous"), ("wrong image", "q_dangerous_shuf")]):
+        for ax, (probe, c) in zip(axes, [("image removed", "q_dangerous"), ("different image", "q_dangerous_shuf")]):
             for k, m in enumerate(models):
                 tb = pd.read_csv(results_dir / m / profile / "by_modality_pooled.csv")
                 tb = tb[(tb.dataset == "slake") & (tb.answer_type == "yesno")].set_index("modality")
@@ -626,13 +626,12 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         sel = tabs["selective_labelfree"]
         order = ["confidence (baseline)", "image PMI, predicted answer  [label-free]",
                  "wrong-image PMI, predicted answer  [label-free]"]
-        groups = ["Confidence", "Image reliance\n(image removed)", "Image reliance\n(wrong image)"]
+        groups = ["Confidence", "Reliance,\nimage removed", "Reliance,\ndifferent image"]
         fig, ax = plt.subplots(figsize=(col, 1.95) if paper else (7.5, 3.4))
         series = {m: tuple(sel[sel.model == m].set_index("score").loc[order, k].to_numpy() for k in ("auroc", "lo", "hi"))
                   for m in models}
         _bars(ax, groups, series, color, LABEL, fs, pct=False, fmt="{:.2f}", ylim=(0.4, 0.82), hline=0.5)
-        ax.text(-0.5, 0.505, "chance", fontsize=fs - 1.5, color=INK2, ha="left", va="bottom")
-        ax.set_ylabel("AUROC, correct answer", color=INK2, fontsize=fs)
+        ax.set_ylabel("AUROC (dashed: chance)", color=INK2, fontsize=fs)
         ax.legend(frameon=False, fontsize=fs - 0.5, loc="upper right")
         _style(ax, None, fs)
         fig.tight_layout()
@@ -650,30 +649,30 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         series = {m: tuple(abst[abst.model == m].set_index("dataset").loc[dss, k].to_numpy()
                            for k in ("abstain_noimg", "lo", "hi")) for m in models}
         _bars(axes[0, 0], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
-        _style(axes[0, 0], "Instruction: answer yes or no (main run)", fs)
+        _style(axes[0, 0], "Instruction: answer yes or no", fs)
         axes[0, 0].legend(frameon=False, fontsize=fs - 0.5, loc="upper left")
         if pa is not None:
             series = {m: tuple(pa[(pa.model == m)].set_index("dataset").loc[dss, k].to_numpy()
                                for k in ("abstain_allowed", "lo", "hi")) for m in models}
             _bars(axes[0, 1], [DS_LABEL[d] for d in dss], series, color, LABEL, fs, ylim=(0, 1.05))
-            _style(axes[0, 1], "Instruction allows 'unknown' (probe R2)", fs)
+            _style(axes[0, 1], "Instruction allows 'unknown'", fs)
         fig.tight_layout()
         save(fig, "fig4_abstention.png", "Declines to answer when the image is removed")
 
         # 5: the MedGemma - Gemma-3 Dangerous gap under every variant (forest plot, one axis: share difference)
         p3 = tabs["p3_sensitivity"].copy()
-        names = {"pre-registered (image-removed probe)": "Image removed (registered)",
-                 f"both models answer without image (mass >= {ANSWER_MASS})": "  both answer blind",
-                 f"neither model abstains (mass >= {ABSTAIN_MASS})": "  no abstentions",
-                 "wrong-image probe instead": "Wrong image"}
+        names = {"pre-registered (image-removed probe)": "Image removed, all questions",
+                 f"both models answer without image (mass >= {ANSWER_MASS})": "both models answer",
+                 f"neither model abstains (mass >= {ABSTAIN_MASS})": "neither model refuses",
+                 "wrong-image probe instead": "Different image"}
         rows = [(names[v], e, lo, hi, n) for v, e, lo, hi, n in p3[["variant", "est", "lo", "hi", "n"]].itertuples(index=False)]
         pb = tabs.get("probe_blank")
         if pb is not None:
             r = pb.iloc[-1]
-            rows.append(("Black image (R1)", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
+            rows.append(("Black image", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
         hm = tabs["harm"]
         hm = hm[hm.model.str.contains(" - ")].set_index("measure")
-        for meas, nm in (("dangerous_correct", "Removed: correct only"), ("dangerous_wrong", "Removed: wrong only")):
+        for meas, nm in (("dangerous_correct", "Image removed, correct answers"), ("dangerous_wrong", "Image removed, incorrect answers")):
             rows.append((nm, hm.loc[meas, "est"], hm.loc[meas, "lo"], hm.loc[meas, "hi"], int(hm.loc[meas, "n"])))
         fig, ax = plt.subplots(figsize=(col, 0.32 * len(rows) + 0.5) if paper else (8.5, 0.45 * len(rows) + 1))
         y = np.arange(len(rows))[::-1]
@@ -710,7 +709,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         if rv is not None and not rv.empty:
             probes = [p for p, _ in REVERSAL_PROBES if p in set(rv.probe)]
             sub = {"noimg": "the reference probe", "shuf": "same dataset and modality",
-                   "blank": "probe R1", "opp": "probe R3, SLAKE"}
+                   "blank": "format kept, content removed", "opp": "SLAKE"}
             fig, ax = plt.subplots(figsize=(col, 2.6) if paper else (8.0, 4.3))
             y = np.arange(len(probes))[::-1].astype(float)
             ms, lw = (4.5 if paper else 8), (1.4 if paper else 2.2)
@@ -919,7 +918,7 @@ def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
     from matplotlib.lines import Line2D
 
     probes = ["noimg", "shuf", "blank", "opp"]
-    names = {"noimg": "Image removed", "shuf": "Wrong image", "blank": "Black image", "opp": "Opposite-answer image"}
+    names = {"noimg": "Image removed", "shuf": "Different image", "blank": "Black image", "opp": "Opposite-answer image"}
     style = {"pathvqa": dict(marker="o", color=INK, mfc=INK), "vqa_rad": dict(marker="s", color="#8a8984", mfc="#8a8984"),
              "slake": dict(marker="D", color=INK2, mfc=SURFACE)}
     off = {"pathvqa": 0.22, "vqa_rad": 0.0, "slake": -0.22}
@@ -955,7 +954,7 @@ def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
             _style(ax, f"{LABEL.get(a, a)}\nvs {LABEL.get(b, b)}", fs)
             ax.tick_params(axis="y", length=0)
         axes[0, 0].set_yticks(y, [names[p] for p in probes])
-        fig.supxlabel("medical − general: change in answer-change rate when the image is altered (points, 95% CI)",
+        fig.supxlabel("medical − general difference in answer-change rate (points, 95% CI)",
                       fontsize=fs, color=INK2)
         fig.legend([Line2D([], [], ls="", ms=ms, **{k: v for k, v in style[d].items()}) for d in style],
                    [DATASET_ROLE[d] for d in style], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=3,

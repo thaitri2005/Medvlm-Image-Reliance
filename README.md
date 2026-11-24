@@ -228,7 +228,7 @@ flowchart LR
 | Probe | What changes | Role |
 |---|---|---|
 | **Image removed** | image tokens omitted, text identical | the taxonomy's reference probe (main run) |
-| **Different image** ("wrong image" in file names) | another image, same dataset and modality | second probe (main run); weak, because the partner often has the same answer |
+| **Different image** (`shuf` in file names; "wrong image" in the pre-registration) | another image, same dataset and modality | second probe (main run); weak, because the partner often has the same answer |
 | **Black image** (R1) | a black image in the image slot | in format, no content; not a neutral input |
 | **"Unknown" allowed** (R2) | image removed, instruction allows "unknown" | separates refusal from blind answering |
 | **Opposite-answer image** (R3 SLAKE, R4 PathVQA) | another image on which the same question has the opposite gold answer | the reference probe: an image-reliant model must change its answer, and to the right one; R4 is outside every medical model's training data |

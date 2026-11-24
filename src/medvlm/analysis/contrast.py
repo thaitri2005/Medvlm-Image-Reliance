@@ -10,7 +10,17 @@ gold answer. Because the two gold answers are opposite, every model outcome fall
 
 follow rate = both right + both wrong. **Pair accuracy** (both right) is the contrast-set metric: a model that
 ignores the image always gives the same answer to both images, so it scores exactly 0 by construction, and a model
-answering independently at random scores 25%. It separates "uses the image" from "is more accurate".
+answering independently at random scores 25%.
+
+The cells are tied to accuracy by an identity. With a and b the accuracies on the own and the partner image and
+w the both-wrong share:
+
+    pair accuracy = a + b - 1 + w            follow rate = a + b - 1 + 2w
+
+So on opposite-answer pairs, where the answers are balanced by construction and a model that ignores the image
+is right exactly half the time, the follow rate is accuracy rescaled (2 x mean accuracy - 1) plus 2w. The probe
+measures accuracy with the answer prior removed; w, small in every run, is its only other degree of freedom.
+`accuracy_pairs` (mean of a and b) and `both_wrong` are reported with intervals for that reason.
 """
 from __future__ import annotations
 
@@ -88,9 +98,9 @@ def _mean(col):
     return lambda x: float(x[col].astype(float).mean())
 
 
-def _vs_product(x) -> float:
-    """Pair accuracy minus the product of the two single-image accuracies."""
-    return float(x.both_right.mean() - x.correct_orig.mean() * x.correct_partner.mean())
+def _pair_set_accuracy(x) -> float:
+    """Accuracy over both images of every pair."""
+    return float((x.correct_orig.astype(float).mean() + x.correct_partner.astype(float).mean()) / 2)
 
 
 def _paired(col):
@@ -111,13 +121,9 @@ def summarize_contrast(paths: Paths, models=MODELS, pairs=PAIRS, sets=SETS, B: i
         for col in METRICS:
             r = cluster_bootstrap(d, _mean(col), B=B, seed=seed)
             row.update({col: r["est"], f"{col}_lo": r["lo"], f"{col}_hi": r["hi"]})
-        # Post hoc: is pair accuracy more than accuracy? If being right on one image said nothing about being
-        # right on the other, pair accuracy would be the product of the two accuracies. A model that answers from
-        # the question alone falls far below that product (it is right on exactly one image of every pair).
-        r = cluster_bootstrap(d, _vs_product, B=B, seed=seed)
-        row.update(both_right_expected=float(d.correct_orig.mean() * d.correct_partner.mean()),
-                   both_right_minus_expected=r["est"], both_right_minus_expected_lo=r["lo"],
-                   both_right_minus_expected_hi=r["hi"])
+        # accuracy over the two images of a pair (answers balanced by construction: 50% without the image)
+        r = cluster_bootstrap(d, _pair_set_accuracy, B=B, seed=seed)
+        row.update(accuracy_pairs=r["est"], accuracy_pairs_lo=r["lo"], accuracy_pairs_hi=r["hi"])
         rows.append(row)
     per_model = pd.DataFrame(rows)
 

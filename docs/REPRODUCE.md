@@ -11,12 +11,12 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 104 fast tests, no GPU / network needed
+pytest                                                  # 105 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
 ([MedGemma-4B](https://huggingface.co/google/medgemma-4b-it), [MedGemma-1.5-4B](https://huggingface.co/google/medgemma-1.5-4b-it),
-[Gemma-3-4B](https://huggingface.co/google/gemma-3-4b-it)), then `hf auth login`. Keep the token out of the repo.
+[Gemma-3-4B](https://huggingface.co/google/gemma-3-4b-it)), then `huggingface-cli login` (or `hf auth login` in recent versions). Keep the token out of the repo.
 
 ## 2. Pre-flight (about 30 min)
 
@@ -64,7 +64,7 @@ medvlm format-check --profile pilot --model medvlthinker_3b          # must PASS
 medvlm pipeline     --profile main  --model medvlthinker_3b --hardware rtx4080 --parts 2
 medvlm probes       --profile main  --model medvlthinker_3b --hardware rtx4080
 medvlm posthoc      --profile main  --model medvlthinker_3b --model-b qwen25vl_3b
-medvlm replication  --profile main                                   # H9-H11, figure 8; per-dataset table, probe-disagreement test, figure 10 (run after contrast --analyze)
+medvlm replication  --profile main                                   # H9-H11, figure 8; per-dataset table, probe-disagreement and refusal-excluded tables, figure 10 (run after contrast --analyze)
 ```
 
 ## 5. Probe R4: opposite-answer images outside the training data (PREREGISTRATION.md section 17)
@@ -78,7 +78,7 @@ medvlm contrast --analyze                           # tables + figure 9; no GPU
 (`manifests/contrast/`, 1,192 PathVQA questions) is committed; the command only fetches and SHA-checks its 682
 images. Each model answers every question on its own image (`outputs/<model>/contrast`) and on the
 opposite-answer partner (`outputs/<model>__opp/contrast`). `--analyze` writes `results/contrast/`: per-model rates
-(including pair accuracy against the product of the two single-image accuracies), paired differences, and the
+(follow rate, pair accuracy, accuracy over both images of the pairs), paired differences, and the
 registered H12 tests, which are computed only when all five models are complete.
 It also covers the SLAKE probe R3 from the main run.
 
@@ -119,7 +119,7 @@ if the installed matplotlib or fonts differ.
 | `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison (P3) |
 | `probes --probe blank\|abstain\|opp\|all` | Robustness probes R1-R3 |
 | `posthoc --model-b B` | Post-hoc analyses, probe tests and figures for one pair |
-| `format-check`, `replication` | Format rule for a new model; replication tests H9-H11 across pairs, the per-dataset table and the direct test of probe disagreement |
+| `format-check`, `replication` | Format rule for a new model; replication tests H9-H11 across pairs, the per-dataset table, the direct test of probe disagreement and the refusal-excluded differences |
 | `contrast [--analyze]` | Probe R4 and the opposite-answer tables (R3 + R4) |
 | `contamination` | Train-split image overlap and documented training use |
 
@@ -135,11 +135,12 @@ Config layering: `configs/base.yaml` -> profile -> model -> hardware -> `configs
 
 ## 8. What is in git, and why it is reproducible
 
-- **Manifests** (`manifests/<profile>/`): the exact sampled questions, gold answers, wrong-image partners and
+- **Manifests** (`manifests/<profile>/`): the exact sampled questions, gold answers, different-image partners and
   SHA hashes of every image; all paraphrase candidates with their rejection reasons; the semantic-equivalence
   judgments; the audit sheets. `prepare` never re-samples an existing manifest.
 - **Determinism:** sampling and partners use SHA-1 (never Python's `hash()`); greedy decoding; batch size 1;
-  every run writes `meta.json` (config, git commit, versions, host).
+  every run writes `meta.json` (config, git commit, Python and library versions, host; runs made before
+  2026-11-24 record only the Python version).
 - **Registrations** are git tags (`prereg-main`, `prereg-probes`, `prereg-replication`, `prereg-contrast`).
 - **Results:** `results/` (index in [results/README.md](../results/README.md)); raw per-call outputs are
   force-added after a finished run (`git add -f outputs/<model>/<profile>`).

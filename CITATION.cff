@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "Consistent but Blind? Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance"
+title: "Consistent but Blind? Probes of Image Reliance Disagree in Medical Vision-Language Models"
 authors:
   - family-names: "Thai Huu"
     given-names: "Tri"

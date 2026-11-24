@@ -83,10 +83,43 @@ def test_probe_disagreement_is_a_difference_of_differences_on_the_same_questions
     n = 600
     img = [f"i{i // 3}" for i in range(n)]
     same = rng.choice([-1.0, 0.0, 1.0], n)
-    agree = did_row(pd.DataFrame({"removal": same, "probe": same, "image_id": img}), B=200, seed=1)
-    assert agree["did"] == 0 and agree["lo"] == 0 == agree["hi"]            # identical probes never disagree
-    # removal says "medical changes 20 points less", the in-format probe says "10 points more": did = -30
-    rem = (rng.random(n) < .3).astype(float) - (rng.random(n) < .5).astype(float)
-    inf = (rng.random(n) < .5).astype(float) - (rng.random(n) < .4).astype(float)
-    r = did_row(pd.DataFrame({"removal": rem, "probe": inf, "image_id": img}), B=200, seed=1)
-    assert abs(r["did"] - (r["d_removal"] - r["d_probe"])) < 1e-12 and r["hi"] < 0 and r["n_images"] == 200
+    agree = did_row(pd.DataFrame({"x": same, "y": same, "image_id": img}), B=200, seed=1)
+    assert agree["did"] == 0 and agree["lo"] == 0 == agree["hi"] and not agree["reversal"]
+    # probe x says "medical changes 20 points less", probe y says "10 points more": did = -30, and a reversal
+    x = (rng.random(n) < .3).astype(float) - (rng.random(n) < .5).astype(float)
+    y = (rng.random(n) < .5).astype(float) - (rng.random(n) < .4).astype(float)
+    r = did_row(pd.DataFrame({"x": x, "y": y, "image_id": img}), B=200, seed=1)
+    assert abs(r["did"] - (r["d_x"] - r["d_y"])) < 1e-12 and r["hi"] < 0 and r["n_images"] == 200 and r["reversal"]
+    # same sign, different size: the probes report different differences but do not order the models oppositely
+    z = (rng.random(n) < .1).astype(float) - (rng.random(n) < .5).astype(float)
+    r = did_row(pd.DataFrame({"x": x, "y": z, "image_id": img}), B=200, seed=1)
+    assert r["lo"] > 0 and not r["reversal"]
+
+
+def test_removal_difference_survives_excluding_refusals_only_if_it_is_not_made_by_them(monkeypatch, tmp_path):
+    """Two models that answer identically except that B's answer is noise wherever B refuses: the removal
+    difference exists on all questions and vanishes once refused questions are excluded."""
+    import medvlm.analysis.posthoc as ph
+
+    rng = np.random.default_rng(0)
+    n = 2000
+    ids = pd.Index([f"s{i}" for i in range(n)], name="sample_id")
+    samples = pd.DataFrame({"answer_type": "yesno", "split": "test", "dataset": "slake",
+                            "image_id": [f"i{i // 4}" for i in range(n)]}, index=ids)
+    orig = rng.random(n) < .6
+    blind = np.where(rng.random(n) < .7, orig, ~orig)            # both models keep 70% of answers without the image
+    refuse = rng.random(n) < .4                                  # B refuses on 40%; its forced answer there is noise
+    blind_b = np.where(refuse, rng.random(n) < .5, blind)
+
+    def raw(blind_answers, mass):
+        return pd.DataFrame([{"sample_id": s, "condition": c, "p_yes": float(v), "yn_mass": float(m)}
+                             for s, o, bl, mm in zip(ids, orig, blind_answers, mass)
+                             for c, v, m in (("orig", o, 1.0), ("noimg", bl, mm))])
+
+    raws = {"A": raw(blind, np.ones(n)), "B": raw(blind_b, np.where(refuse, 0.2, 1.0))}
+    monkeypatch.setattr(ph, "_tables", lambda cfg, paths, models: (None, {"A": samples, "B": samples}, raws))
+    out = ph.removal_without_refusals({}, None, [("A", "B")], B=200, seed=1)
+    out = out[out.dataset == "all"].set_index("subset")
+    assert out.loc["all questions", "hi"] < 0                                  # A changes less: B's refusals add noise
+    assert out.loc["neither refuses (mass >= 0.5)", "d_removal"] == 0          # and nothing is left without them
+    assert out.loc["neither refuses (mass >= 0.5)", "n"] == int((~refuse).sum())

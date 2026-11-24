@@ -80,6 +80,19 @@ def make_query(job: Job, paths: Paths, score_gold: bool) -> Query:
     return Query(job.question, it.answer_type, image, gold)
 
 
+def _library_versions() -> dict:
+    """Versions of the libraries that determine the numbers, for meta.json (absent ones are skipped)."""
+    from importlib import metadata
+
+    out = {}
+    for lib in ("torch", "transformers", "accelerate", "numpy", "pillow"):
+        try:
+            out[lib] = metadata.version(lib)
+        except metadata.PackageNotFoundError:
+            pass
+    return out
+
+
 def _git_commit() -> str:
     try:
         return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
@@ -213,6 +226,7 @@ def run(cfg: dict, paths: Paths, model: VLM, *, limit: int | None = None, shard:
         meta.write_text(json.dumps({
             "model": cfg["model"], "prompt": cfg["prompt"], "run": cfg["run"], "conditions": cfg["conditions"],
             "paraphrase": cfg["paraphrase"], "git_commit": _git_commit(), "python": platform.python_version(),
+            "libraries": _library_versions(),
             "host": socket.gethostname(), "started": time.strftime("%Y-%m-%d %H:%M:%S"),
         }, indent=2, default=str), encoding="utf-8")
 

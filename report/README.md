@@ -19,7 +19,7 @@ to a `.tex` file, since nothing rebuilds them automatically.
 | `fig0_teaser.png` | `python report/make_teaser.py` (examples in `teaser_examples.json`) |
 | `fig1`-`fig7` | `medvlm posthoc --profile main --model medgemma4b --model-b gemma3_4b` |
 | `fig8_pairs`, `fig10_by_dataset` | `medvlm replication --profile main` (after `medvlm contrast --analyze`) |
-| (no figure) Tables 4 and 5 of the paper | `results/replication_main/probe_disagreement.csv` and `results/contrast/contrast_models.csv`, written by the same two commands |
+| (no figure) Tables 3 and 5 of the paper | `results/replication_main/probe_disagreement.csv` and `results/contrast/contrast_models.csv`, written by the same two commands |
 | `fig9_contrast` | `medvlm contrast --analyze` |
 | `<pair>/` subfolders | `medvlm posthoc` for the replication pairs |
 

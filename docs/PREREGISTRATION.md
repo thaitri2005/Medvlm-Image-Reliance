@@ -2,7 +2,7 @@
 
 A modality-by-modality audit of image reliance in a small medical VLM. Solo project, ~2 weeks, all
 runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
-[README.md](../README.md) is the paper-style overview and [docs/REPRODUCE.md](REPRODUCE.md) the how-to-run. Last updated 2026-11-24 (section 19 added; nothing else changed).
+[README.md](../README.md) is the paper-style overview and [docs/REPRODUCE.md](REPRODUCE.md) the how-to-run. Last updated 2026-11-24 (sections 19 and 20 added; nothing else changed).
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is
 listed in section 13 with its reason.
 
@@ -10,14 +10,16 @@ listed in section 13 with its reason.
 > `PLAN.md` at the root until 2026-10-16): `prereg-main` (the plan when the main run started, sections 0-14),
 > `prereg-probes` (section 15), `prereg-replication` (section 16), `prereg-contrast` (section 17). For example
 > `git show prereg-main:PLAN.md`. Corrections of facts found later are listed in section 18, and analyses added
-> after all results were known in section 19, never edited into the frozen text.
+> after all results were known in sections 19 and 20, never edited into the frozen text.
 
 > **Framing after the results.** Sections 0 and 3 keep the framing the study was planned with (a cross-modality
 > audit of MedGemma, with Gemma-3 as control). The probe results (section 15.1) moved the headline to the comparison
 > between probes; the held-out probe R4 (section 17.1) then withdrew the claim that the MedGemmas rely on the image
 > more. The title was "Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models" until
-> 2026-11-24 and is now "Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance", which claims
-> only what three model pairs can show (section 19). No frozen section was edited; post-hoc summaries are listed
+> 2026-11-24, then briefly "Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance", and is now
+> "Probes of Image Reliance Disagree in Medical Vision-Language Models", which claims only what the data show
+> (sections 19 and 20). "Solo project" below describes the project when the plan was written; the paper has two
+> authors. No frozen section was edited; post-hoc summaries are listed
 > in section 13, item 17, section 17.1 and section 19. Test counts and status notes in sections 1-14 describe the
 > project at the time they were written (the suite now has 104 fast tests).
 
@@ -567,3 +569,55 @@ it claimed.
    rest on the two weaker in-format probes. The paper now describes tests in words, organises its test table by
    claim, and maps the identifiers of this file in its Appendix D. No registered estimate, test or decision
    changed.
+
+## 20. Corrections after an internal review (2026-11-24, after section 19; no new model runs)
+
+Three reviewers read the revised paper, results and repository independently (one for methods and statistics,
+one for consistency between documents and data, one as a first-time reader). Their findings led to the changes
+below. Everything is post hoc and computed from the stored outputs.
+
+1. **The product baseline of section 19, item 2, is withdrawn.** On opposite-answer pairs, with a and b the
+   accuracies on the own and the partner image and w the both-wrong share, pair accuracy = a + b - 1 + w and
+   follow rate = a + b - 1 + 2w exactly. Hence pair accuracy minus a*b equals w - (1 - a)(1 - b): the comparison
+   was mechanical, and the "exception" (Gemma-3 on SLAKE, -13.8) only restated that model's lower accuracy. The
+   columns `both_right_expected*` are removed from `results/contrast/contrast_models.csv`; `accuracy_pairs`
+   (accuracy over both images of the pairs, with CI) replaces them. What is reported instead is the identity: the
+   opposite-answer probe is accuracy on a set whose answers are balanced by construction, i.e. accuracy with the
+   answer prior removed.
+2. **The disagreement test of section 19, item 1, is extended and its reading narrowed.** A non-zero difference
+   of differences shows that two probes report different differences, not that they order the models
+   differently (probes differ in base rate and ceiling). `probe_disagreement.csv` now (a) covers every pair of
+   probes, with Holm correction within two families (image removal against an in-format probe: 24 rows; one
+   in-format probe against another: 21 rows); (b) marks a `reversal` when each probe's own difference excludes 0
+   and the signs are opposite; (c) includes the opposite-answer probe on PathVQA for the 108 R4 test questions
+   that are also in the main run. Result: 13 of 24 in the first family, in 6 of 9 cells (5 of 9 without the black
+   image); reversals on SLAKE only (MedGemma-4B against all three in-format probes, MedGemma-1.5 against the
+   opposite-answer image); 5 of 21 between in-format probes, no reversal; no disagreement with a content-based
+   probe shown on PathVQA. "Agree" is replaced by "not shown to disagree".
+3. **Refusal is no longer presented as the explanation of the image-removal differences.** New table
+   `results/replication_main/removal_without_refusals.csv`: the medical - general difference in answer-change
+   rate without the image on all questions, on questions neither model refuses (mass >= 0.5, the definition of
+   refusal used everywhere) and on questions both answer in format (mass >= 0.9). Pooled: MedGemma-4B -6.1, -4.5
+   [-8.8, 0.1], -0.6; MedGemma-1.5 -7.4, -2.3 [-7.0, 2.6], +2.3. Earlier text quoted only the mass >= 0.9 subsets
+   of the Dangerous gap (+8.0, +3.0) and not the mass >= 0.5 ones (+12.6, +7.5), and said that allowing "unknown"
+   removed "most of" the 11.2-point refusal gap (it narrows to 6.7; the registered compliance-only criterion of
+   section 15 was not met). The "agreement between prior and image" account is now stated as a description, since
+   that agreement is what image removal measures.
+4. **Held-out test (section 17.1).** The registered outcomes stand under the registered bootstrap over images.
+   The template-clustered sensitivity analysis reported there does not leave all of them unchanged, as the paper
+   had said: H12b becomes [-12.0, -0.2] (p = 0.047; not significant after Holm) and H12c [-5.3, 2.9] (slightly
+   outside the +-5 margin). The 1,192 questions draw their partners from 508 questions on 397 images. The
+   conclusion common to both analyses, that neither MedGemma model follows the image more than Gemma-3 on PathVQA,
+   is what the paper now claims. "Training exposure" is stated as one explanation among several (modality, label
+   quality and difficulty differ too; own-image accuracy is 66.4% where always answering yes gives 65.0%).
+5. **Disclosures added to the paper.** P2 as tabulated is the label-free redefinition (section 13, item 13); the
+   registered formula gives +0.209 and is shown in a table note. Before section 17 was registered, the 40
+   non-SLAKE swaps and the with-image answers of 108 R4 questions had been seen (already stated in section 17,
+   now also in the paper). Holm correction is per family, not across the study. Bootstrap p-values have a
+   resolution of 1/B.
+6. **Run metadata.** `meta.json` recorded the Python version but no library versions; new runs also record
+   torch, transformers, accelerate, numpy and pillow versions. The versions quoted in the paper for the existing
+   runs were noted at run time and cannot be checked against the repository.
+7. **Wording and title.** The title is now "Probes of Image Reliance Disagree in Medical Vision-Language
+   Models". "Reference probe" means the opposite-answer image everywhere; image removal is "the taxonomy's
+   criterion". No registered estimate, test or decision changed.

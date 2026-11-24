@@ -12,7 +12,8 @@
   probes        robustness probes (blank image, abstain-allowed prompt, opposite-answer image); --probe NAME|all
   posthoc       analyses added after the main run (abstention, label-free PMI, probe confounds) + figures
   format-check  registered format rule for a new model (yes/no mass with the image >= 0.9 per dataset)
-  replication   Holm-adjusted replication tests over the model pairs + the all-pairs figure
+  replication   Holm-adjusted replication tests over the model pairs, the per-dataset table and the
+                probe-disagreement test, with the all-pairs and by-dataset figures
   contrast      probe R4: opposite-answer images on PathVQA; --model all|a,b,..; --analyze for tables only
   contamination image overlap of evaluated sets with each dataset's train split + documented training use
   audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet
@@ -242,7 +243,11 @@ def _replication(cfg, paths, args):
 
     pdis = probe_disagreement(cfg, paths, all_pairs, cfg["analysis"]["bootstrap_B"], cfg["seed"])
     pdis.to_csv(bd_dir / "probe_disagreement.csv", index=False)
-    print("[replication] image removal minus in-format probe (medical - general, difference of differences):\n"
+    from .analysis.posthoc import removal_without_refusals
+
+    removal_without_refusals(cfg, paths, all_pairs, cfg["analysis"]["bootstrap_B"], cfg["seed"]).to_csv(
+        bd_dir / "removal_without_refusals.csv", index=False)
+    print("[replication] difference of differences between probes (medical - general):\n"
           + pdis.round(3).to_string(index=False))
     print(f"[replication] -> {out}; figures: {', '.join(str(f) for f in figs)}")
 

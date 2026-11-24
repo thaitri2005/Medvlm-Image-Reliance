@@ -1,5 +1,5 @@
 """`medvlm posthoc`: analyses added after the main run, each motivated by something the run showed.
-Logged in docs/PREREGISTRATION.md section 13 (items 12-15). Nothing here replaces a pre-registered endpoint; it
+Logged in docs/PREREGISTRATION.md section 13 (items 12-17) and sections 19-20. Nothing here replaces a pre-registered endpoint; it
 qualifies them.
 
   abstention      without the image, models often answer "please provide the image" instead of yes/no;
@@ -18,6 +18,12 @@ qualifies them.
   reversal        one measure (answer changes) under every probe, both models: the probes disagree.
   removal_split   answer changes without the image, split by whether the model would rather refuse.
   figures         fig1-fig7, twice: titled (results/, README) and paper-sized without titles (report/figures/).
+
+Across pairs (`medvlm replication`; docs/PREREGISTRATION.md sections 16, 17.1, 19 and 20):
+
+  replication_summary  the registered tests H9-H11 over the replication pairs, Holm-adjusted.
+  by_dataset           medical - general answer-change difference under every probe, per dataset and pair (fig10).
+  probe_disagreement   difference of differences between every two probes on the same questions.
 """
 from __future__ import annotations
 
@@ -682,7 +688,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         ax.axvline(0, color=INK2, lw=0.9, ls=(0, (3, 3)))
         ax.axhline(1.5, color=GRID, lw=0.8)
         ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
-        ax.set_yticks(y, [f"{nm}  {n}" for nm, *_, n in rows], fontsize=fs - 0.5)
+        ax.set_yticks(y, [f"{nm}  (n = {n:,})" for nm, *_, n in rows], fontsize=fs - 0.5)
         ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v * 100:+.0f}" if v else "0"))
         ax.set_xlabel(f"Dangerous share, {_short(models[0])} − {_short(models[1])} (points, 95% CI)", color=INK2, fontsize=fs)
         _style(ax, None, fs)
@@ -708,7 +714,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
         rv = tabs.get("reversal")
         if rv is not None and not rv.empty:
             probes = [p for p, _ in REVERSAL_PROBES if p in set(rv.probe)]
-            sub = {"noimg": "the reference probe", "shuf": "same dataset and modality",
+            sub = {"noimg": "the taxonomy's criterion", "shuf": "same dataset and modality",
                    "blank": "format kept, content removed", "opp": "SLAKE"}
             fig, ax = plt.subplots(figsize=(col, 2.6) if paper else (8.0, 4.3))
             y = np.arange(len(probes))[::-1].astype(float)
@@ -810,7 +816,7 @@ def pairs_figure(results_dir, pairs: list[tuple[str, str]], out_dir, paper_dir, 
 
 
 DATASET_ROLE = {"pathvqa": "PathVQA (no medical model trained on it)",
-                "vqa_rad": "VQA-RAD (MedGemma-4B RL-trained on it)",
+                "vqa_rad": "VQA-RAD (MedGemma-4B trained on it)",
                 "slake": "SLAKE (both MedGemmas trained on it)"}
 
 
@@ -854,24 +860,69 @@ def by_dataset(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> p
     return pd.DataFrame(rows)
 
 
+def removal_without_refusals(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> pd.DataFrame:
+    """Post hoc: does refusal produce the image-removal difference? Medical - general difference in the share of
+    test yes/no answers that change without the image, on all questions and on the questions that neither model
+    refuses (first-token yes/no mass >= 0.5 for both, the definition of refusal used everywhere) or that both
+    answer in format (mass >= 0.9, the pre-registered format threshold). If refusal produced the difference, it
+    would shrink on these subsets."""
+    from .stats import cluster_mean_ci
+
+    rows = []
+    for a, b in pairs:
+        _, samples, raws = _tables(cfg, paths, [a, b])
+        t = samples[a]
+        idx = t.index[(t.answer_type == "yesno") & (t.split == "test")]
+        ch, mass = {}, {}
+        for m in (a, b):
+            pr = _wide(raws[m], "p_yes")
+            ch[m] = ((pr["orig"].reindex(idx) >= .5) != (pr["noimg"].reindex(idx) >= .5)).astype(float)
+            mass[m] = _wide(raws[m], "yn_mass")["noimg"].reindex(idx)
+        D = pd.DataFrame({"d": ch[a] - ch[b], "image_id": t.loc[idx, "image_id"], "dataset": t.loc[idx, "dataset"],
+                          "mass": pd.concat([mass[a], mass[b]], axis=1).min(axis=1)})
+        for ds in ("all", "pathvqa", "vqa_rad", "slake"):
+            g = D if ds == "all" else D[D.dataset == ds]
+            for name, sub in (("all questions", g), (f"neither refuses (mass >= {ABSTAIN_MASS})", g[g.mass >= ABSTAIN_MASS]),
+                              (f"both answer in format (mass >= {ANSWER_MASS})", g[g.mass >= ANSWER_MASS])):
+                est, lo, hi, n = cluster_mean_ci(sub, "d", B=B, seed=seed)
+                rows.append({"pair": f"{a} - {b}", "dataset": ds, "subset": name, "n": n,
+                             "n_images": sub.image_id.nunique(), "d_removal": est, "lo": lo, "hi": hi})
+    return pd.DataFrame(rows)
+
+
+PROBE_PAIRS = (("noimg", "shuf"), ("noimg", "blank"), ("noimg", "opp"),
+               ("shuf", "blank"), ("shuf", "opp"), ("blank", "opp"))
+
+
 def did_row(D: pd.DataFrame, B: int, seed: int) -> dict:
-    """Difference of differences for one cell. `D` has one row per question: `removal` and `probe` are the paired
-    medical - general differences in "answer changed" under image removal and under the in-format probe."""
-    r = _ci(D, lambda x: float((x.removal - x.probe).mean()), B, seed)
-    return {"n": len(D), "n_images": D.image_id.nunique(), "d_removal": float(D.removal.mean()),
-            "d_probe": float(D.probe.mean()), "did": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"]}
+    """Difference of differences for one cell. `D` has one row per question: `x` and `y` are the paired
+    medical - general differences in "answer changed" under two probes. `reversal` is the strict case: each
+    probe's own difference excludes 0 and the two have opposite signs (the probes order the pair oppositely)."""
+    from .stats import cluster_mean_ci
+
+    r = _ci(D, lambda t: float((t.x - t.y).mean()), B, seed)
+    dx, xlo, xhi, _ = cluster_mean_ci(D, "x", B=B, seed=seed)
+    dy, ylo, yhi, _ = cluster_mean_ci(D, "y", B=B, seed=seed)
+    reversal = bool((xlo > 0 and yhi < 0) or (xhi < 0 and ylo > 0))
+    return {"n": len(D), "n_images": D.image_id.nunique(), "d_x": dx, "d_x_lo": xlo, "d_x_hi": xhi,
+            "d_y": dy, "d_y_lo": ylo, "d_y_hi": yhi, "did": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"],
+            "reversal": reversal}
 
 
 def probe_disagreement(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> pd.DataFrame:
-    """Post hoc: does image removal rank a pair differently from an in-format probe? Tested directly, as a
-    difference of differences on the same questions:
+    """Post hoc: do two probes report the same medical - general difference? Tested directly, as a difference of
+    differences on the same questions, for every pair of probes (x, y):
 
-        did = (medical - general answer-change rate, image removed) - (the same difference, in-format probe)
+        did = (medical - general answer-change rate under x) - (the same difference under y)
 
-    "Removal finds a difference and the other probe does not" is not evidence that the probes disagree; the
-    interval of `did` is. Wrong and black images use the test yes/no questions; the opposite-answer image uses the
-    SLAKE R3 questions (R4 on PathVQA was run without an image-removed condition, so it has no row). Holm
-    adjustment is over all rows of the table."""
+    "x finds a difference and y does not" is not evidence that the probes disagree; the interval of `did` is.
+    A non-zero `did` means the two probes report different differences. It does not by itself mean that they
+    order the two models oppositely (probes differ in base rate and ceiling); `reversal` marks that stricter case.
+
+    Different and black images use the test yes/no questions. The opposite-answer image uses the 367 SLAKE
+    questions of probe R3 and, on PathVQA, the test questions of probe R4 that are also in the main run (the only
+    ones with every condition). Holm adjustment is within two families: image removal against an in-format probe,
+    and one in-format probe against another."""
     from .contrast import contrast_frame
     from .stats import holm
 
@@ -882,29 +933,41 @@ def probe_disagreement(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: i
         test_yn = t.index[(t.answer_type == "yesno") & (t.split == "test")]
         ch = {}
         for m in (a, b):
-            p = _wide(raws[m], "p_yes")
-            o = p["orig"] >= .5
+            pr = _wide(raws[m], "p_yes")
+            o = pr["orig"] >= .5
             pb = _wide(load_results(paths.run_dir(f"{m}__blank", cfg["profile"])), "p_yes")["blank"]
-            ch[m] = {"noimg": (o != (p["noimg"] >= .5)).astype(float), "shuf": (o != (p["shuf"] >= .5)).astype(float),
+            ch[m] = {"noimg": (o != (pr["noimg"] >= .5)).astype(float), "shuf": (o != (pr["shuf"] >= .5)).astype(float),
                      "blank": (o.reindex(pb.index) != (pb >= .5)).astype(float)}
-            f = contrast_frame(paths, m, cfg["profile"])
+            opp = []
+            f = contrast_frame(paths, m, cfg["profile"])                 # R3: SLAKE questions of the main run
             if len(f):
-                ch[m]["opp"] = f.loc[f.dataset == "slake", "follow"].astype(float)
-        for probe in ("shuf", "blank", "opp"):
-            if probe not in ch[a] or probe not in ch[b]:
+                opp.append(f.loc[f.dataset == "slake", "follow"].astype(float))
+            f = contrast_frame(paths, m, "contrast")                     # R4: PathVQA; keep those in the main run
+            if len(f):
+                f = f.loc[f.index.intersection(test_yn), "follow"].astype(float)
+                opp.append(f)
+            if opp:
+                ch[m]["opp"] = pd.concat(opp)
+        for x, y in PROBE_PAIRS:
+            if any(q not in ch[m] for q in (x, y) for m in (a, b)):
                 continue
-            base = ch[a]["opp"].index.intersection(ch[b]["opp"].index) if probe == "opp" else test_yn
+            base = ch[a]["opp"].index.intersection(ch[b]["opp"].index) if "opp" in (x, y) else test_yn
+            base = base.intersection(t.index)
             for ds in ("pathvqa", "vqa_rad", "slake"):
                 sel = base[t.loc[base, "dataset"] == ds]
                 if not len(sel):
                     continue
-                D = pd.DataFrame({"removal": ch[a]["noimg"][sel] - ch[b]["noimg"][sel],
-                                  "probe": ch[a][probe][sel] - ch[b][probe][sel],
+                D = pd.DataFrame({"x": ch[a][x].reindex(sel) - ch[b][x].reindex(sel),
+                                  "y": ch[a][y].reindex(sel) - ch[b][y].reindex(sel),
                                   "image_id": t.loc[sel, "image_id"]}).dropna()
-                rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe": probe, **did_row(D, B, seed)})
+                rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe_x": x, "probe_y": y,
+                             "family": "removal vs in-format" if x == "noimg" else "between in-format",
+                             **did_row(D, B, seed)})
     out = pd.DataFrame(rows)
     if len(out):
-        out["p_holm"] = holm(out.p.tolist())
+        out["p_holm"] = float("nan")
+        for _, g in out.groupby("family"):
+            out.loc[g.index, "p_holm"] = holm(g.p.tolist())
         out["disagree"] = out.p_holm < 0.05
     return out
 
@@ -954,7 +1017,8 @@ def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
             _style(ax, f"{LABEL.get(a, a)}\nvs {LABEL.get(b, b)}", fs)
             ax.tick_params(axis="y", length=0)
         axes[0, 0].set_yticks(y, [names[p] for p in probes])
-        fig.supxlabel("medical − general difference in answer-change rate (points, 95% CI)",
+        fig.supxlabel("medical − general difference in answer-change rate (points, 95% CI); "
+                      "right of 0: the medical model changes its answers more",
                       fontsize=fs, color=INK2)
         fig.legend([Line2D([], [], ls="", ms=ms, **{k: v for k, v in style[d].items()}) for d in style],
                    [DATASET_ROLE[d] for d in style], frameon=False, fontsize=fs - 0.5, loc="upper center", ncol=3,

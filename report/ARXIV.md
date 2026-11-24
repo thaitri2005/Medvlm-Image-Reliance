@@ -49,7 +49,7 @@ comparisons require opposite-answer images on data outside each model's training
 
 **Comments**
 
-7 figures, 5 tables (take the page count from the compiled PDF). Pre-registered; code, data manifests and all model outputs:
+14 pages, 7 figures, 5 tables. Pre-registered; code, data manifests and all model outputs:
 https://github.com/thaitri2005/Medvlm-Image-Reliance
 
 After it is announced, add the arXiv link to the README and to `CITATION` information if any.

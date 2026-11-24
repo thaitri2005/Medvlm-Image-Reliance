@@ -120,7 +120,7 @@ A \dng{} answer appears reliable but does not depend on the image.
 \vspace{5mm}
 \innerblock{}{\textbf{Question.} Does the taxonomy's reliance criterion, \textbf{image removal}, rank models in the
 same order as \textbf{in-format probes}, which keep an image in the input? No probe is assumed to be the ground
-truth: two probes that measure the same property must order a pair of models alike.}
+truth.}
 }
 
 \column{0.5}
@@ -146,7 +146,7 @@ answer when the image changes; for each probe we report the \emph{answer-change 
 Different image & a random image of the same dataset and modality\\
 Black image & format preserved, content removed\\
 \textbf{Opposite-answer image} & an image for which the \emph{same question} has the opposite answer; the
-reference probe, since only here is the correct response defined\\
+reference probe\\
 Abstention permitted & image removed; the model may answer ``unknown''\\
 \bottomrule
 \end{tabular}}
@@ -173,10 +173,10 @@ model pair was registered (as a dated git tag) before it was run. Unsupported pr
 answer-change rate under one probe. Values above zero indicate that the medical model responds more to the image.
 
 \vspace{4mm}
-\textbf{Result.} If the probes measured one property, the markers of a dataset would line up vertically. We test
-this directly: the image-removal difference minus the in-format difference, on the same questions. The two
-disagree in 13 of 21 comparisons (Holm-corrected), and by 60.5 points against the opposite-answer image on SLAKE,
-where image removal has the opposite sign. They agree in three cells, all with small differences.
+\textbf{Result.} Probes that measured one property would line up vertically. Tested directly (image-removal
+difference minus in-format difference, same questions), they disagree in 13 of 21 comparisons after Holm
+correction, by up to 60.5 points on SLAKE, where image removal has the opposite sign. They agree in three cells,
+all with small differences.
 
 \vspace{5mm}
 \begin{center}
@@ -211,24 +211,24 @@ Abstention permitted (bottom): both models decline on $\ge$93\%.}
 \vspace{4mm}
 \textbf{Agreement between prior and image.} When a model's prior matches the image content, its answer does not
 change without the image, and image removal classifies it as image-independent. This accounts for the differences
-in the Qwen pair, in which neither model declines, and for MedGemma-4B's additional \dng{} answers, which are
-\textbf{correct}: +14.1 points \dng-and-correct, \mn0.4 \dng-and-incorrect.
+in the Qwen pair, in which neither model declines. MedGemma-4B's additional \dng{} answers are
+\textbf{correct}: +14.1 points correct, \mn0.4 incorrect.
 }
 
 \block{Recommendations for reliance audits}{
 \begin{enumerate}
-\item Do not rank models by a \dng{} share obtained by image removal; it reflects refusal and priors.
-\item Assess reliance with an image that requires the opposite answer, and test probe agreement directly.
-\item Evaluate that probe on data outside each model's training set, and read it against accuracy.
-\item Report the chance floor, decompose by correctness, and permit abstention.
+\item Do not rank models by image removal; it reflects refusal and priors.
+\item Use an image that requires the opposite answer; test probe agreement directly.
+\item Use data outside each model's training set, and read the result against accuracy.
+\item Report the chance floor, split \dng{} answers by correctness, and permit abstention.
 \end{enumerate}
 }
 
 \column{0.5}
 
-\block{Finding 2: the in-format advantage is confined to training data}{
-Both MedGemma models were trained on SLAKE, where the in-format probes favoured them. We registered a test on
-\textbf{PathVQA}, which none of the medical models was trained on, before running it:
+\block{Finding 2: in-format probes follow the training data}{
+Both MedGemma models were trained on SLAKE, where the in-format probes favour them. A test on held-out
+\textbf{PathVQA} was registered before it was run:
 
 \vspace{3mm}
 \begin{center}\renewcommand{\arraystretch}{1.3}
@@ -245,29 +245,27 @@ medical \mn{} general, points & \muted{training data} & \muted{held out}\\
 \end{center}
 
 \vspace{3mm}
-Both MedGemma predictions were unsupported, so under the decision rule fixed in advance the hypothesis that they
-rely on the image more was \textbf{withdrawn}: the SLAKE difference may reflect training exposure.
+Both MedGemma predictions failed; under the rule fixed in advance, the hypothesis that they rely on the image
+more was \textbf{withdrawn}.
 
 \vspace{3mm}
-\textbf{The probe largely reports accuracy.} In 9 of 10 model\,$\times$\,dataset cells, the share of pairs answered
-correctly on both images is 1--6 points below the product of the two single-image accuracies. The exception is
-\gen{Gemma-3} on SLAKE (23.4\% against 37.3\% expected): 38 of its 61 accuracy points come from answers that do not
-change with the image.
+\textbf{The probe largely reports accuracy.} In 9 of 10 model\,$\times$\,dataset cells, pair accuracy (right on
+both images) is 1--6 points below what single-image accuracy predicts. The exception is \gen{Gemma-3} on SLAKE
+(23.4\% against 37.3\%): 38 of its 61 accuracy points do not depend on the image.
 }
 
 \block{Corrections to the \dng{} share}{
 \begin{itemize}
 \item \textbf{Chance floor:} 36--42\% of yes/no answers appear image-independent by chance alone.
-\item \textbf{Correctness:} the additional \dng{} answers are predominantly correct.
 \item \textbf{Error detection:} image reliance identifies errors at chance level (AUROC \textbf{0.51}; model
 confidence 0.71).
 \end{itemize}
 }
 
 \block{Limitations}{
-\small Three model pairs establish that the disagreement occurs, not how often. No probe is a ground truth, and
-VQA-RAD has no reference probe. The mechanistic accounts and the direct test of disagreement are post hoc; the
-held-out test covers pathology only and cannot separate equal reliance from equal difficulty. Paraphrase
+\small Three model pairs establish that the disagreement occurs, not how often. No probe is a ground truth;
+VQA-RAD has no reference probe. The mechanistic accounts and the disagreement test are post hoc; the held-out test
+covers pathology only. Paraphrase
 equivalence was judged by an LLM (a 50-item check by the first author, with AI assistance, accepted 88\%). No clinical
 claims are made.\\[2mm]
 \muted{\footnotesize Sadanandan \& Behzadan, CVPR-W 2026; Zafar et al.\ 2026; Lotfinia et al.\ 2026; Sellergren

@@ -12,7 +12,7 @@
 **Does a medical vision-language model look at the image? The answer depends on how you ask.** Removing the
 image says MedGemma relies on the image *less* than the general model it was built from. Swapping the image for
 one that requires the opposite answer says it relies on the image *far more*, on the same questions, on SLAKE, a
-dataset MedGemma was trained on. On held-out data the two ways of asking do not disagree.
+dataset MedGemma was trained on. On held-out data no such disagreement is shown.
 
 <p align="center"><img src="report/figures/fig0_teaser.png" width="100%"></p>
 
@@ -30,8 +30,8 @@ dataset MedGemma was trained on. On held-out data the two ways of asking do not 
 > equal accuracy on questions where guessing the usual answer scores exactly 50%.
 >
 > **What we did not find.** The flip appears only on SLAKE, which MedGemma was trained on. On held-out
-> pathology data the probes do not disagree, and no probe that changes what the image shows puts the medical
-> models ahead. Refusing to answer without an image explains part of image removal's behaviour, not all of it.
+> pathology data no disagreement is shown between image removal and the probes that change what the image
+> shows, and none of those probes puts the medical models ahead. Refusing to answer without an image explains part of image removal's behaviour, not all of it.
 
 *Engineering in three lines: a resumable inference engine (about 120,000 model calls on one 16 GB GPU); every
 table and figure regenerated on a CPU from committed model outputs; 105 tests, including a simulation of the
@@ -109,8 +109,9 @@ the medical model look less reliant than the other probe does.
 | | VQA-RAD | **+12.0** [4.3, 20.0] | **+13.5** [6.1, 21.5] | |
 | | SLAKE | +1.1 [−4.0, 6.7] | +1.1 [−2.0, 4.7] | +1.6 [−2.1, 5.5] |
 
-Bold: significant after Holm correction over all 24 comparisons (13 of 24, in 6 of 9 cells). ⇄: a reversal,
-meaning each probe finds a difference on its own and the two have opposite signs.
+Bold: significant after Holm correction over all 24 comparisons (13 of 24, in 6 of the 9 model-pair × dataset
+combinations). ⇄: a sign flip
+(a *reversal* in the paper), meaning each probe finds a difference on its own and the two have opposite signs.
 
 - **The sign flips on SLAKE only**: for MedGemma-4B against every in-format probe, and for MedGemma-1.5 against
   the opposite-answer image.
@@ -121,12 +122,13 @@ meaning each probe finds a difference on its own and the two have opposite signs
 - A non-zero entry shows two probes are not interchangeable; only a sign flip shows they order models
   differently.
 
-**3. Refusal biases image removal and explains one pair's difference, not the others** (post hoc). Told to answer yes or no about
+**3. Refusal biases image removal and accounts for part of one pair's difference** (post hoc). Told to answer yes or no about
 an image it was not given, Gemma-3 asks for the image on 29% of questions (MedGemma-4B 18%, MedGemma-1.5 under
 1%, the Qwen models never). Its forced answers there are unrelated to its answers with the image, so about half
 count as "image-reliant", and the model that refuses more looks more reliant. But dropping every question
-either model refuses removes most of the image-removal difference only for MedGemma-1.5 (−7.4 → −2.3 points);
-for MedGemma-4B most of it stays (−6.1 → −4.5), and the Qwen pair differs with no refusals at all.
+either model refuses removes most of the answer-change difference only for MedGemma-1.5 (−7.4 → −2.3 points), whose *Dangerous*
+gap mostly remains (+7.5 of +9.8); for MedGemma-4B most of both stays (−6.1 → −4.5), and the Qwen pair differs
+with no refusals at all.
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig4_abstention.png" width="78%"></p>
 

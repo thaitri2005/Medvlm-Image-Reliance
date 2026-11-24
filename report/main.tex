@@ -118,8 +118,8 @@ three medical/general model pairs and three datasets, and whether two probes mea
 is tested directly. The individual probes have
 precedent~\cite{sadanandan2026consistent,zafar2026see,lotfinia2026cxr}; to our knowledge, their conclusions about
 the same models have not been compared.
-\item \textbf{What image removal responds to.} Refusal under a forced yes/no format biases the criterion and
-explains the difference in one model pair, not in the others; a chance floor and a split by correctness show what
+\item \textbf{How far refusal explains image removal.} Refusal under a forced yes/no format biases the criterion
+and accounts for part of the difference in one model pair, not in the others; a chance floor and a split by correctness show what
 the \dang{} share contains.
 \item \textbf{What the opposite-answer probe is.} An identity shows that it equals accuracy with the answer prior
 removed, up to the share of pairs answered wrongly on both images, and a pre-registered test shows that the
@@ -392,13 +392,13 @@ MedVLThinker (Qwen2.5-VL) & PathVQA & $+4.5$\ci{1.8}{7.4} & $+4.5^\dagger$\ci{0.
 comparisons they do not ($p_{\text{H}}<0.05$), covering six of the nine pair~$\times$~dataset cells. Three
 patterns should be kept apart; two notes on the in-format probes follow.
 
-\paragraph{The sign flips on SLAKE.} For MedGemma-4B on SLAKE, image removal and every in-format probe order the
+\paragraph{The sign flips on SLAKE (reversals).} For MedGemma-4B on SLAKE, image removal and every in-format probe order the
 pair oppositely: by image removal MedGemma-4B relies on the image \emph{less} than Gemma-3 ($-9.9$ points), by a
-different, a black and an opposite-answer image more (+11.8, +33.0 and +48.0). Against the opposite-answer image
-the two differences lie 60.5 points apart\ci{51.3}{68.8}, on the 367 questions that have a partner image.
-MedGemma-1.5 shows the same reversal against the opposite-answer image only, and less firmly: $-9.0$ against
-+36.5, 45.5 points apart\ci{34.0}{56.5}, with an image-removal difference that excludes zero on those 367
-questions but not on the test questions alone. These are the only reversals in the table.
+different, a black and an opposite-answer image more (+11.8, +33.0 and +48.0). On the 367 questions that have an
+opposite-answer partner, image removal gives $-12.5$ and the opposite-answer image +48.0, a gap of 60.5
+points\ci{51.3}{68.8}. MedGemma-1.5 flips against the opposite-answer image only ($-9.0$ against +36.5 on the same
+367 questions, 45.5 points apart\ci{34.0}{56.5}). On the SLAKE test questions alone its image-removal difference
+($-4.5$) does not exclude zero, so this reversal is less firm. These are the only reversals in the table.
 
 \paragraph{A difference that only image removal reports.} On VQA-RAD, image removal reports that both MedGemma
 models change their answers about 19 points less often than Gemma-3 and that MedVLThinker changes them 11 points
@@ -448,9 +448,9 @@ Test & Estimate & Outcome\\
 \midrule
 \multicolumn{3}{@{}l}{\emph{Image removal, as the taxonomy uses it}}\\
 \dang{} share & $+13.7$\ci{10.0}{17.5} & $p{<}0.001$\\
-Acc.\ w/o image $-$ prior: PathVQA & $+5.0$\ci{0.9}{8.8} & $p_{\text{H}}{=}.042$\\
+Acc.\ w/o image $-$ prior: PathVQA & $+5.0$\ci{0.9}{8.8} & $p_{\text{H}}{=}0.042$\\
 \quad SLAKE & $-3.1$\ci{$-7.8$}{1.8} & n.s.\\
-\quad VQA-RAD & $+7.6$\ci{0.4}{14.5} & $p_{\text{H}}{=}.072$\\
+\quad VQA-RAD & $+7.6$\ci{0.4}{14.5} & $p_{\text{H}}{=}0.072$\\
 AUROC: PMI $-$ confidence$^\ast$ & $-0.20$\ci{$-0.25$}{$-0.15$} & lower\\
 \midrule
 \multicolumn{3}{@{}l}{\emph{Refusal}}\\
@@ -479,9 +479,10 @@ is a spinal cord present}'' (Gemma-3). Without the image, Gemma-3 declines on 35
 MedGemma-4B on 219 (18\%) and MedGemma-1.5 on 8 (\cref{fig:abst}); MedVLThinker and Qwen2.5-VL never decline. On
 declined questions, the forced answer is predominantly \emph{no} and unrelated to the model's answer with the
 image ($\kappa=-0.01$ for Gemma-3, 0.04 for MedGemma-4B), so 53--55\% of these answers are scored as
-image-reliant: the model that refuses more looks more reliant. When abstention is permitted, MedGemma-4B declines on 93.0\% of questions and Gemma-3 on 99.7\%
-($-6.7$, as predicted): the refusal difference narrows from 11.2 to 6.7 points near the ceiling, and the
-registered criterion for calling it a pure compliance effect (below 3 points) is not met.
+image-reliant: the model that refuses more looks more reliant. When abstention is permitted, both models decline almost always: MedGemma-4B on 93.0\% of questions and Gemma-3
+on 99.7\% ($-6.7$, as predicted). The refusal difference thus narrows from 11.2 points under the forced format to
+6.7, but it stays above the 3 points that we had registered as the threshold for attributing refusal entirely to
+the instruction.
 
 \begin{figure}[t]
 \centering
@@ -493,23 +494,24 @@ almost always decline.}
 \label{fig:abst}
 \end{figure}
 
-\paragraph{Refusal explains one pair, not the others.} If refusal produced the image-removal difference, the
-difference would vanish once the questions that either model refuses are dropped. For MedGemma-1.5 it largely does
-(answer-change difference $-7.4$ points on all questions, $-2.3$\ci{$-7.0$}{2.6} without refusals). For
-MedGemma-4B it does not ($-6.1$ to $-4.5$\ci{$-8.8$}{0.1}), and its \dang{} difference barely moves (+13.7 to
-+12.6\ci{8.1}{17.0}). The Qwen pair, in which neither model ever declines, still differs on PathVQA and VQA-RAD.
-Under the stricter pre-registered format threshold ($m\ge0.9$ for both models, which keeps under half of the
-questions), the pooled differences do disappear, but those subsets are selected and unstable across datasets; the
-repository reports both thresholds for every dataset. Refusal therefore explains the image-removal difference for
-one pair and not for the other two.
+\paragraph{Refusal accounts for part of one pair's difference.} If refusal produced the image-removal difference,
+the difference would vanish once the questions that either model refuses are dropped. For MedGemma-1.5 the
+answer-change difference largely does ($-7.4$ points on all questions, $-2.3$\ci{$-7.0$}{2.6} without refusals),
+but most of its \dang{} difference, the taxonomy's own quantity, remains (+7.5\ci{2.4}{12.3} of +9.8). For
+MedGemma-4B neither changes much: $-6.1$ to $-4.5$\ci{$-8.8$}{0.1} in answer-change rate, with the SLAKE difference
+growing from $-9.9$ to $-14.9$\ci{$-24.1$}{$-5.4$}, and +12.6\ci{8.1}{17.0} of +13.7 in \dang{} share. The Qwen
+pair, in which neither model ever declines, still differs on PathVQA and VQA-RAD. Under the stricter
+pre-registered format threshold ($m\ge0.9$ for both models, which keeps under half of the questions), the pooled
+differences do disappear, but those subsets are selected and unstable across datasets; the repository reports
+both thresholds for every dataset. The refusal criterion also misses a model that answers with a default instead
+of declining: MedGemma-1.5's yes-rate falls from 47\% with the image to 17\% without it. Refusal therefore
+accounts for most of one pair's answer-change difference, and for little of its \dang{} difference or of the
+other pairs' differences.
 
 \paragraph{The remainder is unexplained.} One candidate is that MedGemma-4B's answers without the image are better
 guesses: they exceed the majority-answer prior on PathVQA, which it was not trained on (+5.0\ci{0.9}{8.8},
 \cref{tab:tests}), and Gemma-3's never do. A model whose answer without the image tends to match what the image
-shows changes its answer less often when the image is removed. We did not test this account, and the agreement
-between a model's answers with and without the image cannot serve as evidence for it, since that agreement is
-what image removal measures. The refusal criterion also misses a model that answers with a default instead of
-declining: MedGemma-1.5's yes-rate falls from 47\% with the image to 17\% without it.
+shows changes its answer less often when the image is removed. We did not test this account.
 
 \paragraph{What the \dang{} share contains.} Two properties of the \dang{} share qualify the 13.7-point excess.
 First, much of any \dang{} share on yes/no questions is chance, since an answer counts as image-independent
@@ -535,7 +537,7 @@ questions.}
 \subsection{The opposite-answer probe and held-out data}
 \label{sec:r4}
 \paragraph{The probe is accuracy with the answer prior removed (post hoc).} Let $a$ and $b$ be a model's accuracies on the
-own and the partner image of opposite-answer pairs, and $w$ the share of pairs it answers wrongly on both images.
+original and the partner image of opposite-answer pairs, and $w$ the share of pairs it answers wrongly on both images.
 Because the two reference answers are opposite,
 \begin{equation}
 \begin{aligned}
@@ -547,7 +549,7 @@ Because the two reference answers are opposite,
 On these pairs the answers are balanced by construction, so a model that ignores the image is right on exactly
 half of the images. The follow rate is therefore the model's accuracy above 50\%, doubled, plus $2w$: balanced
 accuracy, up to the both-wrong share. The share $w$ is the only place where using the image and reading it
-correctly can come apart; it is small on SLAKE (1--5\%) and not negligible on PathVQA (6--7\%, a quarter to a third
+correctly can come apart; it is small on SLAKE (1--5\%) and not negligible on PathVQA (6--7\%, so that $2w$ is a quarter to a third
 of the follow rate; \cref{tab:pair}). This is the sense in which the opposite-answer image is the most direct
 probe: ordinary accuracy can be earned from priors, and this cannot. It also means that the probe inherits
 whatever makes a model accurate on a dataset, including having been trained on it.
@@ -596,7 +598,7 @@ in 24.8\% (+48.0\ci{41.9}{53.8}, as predicted), and MedGemma-1.5 in 61.3\% (+36.
 \cref{eq:identity}, Gemma-3 is right on 61.0\% of these images, 11 points above what ignoring the image yields,
 against 35 points for MedGemma-4B. Both MedGemma models were trained on SLAKE (the evaluated images are disjoint
 from its training split, but the image distribution and question templates are shared), whereas MedVLThinker,
-which was not, matches its base. Training exposure therefore explains the SLAKE results as well as greater image
+whose documentation does not list SLAKE, matches its base. Training exposure therefore explains the SLAKE results as well as greater image
 reliance does.
 
 \paragraph{PathVQA, held out.} We registered a test that could separate the two: the opposite-answer probe for
@@ -615,9 +617,9 @@ images, above the 50\% of a model that ignores the image, and on both images of 
 of uninformative answers: all five models read pathology images, to a similar and modest degree. The test does
 not isolate training exposure, since SLAKE and PathVQA also differ in modality, in label quality (PathVQA's
 questions and labels are generated automatically) and in difficulty. A model cannot follow an image it cannot
-read, so equal results on PathVQA may reflect equal difficulty as much as equal reliance. Nor does exposure always
-show under the weaker probes: MedGemma-4B was trained on VQA-RAD and is 25 points more accurate there, yet neither
-in-format probe available on VQA-RAD separates it from Gemma-3.
+read, so equal results on PathVQA may reflect equal difficulty as much as equal reliance. Exposure alone also does not
+guarantee an in-format advantage: MedGemma-4B was trained on VQA-RAD and is 25 points more accurate there, yet
+neither the different nor the black image separates it from Gemma-3 on that dataset.
 
 \subsection{Image reliance does not identify errors}
 \begin{figure}[t]
@@ -773,12 +775,11 @@ Training-data statements & Corrected after re-examining the documentation (\S18)
 \end{tabular}
 \normalsize
 
-\normalsize
 \paragraph{Statistical notes.} Holm correction is applied within each registered family, not across the paper; the
 weakest registered result ($p_{\text{H}}=0.042$) would not survive a correction across families. Bootstrap
 $p$-values have a resolution of $1/B$; values below it are reported as $p<0.001$. Intervals for the same quantity
-computed by different bootstrap routines (the registered tests, the per-dataset table, \cref{tab:did}) can differ
-in the last digit.
+computed by different bootstrap routines (the registered tests, the per-dataset table and \cref{fig:bydataset},
+\cref{tab:did}) can differ by up to half a point.
 
 \section{Registered tests and identifiers}
 \label{app:ids}

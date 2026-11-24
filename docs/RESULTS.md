@@ -28,7 +28,7 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
    disagreement with a content-based probe is shown. In-format probes also disagree with each other (5 of 21),
    never with a reversal. No probe is treated as ground truth; the opposite-answer image is the reference where it
    exists (SLAKE, PathVQA).
-3. **Refusal adds noise to image removal but does not explain its differences** (§6; post hoc). Without an image
+3. **Refusal biases image removal and accounts for part of one pair's difference** (§6; post hoc). Without an image
    Gemma-3 asks for it on 354 of 1,206 questions (MedGemma-4B 219, MedGemma-1.5 8), and its forced answers there
    are unrelated to its image answers (κ ≈ 0). Excluding refused questions removes most of the image-removal
    difference for MedGemma-1.5 (−7.4 → −2.3) but not for MedGemma-4B (−6.1 → −4.5), and the Qwen pair differs
@@ -630,5 +630,6 @@ an empty image as "no findings" (its yes-rate falls from 58% to 28%), a reaction
 of image content, since its content probes (different and opposite-answer image) show no PathVQA difference.
 
 *Intervals.* The per-dataset table above comes from `by_dataset.csv`; the registered tests H8 and H9 report the
-same SLAKE differences with intervals [41.9, 53.8] and [30.6, 42.1] from their own bootstrap runs. The two can
-differ in the last digit.
+same SLAKE differences with intervals [41.9, 53.8] and [30.6, 42.1] from their own bootstrap runs, and the
+paper's Table 3 takes the image-removal intervals from `probe_disagreement.csv`. Intervals for one quantity from
+different bootstrap routines can differ by up to half a point; no conclusion depends on which is used.

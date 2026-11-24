@@ -621,3 +621,9 @@ below. Everything is post hoc and computed from the stored outputs.
 7. **Wording and title.** The title is now "Probes of Image Reliance Disagree in Medical Vision-Language
    Models". "Reference probe" means the opposite-answer image everywhere; image removal is "the taxonomy's
    criterion". No registered estimate, test or decision changed.
+8. **Two further review rounds** by the same three reviewers changed wording only: statements about held-out
+   PathVQA are limited to probes that change image content (the black image does separate one pair there); the
+   SLAKE sign flip is stated per model (MedGemma-4B against every in-format probe, MedGemma-1.5 against the
+   opposite-answer image only); refusal is said to account for most of MedGemma-1.5's answer-change difference
+   and for little of its Dangerous-share difference (+7.5 of +9.8 remains) or of the other pairs' differences;
+   the both-wrong share is noted as not negligible on PathVQA (6-7%). No number changed.

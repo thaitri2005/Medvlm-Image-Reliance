@@ -36,16 +36,17 @@ different image, a black image, or an image for which the same question has the 
 differences between models. Three medical VLMs and the general-purpose models they were built from (MedGemma-4B and
 MedGemma-1.5-4B vs. Gemma-3-4B; MedVLThinker-3B vs. Qwen2.5-VL-3B) answer the same yes/no questions on CT, MRI,
 X-ray and pathology images under every probe. By image removal, MedGemma-4B appears less image-reliant than
-Gemma-3-4B (Dangerous share higher by 13.7 points [10.0, 17.5]; pre-registered). The in-format probes do not
-reproduce this difference. Tested directly on the same questions (post hoc), image removal and an in-format probe
-report different medical-general differences in six of nine model-pair x dataset cells, and on SLAKE they order
-both MedGemma models against Gemma-3 oppositely. In-format probes also differ from one another, and the most direct
-of them, the opposite-answer image, is by an identity accuracy with the answer prior removed. Its MedGemma
-advantage on SLAKE, which both MedGemma models were trained on (+48.0 and +36.5 points), is absent on held-out
-PathVQA (+0.8 and -5.6; registered before it was run), where no probe shows the medical models to be more
-image-reliant. Refusal under a forced answer format contributes to the image-removal differences but does not
-explain them. Probes of image reliance are not interchangeable: a comparison between models should name its probe,
-use images that require a different answer, and be run on data outside each model's training set.
+Gemma-3-4B (Dangerous share higher by 13.7 points [10.0, 17.5]; pre-registered). Probes that keep an image do not
+agree. Tested directly on the same questions (post hoc), image removal and an in-format probe measure a different
+gap between a medical model and its base in six of nine model-pair x dataset cells, and on SLAKE the sign flips: by
+the opposite-answer image, both MedGemma models are far more image-reliant than Gemma-3 (+48.0 and +36.5 points).
+Refusal under a forced answer format accounts for part of the image-removal differences, not all. We show that the
+opposite-answer probe equals accuracy on pairs for which the answer prior is useless, up to the share of pairs
+answered wrongly on both images. Its MedGemma advantage appears on SLAKE, which both models were trained on, and
+not on held-out PathVQA (+0.8 and -5.6; registered before it was run), where no probe that changes image content
+shows the medical models to be more image-reliant. Probes of image reliance are not interchangeable: a comparison
+between models should name its probe, use images that require a different answer, and be run on data outside each
+model's training set.
 
 **Comments**
 

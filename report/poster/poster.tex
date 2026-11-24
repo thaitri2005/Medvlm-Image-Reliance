@@ -164,7 +164,7 @@ model pair was registered (as a dated git tag) before it was run. Unsupported pr
 \end{columns}
 
 % ================================================================== row 2: finding 1 (full width)
-\block{Finding 1: image removal and in-format probes report different differences}{
+\block{Finding 1: image removal and in-format probes measure different gaps}{
 \begin{minipage}[t]{0.64\linewidth}\vspace{0pt}
 \includegraphics[width=\linewidth]{../figures/fig10_by_dataset.pdf}
 \end{minipage}\hfill
@@ -173,10 +173,10 @@ model pair was registered (as a dated git tag) before it was run. Unsupported pr
 answer-change rate under one probe. Right of zero, the medical model responds more to the image.
 
 \vspace{4mm}
-\textbf{Result.} Probes that measured one property would line up vertically. On SLAKE (open diamonds) they do
-the opposite: image removal puts both MedGemma models left of zero, every in-format probe far to the right.
-Tested directly on the same questions, the two kinds of probe differ in 6 of 9 model-pair\,$\times$\,dataset
-cells. On held-out PathVQA no such disagreement is shown.
+\textbf{Result.} Probes that measured one property would line up vertically. On SLAKE (open diamonds) the sign
+flips: image removal puts MedGemma-4B left of zero, every in-format probe far to the right. The two kinds of
+probe measure a different gap in 6 of 9 model-pair\,$\times$\,dataset cells; on held-out PathVQA no disagreement
+is shown with a probe that changes image content.
 
 \vspace{5mm}
 \begin{center}
@@ -196,12 +196,11 @@ data\end{minipage}\\
 \begin{columns}
 \column{0.5}
 
-\block{Sources of the image-removal differences}{
+\block{Does refusal explain image removal? In part}{
 \begin{minipage}[t]{0.55\linewidth}\vspace{0pt}
-\textbf{Refusal adds noise.} Without the image, \gen{Gemma-3} declines on \textbf{29\%} of questions,
+\textbf{Refusal biases the criterion.} Without the image, \gen{Gemma-3} declines on \textbf{29\%} of questions,
 \med{MedGemma-4B} on 18\%, \med{MedGemma-1.5} on 0.7\%, and the Qwen-based models on none. Forced answers on
-declined questions are unrelated to the answers given with the image ($\kappa \approx 0$), so about half are
-scored as image-reliant.
+declined questions are unrelated to the answers with the image, so about half are scored as image-reliant.
 \end{minipage}\hfill
 \begin{minipage}[t]{0.42\linewidth}\vspace{0pt}
 \includegraphics[width=\linewidth]{../figures/fig4_abstention.pdf}
@@ -210,9 +209,9 @@ scored as image-reliant.
 Abstention permitted (bottom): both models decline on $\ge$93\%.}
 
 \vspace{4mm}
-\textbf{But refusal is not the explanation.} Without the refused questions, most of the image-removal difference
-disappears for MedGemma-1.5 (\mn7.4 to \mn2.3 points) but not for MedGemma-4B (\mn6.1 to \mn4.5), and the Qwen
-pair differs with no refusals at all.
+\textbf{It explains one pair, not the others.} Without the refused questions, the image-removal difference
+largely disappears for MedGemma-1.5 (\mn7.4 to \mn2.3 points) but not for MedGemma-4B (\mn6.1 to \mn4.5); the Qwen
+pair differs with no refusals.
 
 \vspace{3mm}
 \textbf{The \dng{} share.} On yes/no questions its chance floor is 36--42\%. MedGemma-4B's excess lies in correct
@@ -231,7 +230,7 @@ vs.\ 31\%).
 
 \column{0.5}
 
-\block{Finding 2: in-format probes follow the training data}{
+\block{Finding 2: no advantage on held-out data}{
 Both MedGemma models were trained on SLAKE, where the in-format probes favor them. A test on held-out
 \textbf{PathVQA} was registered before it was run:
 
@@ -250,8 +249,8 @@ medical \mn{} general, points & \muted{training data} & \muted{held out}\\
 \end{center}
 
 \vspace{3mm}
-Both MedGemma predictions failed; under the rule fixed in advance, the hypothesis that they rely on the image
-more was \textbf{withdrawn}.
+Both MedGemma predictions failed; under the rule fixed in advance, the claim that they rely on the image more is
+\textbf{not supported on held-out data}.
 
 \vspace{3mm}
 \textbf{The probe is accuracy without priors.} On opposite-answer pairs the answers are balanced, so ignoring
@@ -267,7 +266,7 @@ Image reliance does not identify errors: it ranks correct above incorrect answer
 
 \block{Limitations}{
 \small Three model pairs show that probes can disagree, not how often. No probe is a ground truth; every reversal
-is on SLAKE, and no disagreement is shown on held-out data. The comparison between probes is post hoc; the held-out
+is on SLAKE, and no disagreement with a content-based probe is shown on held-out data. The comparison between probes is post hoc; the held-out
 test covers pathology only, at low accuracy. Paraphrase
 equivalence was judged by an LLM (a 50-item check by the first author, with AI assistance, accepted 88\%). No clinical
 claims are made.\\[2mm]

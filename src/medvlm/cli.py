@@ -12,8 +12,8 @@
   probes        robustness probes (blank image, abstain-allowed prompt, opposite-answer image); --probe NAME|all
   posthoc       analyses added after the main run (abstention, label-free PMI, probe confounds) + figures
   format-check  registered format rule for a new model (yes/no mass with the image >= 0.9 per dataset)
-  replication   Holm-adjusted replication tests over the model pairs, the per-dataset table and the
-                probe-disagreement test, with the all-pairs and by-dataset figures
+  replication   Holm-adjusted replication tests over the model pairs, the per-dataset table, the
+                probe-disagreement test and the refusal-excluded differences, with two figures
   contrast      probe R4: opposite-answer images on PathVQA; --model all|a,b,..; --analyze for tables only
   contamination image overlap of evaluated sets with each dataset's train split + documented training use
   audit-score   acceptance rate + agreement/kappa from the filled paraphrase audit sheet

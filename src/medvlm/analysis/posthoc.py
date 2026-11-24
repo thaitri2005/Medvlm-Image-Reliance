@@ -6,9 +6,10 @@ qualifies them.
                   rate per model and dataset (first-token yes+no mass < 0.5).
   selective       P2 used log p(GOLD answer), which leaks the label (log p(gold|image) alone has
                   AUROC 1.0 for yes/no). Label-free image PMI uses the model's own predicted answer.
-  partner         how often the wrong-image partner has the same gold answer for the same question
+  partner         how often the different-image partner has the same gold answer for the same question
                   (only where that pair exists in the data), and whether the model follows real changes.
-  p3_sensitivity  P3 with abstaining questions removed, and with the wrong-image probe.
+  p3_sensitivity  P3 with abstaining questions removed, and with the different-image probe (row label
+                  "wrong-image probe", its name in the pre-registration).
   chance          the quadrant metric counts "unchanged without the image" raw; on yes/no ~half of that is
                   chance. Chance agreement, the chance-only Dangerous floor, Cohen's kappa and paired d(kappa).
   no_pilot        key endpoints re-estimated without the 330 pilot questions the design was tuned on.
@@ -24,6 +25,7 @@ Across pairs (`medvlm replication`; docs/PREREGISTRATION.md sections 16, 17.1, 1
   replication_summary  the registered tests H9-H11 over the replication pairs, Holm-adjusted.
   by_dataset           medical - general answer-change difference under every probe, per dataset and pair (fig10).
   probe_disagreement   difference of differences between every two probes on the same questions.
+  removal_without_refusals  the image-removal difference with refused questions excluded.
 """
 from __future__ import annotations
 
@@ -667,7 +669,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
 
         # 5: the MedGemma - Gemma-3 Dangerous gap under every variant (forest plot, one axis: share difference)
         p3 = tabs["p3_sensitivity"].copy()
-        names = {"pre-registered (image-removed probe)": "Image removed, all questions",
+        names = {"pre-registered (image-removed probe)": "Removed: all questions",
                  f"both models answer without image (mass >= {ANSWER_MASS})": "both models answer",
                  f"neither model abstains (mass >= {ABSTAIN_MASS})": "neither model refuses",
                  "wrong-image probe instead": "Different image"}
@@ -678,7 +680,7 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
             rows.append(("Black image", r.dangerous_blank, r.dangerous_lo, r.dangerous_hi, int(r.dangerous_n)))
         hm = tabs["harm"]
         hm = hm[hm.model.str.contains(" - ")].set_index("measure")
-        for meas, nm in (("dangerous_correct", "Image removed, correct answers"), ("dangerous_wrong", "Image removed, incorrect answers")):
+        for meas, nm in (("dangerous_correct", "Removed: correct answers"), ("dangerous_wrong", "Removed: incorrect answers")):
             rows.append((nm, hm.loc[meas, "est"], hm.loc[meas, "lo"], hm.loc[meas, "hi"], int(hm.loc[meas, "n"])))
         fig, ax = plt.subplots(figsize=(col, 0.32 * len(rows) + 0.5) if paper else (8.5, 0.45 * len(rows) + 1))
         y = np.arange(len(rows))[::-1]
@@ -687,8 +689,9 @@ def figures(out_dir, samples, models, tabs, results_dir, profile, paper_dir=None
                         elinewidth=1.3 if paper else 2, mec=SURFACE, mew=1)
         ax.axvline(0, color=INK2, lw=0.9, ls=(0, (3, 3)))
         ax.axhline(1.5, color=GRID, lw=0.8)
-        ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
-        ax.set_yticks(y, [f"{nm}  (n = {n:,})" for nm, *_, n in rows], fontsize=fs - 0.5)
+        ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.2 if paper else 0.1))
+        ax.set_yticks(y, [f"{nm}, n={n:,}" for nm, *_, n in rows], fontsize=fs - 0.5)
+        ax.set_xlim(-0.24, 0.24)
         ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v * 100:+.0f}" if v else "0"))
         ax.set_xlabel(f"Dangerous share, {_short(models[0])} − {_short(models[1])} (points, 95% CI)", color=INK2, fontsize=fs)
         _style(ax, None, fs)
@@ -1028,7 +1031,7 @@ def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
         if not paper:
             fig.canvas.draw()
             bb = fig.get_tightbbox(fig.canvas.get_renderer())
-            fig.suptitle("Which model relies on the image more? It depends on the probe and on the training data",
+            fig.suptitle("Which model relies on the image more? It depends on the probe and on the data",
                          x=bb.x0 / fig.get_figwidth(), y=bb.y1 / fig.get_figheight() + 0.015, ha="left", va="bottom",
                          fontsize=fs + 3, color=INK)
         save_figure(fig, target / "fig10_by_dataset.png", paper)

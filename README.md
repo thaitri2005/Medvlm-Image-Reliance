@@ -11,22 +11,27 @@
 
 **Does a medical vision-language model look at the image? The answer depends on how you ask.** Removing the
 image says MedGemma relies on the image *less* than the general model it was built from. Swapping the image for
-one that requires the opposite answer says it relies on the image *far more*, on the same questions.
+one that requires the opposite answer says it relies on the image *far more*, on the same questions, on SLAKE, a
+dataset MedGemma was trained on. On held-out data the two ways of asking do not disagree.
 
 <p align="center"><img src="report/figures/fig0_teaser.png" width="100%"></p>
 
 <p align="center"><sub><i>Dangerous</i>: the answer survives rephrasing and does not change when the image is altered.
 <i>Ideal</i>: it survives rephrasing and does change. Actual model outputs.</sub></p>
 
-> **TL;DR.** A recent taxonomy calls a medical VLM answer *consistent but dangerous* when it survives rephrasing
-> **and** does not change when the image is removed. We ran that probe next to three probes that keep an image
-> in the input, on the same questions, for three medical VLMs and the general-purpose models they were built
-> from. **The two kinds of probe disagree about which model of a pair relies on the image more**: in 6 of 9
-> model-pair × dataset combinations they report different differences, and on SLAKE they point in opposite
-> directions, 60 points apart. Refusing to answer without an image explains part of this, not all of it. The
-> probes that keep an image have their own confound: the most direct one is accuracy in disguise, and it favours
-> the MedGemma models only on data they were trained on. On held-out pathology data no probe shows the medical
-> models to be more image-reliant.
+> **TL;DR.** A recent taxonomy calls a medical VLM answer *dangerous* when it survives rephrasing and does not
+> change when the image is removed. We ran that probe next to three probes that swap the image instead (a
+> different image, a black image, an image whose correct answer is the opposite), on the same questions, for
+> three medical VLMs and the general-purpose models they were built from.
+>
+> **What we found.** The probes are not interchangeable. In 6 of 9 model-pair × dataset combinations they
+> measure a different gap between the two models, and on SLAKE the sign flips: image removal puts MedGemma-4B
+> behind its base, the opposite-answer image puts it 48 points ahead. The opposite-answer probe turns out to
+> equal accuracy on questions where guessing the usual answer scores exactly 50%.
+>
+> **What we did not find.** The flip appears only on SLAKE, which MedGemma was trained on. On held-out
+> pathology data the probes do not disagree, and no probe that changes what the image shows puts the medical
+> models ahead. Refusing to answer without an image explains part of image removal's behaviour, not all of it.
 
 *Engineering in three lines: a resumable inference engine (about 120,000 model calls on one 16 GB GPU); every
 table and figure regenerated on a CPU from committed model outputs; 105 tests, including a simulation of the
@@ -86,11 +91,11 @@ MedGemma's red segment is larger everywhere. Right panel: with a different image
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png" width="92%"></p>
 
-**2. Probes that keep an image report different differences** (post hoc). "Significant under one probe, not
-under another" is not evidence that two probes disagree, so the disagreement is tested directly: the
-image-removal difference **minus** the in-format difference, on the same questions. Zero means the two probes
-report the same difference; negative means image removal makes the medical model look less reliant than the
-other probe does.
+**2. Image removal and probes that keep an image measure different gaps** (post hoc). "Significant under one
+probe, not under another" is not evidence that two probes disagree, so the disagreement is tested directly: the
+medical − general gap under image removal **minus** the gap under a probe that keeps an image (an *in-format*
+probe), on the same questions. Zero means the two probes measure the same gap; negative means image removal makes
+the medical model look less reliant than the other probe does.
 
 | Image removal − in-format probe (points) | Dataset | Different image | Black image | Opposite-answer image |
 |---|---|---|---|---|
@@ -107,31 +112,32 @@ other probe does.
 Bold: significant after Holm correction over all 24 comparisons (13 of 24, in 6 of 9 cells). ⇄: a reversal,
 meaning each probe finds a difference on its own and the two have opposite signs.
 
-- **Reversals happen on SLAKE only**, for both MedGemma models against the opposite-answer image.
+- **The sign flips on SLAKE only**: for MedGemma-4B against every in-format probe, and for MedGemma-1.5 against
+  the opposite-answer image.
 - **On VQA-RAD, only image removal reports a difference.** VQA-RAD has no opposite-answer images, so the
   comparison there is with the two weaker probes.
-- **On held-out PathVQA no disagreement with a content-based probe is shown.** The intervals are too wide to
-  call it agreement.
-- **Probes that keep an image also disagree with each other**, in 5 of 21 comparisons, though never with a
-  reversal. A non-zero entry shows two probes are not interchangeable; only a reversal shows they order models
+- **On held-out PathVQA no disagreement is shown** with either probe that changes what the image shows (a
+  different image, an opposite-answer image). The intervals are too wide to call it agreement.
+- A non-zero entry shows two probes are not interchangeable; only a sign flip shows they order models
   differently.
 
-**3. Refusal adds noise to image removal but does not explain it** (post hoc). Told to answer yes or no about
+**3. Refusal biases image removal and explains one pair's difference, not the others** (post hoc). Told to answer yes or no about
 an image it was not given, Gemma-3 asks for the image on 29% of questions (MedGemma-4B 18%, MedGemma-1.5 under
 1%, the Qwen models never). Its forced answers there are unrelated to its answers with the image, so about half
-count as "image-reliant". But dropping every question either model refuses removes most of the image-removal
-difference only for MedGemma-1.5 (−7.4 → −2.3 points); for MedGemma-4B most of it stays (−6.1 → −4.5), and the
-Qwen pair differs with no refusals at all.
+count as "image-reliant", and the model that refuses more looks more reliant. But dropping every question
+either model refuses removes most of the image-removal difference only for MedGemma-1.5 (−7.4 → −2.3 points);
+for MedGemma-4B most of it stays (−6.1 → −4.5), and the Qwen pair differs with no refusals at all.
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig4_abstention.png" width="78%"></p>
 
-**4. The opposite-answer probe is accuracy with the answer prior removed, and its MedGemma advantage does not
+**4. The opposite-answer probe is accuracy where guessing cannot help, and its MedGemma advantage does not
 appear on held-out data** (identity: post hoc; held-out test: registered). On opposite-answer pairs the answers
-are balanced by construction, so a model that ignores the image is right exactly half the time, and
+are balanced by construction, so a model that ignores the image and guesses the usual answer is right exactly
+half the time, and
 
 `share of pairs where the answer changes = 2 × accuracy on those images − 1 + 2 × share wrong on both`
 
-exactly. The probe therefore measures accuracy where priors cannot help, which is what makes it the better
+exactly. The probe therefore measures accuracy where priors cannot help, which is what makes it the most direct
 probe, and it inherits whatever makes a model accurate on a dataset, including having been trained on it.
 
 | Answer changes with an opposite-answer image | SLAKE (in MedGemma training data) | PathVQA (held out) |
@@ -142,7 +148,8 @@ probe, and it inherits whatever makes a model accurate on a dataset, including h
 
 Under the decision rule fixed before the run, the claim that the MedGemma models use the image more is not
 supported on held-out data. PathVQA is hard for every model (64–69% accuracy on these pairs, where ignoring the
-image gives 50%), so "no difference" there may mean equal difficulty as much as equal reliance.
+image gives 50%), so "no difference" there may mean equal difficulty as much as equal reliance. In the figure,
+"pair accuracy" is the share of pairs answered correctly on both images.
 
 <p align="center"><img src="results/contrast/fig9_contrast.png" width="100%"></p>
 
@@ -166,9 +173,13 @@ predictions are reported as such. The last column is the test's identifier in th
 | Declines when "unknown" is allowed, MedGemma-4B − Gemma-3 (predicted < 0) | −6.7 [−8.2, −5.3] | supported; both ≥ 93% | H7 |
 | Follows an opposite-answer image on SLAKE, MedGemma-4B − Gemma-3 (predicted > 0) | +48.0 [41.9, 53.8] | supported | H8 |
 | Same three effects in the two added pairs | MedGemma-1.5: +36.5, −7.4, −28.7; MedVLThinker: −1.6, +3.9, 0.0 | MedGemma-1.5 only | H9–H11 |
-| Follows an opposite-answer image on PathVQA, MedGemma-4B − Gemma-3 (predicted > 0) | +0.8 [−2.7, 4.2] | **failed** | H12a |
-| … MedGemma-1.5 − Gemma-3 (predicted > 0) | −5.6 [−9.1, −2.0] | **reversed**; weaker under a stricter bootstrap | H12b |
-| … MedVLThinker − Qwen2.5-VL (predicted within ±5) | −0.9 [−3.0, 1.3] | supported; borderline under a stricter bootstrap | H12c |
+| Follows an opposite-answer image on PathVQA, MedGemma-4B − Gemma-3 (predicted > 0) | +0.8 [−2.7, 4.2] | **not supported** | H12a |
+| … MedGemma-1.5 − Gemma-3 (predicted > 0) | −5.6 [−9.1, −2.0] | **reversed** ¹ | H12b |
+| … MedVLThinker − Qwen2.5-VL (predicted within ±5) | −0.9 [−3.0, 1.3] | supported ¹ | H12c |
+
+¹ Under the registered bootstrap over images. Resampling question templates instead, which is more conservative
+because the questions reuse templates, widens both intervals (the first is then not significant after
+correction, the second slightly exceeds ±5); the conclusion that the MedGemma models are not ahead is unchanged.
 
 ### What to take away
 
@@ -210,7 +221,7 @@ R1 (black image), R2 ("unknown" allowed), R3 and R4 (opposite-answer image on SL
   bf16 with identical prompts and scoring; each added model passed a registered format check first.
 - **Data.** [SLAKE](https://www.med-vqa.com/slake/) (CT, MRI, X-ray), [VQA-RAD](https://osf.io/89kps/)
   (radiology), [PathVQA](https://github.com/UCSD-AI4H/PathVQA) (pathology): 3,365 questions on 907 images,
-  plus 1,192 PathVQA questions on 682 images for R4. All are sampled once with SHA-1 seeds and fixed in
+  plus 1,192 PathVQA questions on 682 images for the held-out opposite-answer probe. All are sampled once with SHA-1 seeds and fixed in
   `manifests/`. What each model was trained on is documented in [docs/RESULTS.md §13](docs/RESULTS.md).
 - **Scoring.** Yes/no answers come from one forward pass,
   `P(yes) = sigmoid(logsumexp(yes-token logits) - logsumexp(no-token logits))`,
@@ -291,11 +302,9 @@ The paper's limitations section is the full list. The ones that change how to re
 - **Three pairs, two families, small models.** They show that reliance probes *can* report different and even
   opposite differences, not how often this happens. Two of the three pairs share the same base model.
 - **No ground truth, and no disagreement shown on held-out data.** The reference probe exists only on SLAKE and
-  PathVQA. Every reversal is on SLAKE, which the MedGemma models were trained on; on held-out PathVQA image
-  removal and the content-based probes are not shown to differ.
-- **The held-out test is one modality at low accuracy.** It cannot tell equal reliance from equal difficulty,
-  and two of its three registered outcomes weaken under a stricter bootstrap; the conclusion that the MedGemma
-  models are not ahead there does not.
+  PathVQA. Every sign flip is on SLAKE, which the MedGemma models were trained on; on held-out PathVQA image
+  removal and the probes that change what the image shows are not shown to differ.
+- **The held-out test is one modality at low accuracy.** It cannot tell equal reliance from equal difficulty.
 - **Post hoc parts.** The comparison between probes, the refusal analysis and the per-dataset breakdown were
   done after the primary results. Of the dataset-specific comparisons, only the held-out test was registered.
 - **Paraphrases were judged by an LLM**, not by independent human raters. A check of 50 of them by the first

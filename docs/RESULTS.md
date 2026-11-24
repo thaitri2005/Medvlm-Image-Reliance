@@ -115,7 +115,8 @@ blind. The next two sections show why that reading is wrong.
 Share of yes/no answers that change when the image is altered (`reversal.csv`; descriptive, post hoc as a
 summary of the registered probes). A model that uses the image should change its answer when the image changes.
 Pooled over datasets the in-format probes rank MedGemma above Gemma-3, but §14–15 show that this comes from SLAKE,
-a dataset MedGemma was trained on; on PathVQA the in-format gaps are close to 0.
+a dataset MedGemma was trained on; on PathVQA the gaps under the content-based probes (different and
+opposite-answer image) are close to 0; the black image is the exception (§15).
 
 | Probe | n | MedGemma | Gemma-3 | MedGemma − Gemma-3 |
 |---|---|---|---|---|
@@ -219,7 +220,7 @@ medical − general difference in the share of test yes/no answers that change w
 (Intervals here come from the fast cluster bootstrap and can differ in the last digit from the registered
 tests.) Under the definition of refusal used everywhere else (mass < 0.5), excluding refused questions removes
 most of the difference for MedGemma-1.5 and little of it for MedGemma-4B, where the SLAKE difference grows. Under
-the stricter format threshold (mass ≥ 0.9, 41–43% of the questions) the pooled differences vanish, but the
+the stricter format threshold (mass ≥ 0.9, under half of the questions) the pooled differences vanish, but the
 subsets are selected and unstable (MedGemma-1.5 on SLAKE: +40 on 80 questions). The Dangerous gap (P3) behaves
 the same way: +12.6 [8.1, 17.0] of +13.7 without refusals and +8.0 [2.9, 13.3] at the format threshold for
 MedGemma-4B; +7.5 [2.4, 12.3] of +9.8 and +3.0 [−3.6, 9.5] for MedGemma-1.5. The Qwen pair never refuses and
@@ -317,7 +318,8 @@ pair was not needed. 18,896 + 3,535 calls per model, all complete.
 more under a black image (+8.2 [3.7, 12.6]), but changes *less* when the image is removed, and its Dangerous share
 under image removal is +9.8 [5.8, 13.9] higher. Refusal is even more lopsided than for MedGemma-4B (8 vs 354 of
 1,206 questions), and on the 467 questions both models answer, the Dangerous gap shrinks to +3.0 [−3.6, 9.5]:
-refusal accounts for nearly all of it. Unlike MedGemma-4B, MedGemma-1.5 answers blind even when allowed to decline
+at that strict threshold refusal accounts for most of it; under the usual definition of refusal +7.5 [2.4, 12.3]
+remains (§6). Unlike MedGemma-4B, MedGemma-1.5 answers blind even when allowed to decline
 (it declines on 52.7%). Its excess Dangerous answers are again correct (+9.3 [5.7, 12.6] correct, +0.5 [−2.1, 3.2]
 wrong).
 
@@ -325,15 +327,15 @@ wrong).
 indistinguishable under every in-format probe (opposite-answer −1.6, black −0.8 [−3.0, 1.3], different image −1.2
 [−3.3, 1.0]) and in error rate (30.8% vs 31.7%): the RL fine-tune did not change how the model uses the image.
 Neither model ever refuses under the forced format, and both decline on ≥ 98.7% when allowed to. Image removal
-still reports a small difference the in-format probes do not see (+3.9, opposite to H10), because the base's blind
-answers agree more with its image answers (κ 0.16 vs 0.09).
+still reports a small difference the in-format probes do not see (+3.9, opposite to H10), and the base's blind
+answers agree more with its image answers (κ 0.16 vs 0.09), which describes the difference rather than explains it.
 
 **Reading.** Pooled over datasets, image removal matched the in-format probes in none of the three pairs; by
 dataset the picture is finer (§15: they disagree in 6 of 9 cells). H9 (follows the
 opposite-answer image more) holds for MedGemma-1.5 on SLAKE, but R4 (§14) shows that this advantage does not carry
 over to PathVQA, so the pooled "reversal" is a disagreement between probes, not evidence that the MedGemmas use
-the image more in general. The refusal account was formed after the primary results; it fits all three pairs,
-but three pairs cannot test it formally.
+the image more in general. The refusal account was formed after the primary results. §6 tests it: it explains
+most of pair A's image-removal difference and little of the primary pair's.
 
 ## 10. Hypotheses
 
@@ -357,7 +359,7 @@ but three pairs cannot test it formally.
 ## 11. Threats to validity
 
 - Three pairs from two families: they show that image removal *can* disagree with in-format probes and that refusal
-  predicts where, not how often across the field. Checkpoints differ in their whole post-training, not only in medical data.
+  contributes, not how often across the field. Checkpoints differ in their whole post-training, not only in medical data.
 - No probe is ground truth. The reference probe (opposite-answer image) exists only on SLAKE and PathVQA; on
   VQA-RAD image removal is compared with two weaker probes, one attenuated (a random partner often has the same
   answer) and one not neutral (a black image).
@@ -371,8 +373,8 @@ but three pairs cannot test it formally.
 - R4 covers one modality, pathology, on which every model is weak (pair accuracy 36–43%); the absence of a gap
   there is evidence against a general "uses the image more", not proof that no domain shows one. It also cannot
   tell equal reliance from equal difficulty: a model cannot follow an image it cannot read (§14).
-- The per-dataset breakdown and the direct test of probe disagreement (§15) and the comparison of pair accuracy
-  with accuracy (§14) are post hoc; only R4 among the dataset-specific comparisons was registered.
+- The per-dataset breakdown and the direct test of probe disagreement (§15) and the identity for the
+  opposite-answer probe (§14) are post hoc; only R4 among the dataset-specific comparisons was registered.
 - Paraphrase equivalence was judged by an LLM (PREREGISTRATION.md §4.5) and not validated by independent human
   raters. A second check of 50 paraphrases used in the analysis (a seeded random sample of valid paraphrases not rated in earlier rounds,
   `manifests/main/paraphrase_audit.csv`), rated by the first author with AI assistance on 2026-10-17, accepted 44 of 50
@@ -477,7 +479,8 @@ training data of any medical model). Same prompt, bf16, batch 1, greedy. `result
 | H12c | MedVLThinker − Qwen2.5-VL | within ±5 | −0.9 [−3.0, 1.3] | | **supported** |
 
 Resampling PathVQA's 154 question templates instead of images (more conservative) gives +0.8 [−6.8, 7.3], −5.6
-[−12.0, −0.2] and −0.9 [−5.3, 2.9]: the same conclusions.
+[−12.0, −0.2] and −0.9 [−5.3, 2.9]. Two registered outcomes weaken (see "Sensitivity to clustering" below); the
+conclusion that neither MedGemma model follows the image more than Gemma-3 does not.
 
 **Decision rule** (fixed before running): H12a fails with a CI that includes 0, so the SLAKE gap (+48.0) is
 reported as possibly a training-distribution effect and the claim is restricted to the disagreement between
@@ -487,7 +490,8 @@ withdrawn (rule iii). The Qwen pair behaves as predicted.
 **Reading.** Every model follows the PathVQA partner image on 43–49% of swaps and is right on both images on
 36–43%, above the 0% of a model that ignores the image and the 25% of image-dependent guessing: all five read
 pathology images, to a similar and modest degree. MedGemma's large SLAKE advantage (pair accuracy 71.7% vs
-23.4%) does not transfer to a domain it was not trained on. This matches accuracy: with the image, MedGemma-4B
+23.4%) does not appear on PathVQA, which it was not
+trained on. This matches accuracy: with the image, MedGemma-4B
 beats Gemma-3 by 18 points on SLAKE yes/no and by 2 on PathVQA (§2).
 
 **Sensitivity to clustering.** The 1,192 questions reuse 154 question templates and draw their partners from
@@ -602,7 +606,7 @@ on PathVQA for a reason unrelated to image content).
 - **On VQA-RAD only image removal reports a difference**, and all six comparisons are significant. There is no
   opposite-answer probe there, so the comparison is with the two weaker probes, on images MedGemma-4B was
   trained on.
-- **On held-out PathVQA no disagreement with a content-based probe is shown**, for any pair. The intervals (±6–8
+- **On held-out PathVQA no disagreement with a content-based probe is shown**, for any pair. The intervals (±4–7
   points against the different image, ±10–18 against the opposite-answer image on 108 questions) are too wide to
   call this agreement. The same holds for the Qwen pair on SLAKE.
 - Six of the nine cells share the same Gemma-3 outputs, so they are not independent replications.
@@ -619,7 +623,7 @@ So the different-image probe reports a smaller MedGemma advantage on SLAKE than 
 with its attenuation by partners that have the same answer. Probes are not interchangeable in general; image
 removal is the only one that reverses an order.
 
-**The in-format advantage of the MedGemmas is a SLAKE effect.** Different, black and opposite-answer images all
+**The in-format advantage of the MedGemmas appears on SLAKE only.** Different, black and opposite-answer images all
 separate the MedGemmas from Gemma-3 on SLAKE, their training distribution, and almost nowhere else. The one
 exception is MedGemma-4B on a black image, which changes its answer more on every dataset (+19 on PathVQA): it reads
 an empty image as "no findings" (its yes-rate falls from 58% to 28%), a reaction to the image slot rather than use

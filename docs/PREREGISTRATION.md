@@ -20,8 +20,8 @@ listed in section 13 with its reason.
 > "Probes of Image Reliance Disagree in Medical Vision-Language Models", which claims only what the data show
 > (sections 19 and 20). "Solo project" below describes the project when the plan was written; the paper has two
 > authors. No frozen section was edited; post-hoc summaries are listed
-> in section 13, item 17, section 17.1 and section 19. Test counts and status notes in sections 1-14 describe the
-> project at the time they were written (the suite now has 104 fast tests).
+> in section 13, item 17, section 17.1 and sections 19 and 20. Test counts and status notes in sections 1-14 describe the
+> project at the time they were written (the suite now has 105 fast tests).
 
 ## 0. Objective, target, scope
 

@@ -20,7 +20,7 @@ Tables: `results/<model>/main/`, `results/compare_medgemma4b_vs_gemma3_4b/main/`
 1. **Image removal, the criterion of the consistent-but-dangerous taxonomy, says MedGemma ignores the image more
    than Gemma-3.** Its Dangerous share is +13.7 points higher [10.0, 17.5] (P3), in every dataset and every cell of
    the pre-registered sensitivity grid.
-2. **Probes that keep an image in the input report different differences** (§5, §15; post hoc). Tested directly
+2. **Image removal and probes that keep an image measure different gaps** (§5, §15; post hoc). Tested directly
    as a difference of differences on the same questions, image removal and an in-format probe (different, black
    or opposite-answer image) disagree about a medical model and its base in 13 of 24 comparisons after Holm
    correction, in 6 of 9 pair × dataset cells. On SLAKE they order both MedGemma models against Gemma-3
@@ -597,7 +597,7 @@ the 108 PathVQA test questions of R4 that are also in the main run; VQA-RAD has 
 | | VQA-RAD | **+12.0** [4.3, 20.0] | **+13.5** [6.1, 21.5] | |
 | | SLAKE | +1.1 [−4.0, 6.7] | +1.1 [−2.0, 4.7] | +1.6 [−2.1, 5.5] |
 
-Bold: p_Holm < 0.05. **Image removal and an in-format probe report different differences in 13 of 24
+Bold: p_Holm < 0.05. **Image removal and an in-format probe measure a different gap in 13 of 24
 comparisons, covering 6 of 9 cells** (5 of 9 without the black image, which separates MedGemma-4B from Gemma-3
 on PathVQA for a reason unrelated to image content).
 

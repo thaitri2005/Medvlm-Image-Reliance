@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "Consistent but Blind? Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models"
+title: "Consistent but Blind? Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance"
 authors:
   - family-names: "Thai Huu"
     given-names: "Tri"
@@ -10,7 +10,7 @@ authors:
     given-names: "Hung"
     affiliation: "VinUniversity"
     email: "23hung.nl@vinuni.edu.vn"
-version: "1.0.0"
-date-released: "2026-10-22"
+version: "1.1.0"
+date-released: "2026-11-24"
 license: MIT
 repository-code: "https://github.com/thaitri2005/Medvlm-Image-Reliance"

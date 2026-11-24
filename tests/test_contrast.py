@@ -84,6 +84,10 @@ def test_oracle_follows_and_scores_pair_accuracy_one_blind_model_scores_zero(pat
     assert m.loc["medgemma4b", "follow"] == 1 and m.loc["medgemma4b", "both_right"] == 1
     assert m.loc["gemma3_4b", "follow"] == 0 and m.loc["gemma3_4b", "both_right"] == 0   # 0 by construction
     assert m.loc["gemma3_4b", "stuck"] == 1
+    # pair accuracy against the product of the two accuracies: an image reader matches it, a model that answers
+    # from the question alone is right on exactly one image of each pair and falls 25 points below it
+    assert m.loc["medgemma4b", "both_right_minus_expected"] == 0
+    assert m.loc["gemma3_4b", "both_right_expected"] == 0.25 and m.loc["gemma3_4b", "both_right_minus_expected"] == -0.25
     d = out["contrast_pairs"].iloc[0]
     assert d.d_follow == 1 and d.d_both_right == 1
     assert out["contrast_tests"].empty                     # the registered family needs all three pairs

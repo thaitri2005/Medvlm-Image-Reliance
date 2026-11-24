@@ -74,3 +74,19 @@ def test_replication_summary_holm_across_pairs_and_decision_rule(tmp_path):
     rep = T.groupby("pair").reversal_replicates.first()
     assert rep["m1 - g1"] and not rep["m2 - g2"]               # m2: image removal does not rank the other way
     assert (T.p_holm >= T.p).all() and len(T) == 6            # Holm over all six tests; missing pair skipped
+
+
+def test_probe_disagreement_is_a_difference_of_differences_on_the_same_questions():
+    from medvlm.analysis.posthoc import did_row
+
+    rng = np.random.default_rng(0)
+    n = 600
+    img = [f"i{i // 3}" for i in range(n)]
+    same = rng.choice([-1.0, 0.0, 1.0], n)
+    agree = did_row(pd.DataFrame({"removal": same, "probe": same, "image_id": img}), B=200, seed=1)
+    assert agree["did"] == 0 and agree["lo"] == 0 == agree["hi"]            # identical probes never disagree
+    # removal says "medical changes 20 points less", the in-format probe says "10 points more": did = -30
+    rem = (rng.random(n) < .3).astype(float) - (rng.random(n) < .5).astype(float)
+    inf = (rng.random(n) < .5).astype(float) - (rng.random(n) < .4).astype(float)
+    r = did_row(pd.DataFrame({"removal": rem, "probe": inf, "image_id": img}), B=200, seed=1)
+    assert abs(r["did"] - (r["d_removal"] - r["d_probe"])) < 1e-12 and r["hi"] < 0 and r["n_images"] == 200

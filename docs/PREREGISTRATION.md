@@ -2,21 +2,24 @@
 
 A modality-by-modality audit of image reliance in a small medical VLM. Solo project, ~2 weeks, all
 runs on one GPU machine. This file is the single source of truth for *what we claim and how we test it*;
-[README.md](../README.md) is the paper-style overview and [docs/REPRODUCE.md](REPRODUCE.md) the how-to-run. Last updated 2026-10-16.
+[README.md](../README.md) is the paper-style overview and [docs/REPRODUCE.md](REPRODUCE.md) the how-to-run. Last updated 2026-11-24 (section 19 added; nothing else changed).
 Sections 5-6 are the **analysis pre-registration**: frozen before `main` runs; any later change is
 listed in section 13 with its reason.
 
 > **Registrations are tagged in git**, so anyone can check that a plan predates its results (this file was
 > `PLAN.md` at the root until 2026-10-16): `prereg-main` (the plan when the main run started, sections 0-14),
 > `prereg-probes` (section 15), `prereg-replication` (section 16), `prereg-contrast` (section 17). For example
-> `git show prereg-main:PLAN.md`. Corrections of facts found later are listed in section 18, never edited into
-> the frozen text.
+> `git show prereg-main:PLAN.md`. Corrections of facts found later are listed in section 18, and analyses added
+> after all results were known in section 19, never edited into the frozen text.
 
 > **Framing after the results.** Sections 0 and 3 keep the framing the study was planned with (a cross-modality
 > audit of MedGemma, with Gemma-3 as control). The probe results (section 15.1) moved the headline to the comparison
 > between probes; the held-out probe R4 (section 17.1) then withdrew the claim that the MedGemmas rely on the image
-> more. The final title is "Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models". No
-> frozen section was edited; post-hoc summaries are listed in section 13, item 17, and section 17.1.
+> more. The title was "Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models" until
+> 2026-11-24 and is now "Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance", which claims
+> only what three model pairs can show (section 19). No frozen section was edited; post-hoc summaries are listed
+> in section 13, item 17, section 17.1 and section 19. Test counts and status notes in sections 1-14 describe the
+> project at the time they were written (the suite now has 104 fast tests).
 
 ## 0. Objective, target, scope
 
@@ -537,3 +540,30 @@ carry the corrected interpretation.
    split; test and validation images are disjoint from it. If the train split was used, the evaluated SLAKE
    images were not training images, but their distribution was (motivating R4, section 17).
 
+## 19. Post-hoc analyses added in the narrative revision (2026-11-24, after all results were known)
+
+No new model runs. Both analyses are computed from the stored outputs, are post hoc, and are labelled so in
+RESULTS.md and the paper. They were added because the previous summary of the probe comparison did not test what
+it claimed.
+
+1. **Direct test of probe disagreement** (`medvlm replication` -> `results/replication_main/probe_disagreement.csv`;
+   RESULTS.md section 15). Section 17.1 and the paper summarised the per-dataset table as "image removal separates
+   the models in 5 of 9 cells, and in none of them does an in-format probe agree". That compares a significant
+   difference with a non-significant one, which is not a test of disagreement, and the README's shorthand
+   "never agree" was contradicted by one cell (MedGemma-1.5 on PathVQA, where image removal, the wrong image and
+   the opposite-answer image point the same way). The replacement is a difference of differences on the same
+   questions: (medical - general answer-change rate under image removal) - (the same under the in-format probe),
+   95% CI by cluster bootstrap over images, Holm over all 21 rows. Result: the probes disagree in 13 of 21
+   comparisons, in 6 of 9 pair-dataset cells; they agree in 3 cells, all with small differences. The 5-of-9
+   description is kept in RESULTS.md as a description, not as the claim.
+2. **Pair accuracy against the accuracy product** (`medvlm contrast --analyze` -> `results/contrast/contrast_models.csv`,
+   columns `both_right_expected`, `both_right_minus_expected*`; RESULTS.md section 14). Asks whether the
+   opposite-answer probe reports more than accuracy. Result: pair accuracy is 1-6 points below the product of the
+   two single-image accuracies in 9 of 10 model-dataset cells; Gemma-3 on SLAKE is 13.8 points below. The 25%
+   reference point of pair accuracy (image-dependent but uninformative answers) is now stated next to the 0% of a
+   model that ignores the image.
+3. **Wording.** The title was narrowed (see the framing note at the top). "No probe is ground truth" is stated in
+   the paper: the opposite-answer image is the reference where it exists (SLAKE, PathVQA), and VQA-RAD comparisons
+   rest on the two weaker in-format probes. The paper now describes tests in words, organises its test table by
+   claim, and maps the identifiers of this file in its Appendix D. No registered estimate, test or decision
+   changed.

@@ -11,7 +11,7 @@ git clone https://github.com/thaitri2005/Medvlm-Image-Reliance.git && cd Medvlm-
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128   # CUDA build first
 pip install -e ".[model,dev]"
-pytest                                                  # 103 fast tests, no GPU / network needed
+pytest                                                  # 104 fast tests, no GPU / network needed
 ```
 
 MedGemma and Gemma-3 are gated: accept the terms on their Hugging Face pages
@@ -64,7 +64,7 @@ medvlm format-check --profile pilot --model medvlthinker_3b          # must PASS
 medvlm pipeline     --profile main  --model medvlthinker_3b --hardware rtx4080 --parts 2
 medvlm probes       --profile main  --model medvlthinker_3b --hardware rtx4080
 medvlm posthoc      --profile main  --model medvlthinker_3b --model-b qwen25vl_3b
-medvlm replication  --profile main                                   # H9-H11, figure 8; per-dataset table + figure 10 (run after contrast --analyze)
+medvlm replication  --profile main                                   # H9-H11, figure 8; per-dataset table, probe-disagreement test, figure 10 (run after contrast --analyze)
 ```
 
 ## 5. Probe R4: opposite-answer images outside the training data (PREREGISTRATION.md section 17)
@@ -77,8 +77,9 @@ medvlm contrast --analyze                           # tables + figure 9; no GPU
 `--model` also takes a comma-separated list (`--model medgemma4b,gemma3_4b`). The manifest
 (`manifests/contrast/`, 1,192 PathVQA questions) is committed; the command only fetches and SHA-checks its 682
 images. Each model answers every question on its own image (`outputs/<model>/contrast`) and on the
-opposite-answer partner (`outputs/<model>__opp/contrast`). `--analyze` writes `results/contrast/`: per-model rates,
-paired differences, and the registered H12 tests, which are computed only when all five models are complete.
+opposite-answer partner (`outputs/<model>__opp/contrast`). `--analyze` writes `results/contrast/`: per-model rates
+(including pair accuracy against the product of the two single-image accuracies), paired differences, and the
+registered H12 tests, which are computed only when all five models are complete.
 It also covers the SLAKE probe R3 from the main run.
 
 ## 6. Training-data check
@@ -88,6 +89,20 @@ medvlm contamination        # image overlap with each dataset's train split + do
 ```
 
 Writes `results/contamination/`. It downloads the train splits (SLAKE, VQA-RAD, PathVQA); no model is loaded.
+
+## 6a. Re-running the analyses without a GPU
+
+Every table and figure is computed from the committed `outputs/` and `manifests/`, so the analysis commands run
+on a CPU-only machine without downloading images or models (`pip install -e ".[dev]"` is enough):
+
+```bash
+medvlm posthoc     --profile main --model medgemma4b --model-b gemma3_4b   # each pair
+medvlm contrast    --analyze
+medvlm replication --profile main
+```
+
+Tables are reproduced exactly (fixed bootstrap seed). Figures are redrawn, so their files change by a few bytes
+if the installed matplotlib or fonts differ.
 
 ## 7. Commands
 
@@ -104,7 +119,7 @@ Writes `results/contamination/`. It downloads the train splits (SLAKE, VQA-RAD, 
 | `status`, `analyze`, `compare` | Progress; tables in `results/<model>/<profile>/`; paired model comparison (P3) |
 | `probes --probe blank\|abstain\|opp\|all` | Robustness probes R1-R3 |
 | `posthoc --model-b B` | Post-hoc analyses, probe tests and figures for one pair |
-| `format-check`, `replication` | Format rule for a new model; replication tests H9-H11 across pairs |
+| `format-check`, `replication` | Format rule for a new model; replication tests H9-H11 across pairs, the per-dataset table and the direct test of probe disagreement |
 | `contrast [--analyze]` | Probe R4 and the opposite-answer tables (R3 + R4) |
 | `contamination` | Train-split image overlap and documented training use |
 

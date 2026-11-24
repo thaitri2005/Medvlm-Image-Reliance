@@ -1,5 +1,5 @@
 <h1 align="center">Consistent but Blind?</h1>
-<p align="center"><b>Image removal does not measure image reliance in medical vision-language models</b></p>
+<p align="center"><b>Image removal does not rank medical vision-language models by image reliance</b></p>
 <p align="center"><b>Tri Thai Huu</b>, <b>Hung Nguyen Le</b> · VinUniversity · <a href="mailto:23tri.th@vinuni.edu.vn">23tri.th@vinuni.edu.vn</a>, <a href="mailto:23hung.nl@vinuni.edu.vn">23hung.nl@vinuni.edu.vn</a></p>
 <p align="center">
 5 models: 3 medical VLMs vs the 2 general-purpose models they derive from &nbsp;·&nbsp; SLAKE · VQA-RAD · PathVQA &nbsp;·&nbsp; CT · MRI · X-ray · pathology &nbsp;·&nbsp; pre-registered
@@ -13,13 +13,15 @@
 
 > **TL;DR.** A recent taxonomy flags a medical VLM answer as *consistent but dangerous* when it survives
 > rephrasing **and** survives removing the image. We ran that test next to three tests that keep an image in
-> the input, on the same questions, for five models: three medical VLMs (MedGemma-4B, MedGemma-1.5-4B, MedVLThinker-3B) and the two
-> general-purpose models they were built from (Gemma-3-4B, Qwen2.5-VL-3B). **Image removal and
-> the in-format tests never agree:** wherever image removal says a medical model ignores the image more or less
-> than its base, no in-format test confirms it. What image removal picks up is whether a model refuses to answer
-> without an image and whether its guesses happen to match the image. The in-format tests have their own trap:
-> they show the MedGemmas using the image far more than their base only on data the MedGemmas were trained on.
-> On held-out pathology data, a pre-registered test finds no difference.
+> the input, on the same questions, for five models: three medical VLMs (MedGemma-4B, MedGemma-1.5-4B,
+> MedVLThinker-3B) and the two general-purpose models they were built from (Gemma-3-4B, Qwen2.5-VL-3B).
+> **The two kinds of test rank the models differently.** Tested directly, image removal disagrees with an
+> in-format test about a medical model and its base in 13 of 21 comparisons (6 of 9 pair × dataset cells), by up
+> to 60 points, and the tests agree only where the differences are small. What image removal picks up is whether
+> a model refuses to answer without an image and whether its guesses happen to match the image. The in-format
+> tests have their own trap: they show the MedGemmas using the image far more than their base only on data the
+> MedGemmas were trained on. On held-out pathology data, a pre-registered test finds no difference, and what the
+> test reports is close to what accuracy alone predicts.
 
 ---
 
@@ -31,12 +33,16 @@ Each point is a **medical − general** difference in how often a yes/no answer 
 A model that uses the image should change its answer when the image changes. Rows are probes, markers are
 datasets, panels are model pairs.
 
-- **Image removal (top row) and the in-format probes (the other rows) never agree.** Image removal separates the
-  medical model from its base in 5 of 9 pair × dataset cells. In 4 of them no in-format probe sees any
-  difference; in the 5th (MedGemma-4B on SLAKE) every in-format probe points the other way.
+- **If the probes measured one thing, the markers of a dataset would line up vertically in each panel. They do
+  not.** Tested directly (result 2 below), image removal (top row) ranks a pair differently from the in-format
+  probes (the other rows) in 6 of the 9 pair × dataset cells. On SLAKE it has the opposite sign for both
+  MedGemmas. The probes agree in 3 cells, all with small differences.
 - **The in-format probes favour the MedGemmas mainly on SLAKE** (open diamonds), a dataset both were trained on.
   On PathVQA (filled circles), which no medical model was trained on, the opposite-answer gap is +0.8 for
-  MedGemma-4B and −5.6 for MedGemma-1.5. That test (R4) was registered before it was run.
+  MedGemma-4B and −5.6 for MedGemma-1.5. That test was registered before it was run.
+- **No probe is treated as ground truth.** The opposite-answer image is the only probe with a defined correct
+  response, so it is the reference where it exists (SLAKE, PathVQA). VQA-RAD has too few recurring questions for
+  it, so there image removal is compared with the two weaker in-format probes.
 
 ## Why this matters
 
@@ -65,10 +71,11 @@ data**, and to explain why they disagree.
 | | Prior work | This project |
 |---|---|---|
 | Quadrant taxonomy | Introduced on chest X-ray yes/no ([CbD](https://arxiv.org/abs/2603.20985)) | Reused unchanged as the reference; extended to CT, MRI and pathology on three VQA datasets |
-| Black-image, swapped and hard-negative images | Used to corroborate image removal ([CbD](https://arxiv.org/abs/2603.20985)) or to define reliance metrics and train against them ([Zafar et al.](https://arxiv.org/abs/2607.03647), [Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | Removal was argued to reflect a model's default answer ([Lotfinia et al.](https://arxiv.org/abs/2606.17710)); we test the consequence for **comparisons between models**: image removal is confirmed by no in-format probe, in any pair or dataset |
+| Black-image, swapped and hard-negative images | Used to corroborate image removal ([CbD](https://arxiv.org/abs/2603.20985)) or to define reliance metrics and train against them ([Zafar et al.](https://arxiv.org/abs/2607.03647), [Lotfinia et al.](https://arxiv.org/abs/2606.17710)) | Removal was argued to reflect a model's default answer ([Lotfinia et al.](https://arxiv.org/abs/2606.17710)); we test the consequence for **comparisons between models**, directly: image removal ranks a pair differently from an in-format probe in 13 of 21 comparisons |
 | Refusing without an image | Studied as a safety outcome ([MedVIGIL](https://arxiv.org/abs/2605.07919), [Hearsay](https://arxiv.org/abs/2607.26886)) | Shown to be a **confound** of the image-removal probe: a forced yes/no turns refusals into scored answers |
 | Training-data exposure | Usually noted as a caveat | Tested: the same probe inside (SLAKE) and outside (PathVQA) the medical models' training data, registered in advance |
 | *Dangerous* share | Raw share; accuracy per quadrant | Chance floor and Cohen's κ; paired split into correct and wrong *Dangerous* answers |
+| Opposite-answer pairs | Pair accuracy as a contrast-set score | Pair accuracy read against single-image accuracy: how much of a model's accuracy does not come from the image |
 
 ## Results
 
@@ -82,9 +89,10 @@ pre-registered sensitivity grid (MedGemma-1.5: +9.8).
 
 <p align="center"><img src="results/posthoc_medgemma4b_vs_gemma3_4b/main/fig1_quadrants.png" width="92%"></p>
 
-**2. No probe that keeps an image in the input confirms it** (figure at the top). Split by dataset:
+**2. Probes that keep an image in the input rank the models differently** (figure at the top). Medical −
+general difference in how often the answer changes, by dataset:
 
-| Medical − general (points) | Dataset | Image removed | Wrong image | Black image | Opposite-answer image |
+| Medical − general (points) | Dataset | Image removed | Different image | Black image | Opposite-answer image |
 |---|---|---|---|---|---|
 | MedGemma-4B − Gemma-3 | PathVQA | +1.7 | +2.3 | **+19.2** | +0.8 |
 | | VQA-RAD | **−19.1** | +2.0 | +5.2 | |
@@ -97,7 +105,29 @@ pre-registered sensitivity grid (MedGemma-1.5: +9.8).
 | | SLAKE | −2.3 | −3.4 | **−3.4** | −1.6 |
 
 Bold: 95% CI excludes 0. The opposite-answer image exists only where a question recurs on another image with the
-opposite answer (SLAKE: R3; PathVQA: R4).
+opposite answer (SLAKE and PathVQA).
+
+"Significant under one probe, not under another" is not by itself evidence that two probes disagree, so the
+disagreement is tested directly: the image-removal difference **minus** the in-format difference, on the same
+questions (post hoc; `results/replication_main/probe_disagreement.csv`). Zero means the two probes rank the pair
+alike.
+
+| Image removal − in-format probe (points) | Dataset | Different image | Black image | Opposite-answer image |
+|---|---|---|---|---|
+| MedGemma-4B − Gemma-3 | PathVQA | −0.7 [−7.1, 5.9] | **−17.5** [−23.8, −10.8] | |
+| | VQA-RAD | **−21.1** [−32.2, −9.6] | **−24.3** [−36.3, −11.7] | |
+| | SLAKE | **−21.7** [−30.5, −13.3] | **−42.8** [−52.1, −33.0] | **−60.5** [−68.8, −51.3] |
+| MedGemma-1.5 − Gemma-3 | PathVQA | +1.7 [−4.8, 8.0] | −4.0 [−9.5, 1.7] | |
+| | VQA-RAD | **−16.7** [−26.0, −6.7] | **−19.5** [−29.6, −9.2] | |
+| | SLAKE | **−17.2** [−26.2, −8.7] | **−32.4** [−41.8, −23.0] | **−45.5** [−56.5, −34.0] |
+| MedVLThinker − Qwen2.5-VL | PathVQA | +4.5 [0.5, 8.5] | +3.2 [0.0, 6.4] | |
+| | VQA-RAD | **+12.0** [4.3, 20.0] | **+13.5** [6.1, 21.5] | |
+| | SLAKE | +1.1 [−4.0, 6.7] | +1.1 [−2.0, 4.7] | +1.6 [−2.1, 5.5] |
+
+Bold: significant after Holm correction over all 21 comparisons (13 of 21, in 6 of 9 cells). The probes agree in
+three cells: the Qwen pair on SLAKE (no probe sees a difference), MedGemma-1.5 on PathVQA (all point the same
+way), and the Qwen pair on PathVQA (a small disagreement that does not survive correction). No large
+image-removal difference is reproduced by any in-format probe.
 
 **3. What image removal picks up instead.**
 
@@ -121,6 +151,24 @@ MedGemma advantage is gone: **+0.8 [−2.7, 4.2]** for MedGemma-4B and **−5.6 
 the decision rule fixed before the run, the claim that the MedGemmas use the image more is withdrawn.
 
 <p align="center"><img src="results/contrast/fig9_contrast.png" width="100%"></p>
+
+**Is the opposite-answer probe more than accuracy? Mostly not** (post hoc). Being right on both images of a pair
+(*pair accuracy*) is 0% for a model that ignores the image and 25% for image-dependent guessing. In 9 of 10
+model × dataset cells it sits 1–6 points below the product of the two single-image accuracies: how accurate a
+model is on a distribution predicts how often it follows an opposite-answer image there. That is why the
+in-format advantage follows the training data, and why "no difference" on PathVQA, where every model is right
+on only 57–71% of single images, may mean equal difficulty as much as equal reliance. The exception is the
+informative case:
+
+| SLAKE opposite-answer pairs (n = 367) | Accuracy over both images | Same answer to both images | Pair accuracy | Expected from accuracy | Pair − expected |
+|---|---|---|---|---|---|
+| MedGemma-4B | 85.3% | 27.2% | 71.7% | 72.7% | −1.1 [−2.0, −0.1] |
+| Gemma-3 | 61.0% | 75.2% | 23.4% | 37.3% | **−13.8** [−15.6, −11.9] |
+
+Accuracy = pair accuracy + half the "same answer" share, exactly. So 37.6 of Gemma-3's 61.0 accuracy points on
+these questions come from answers that do not depend on the image (MedGemma-4B: 13.6 of 85.3). Single-image
+accuracy cannot show that; the opposite-answer probe measures it. All five models and both datasets:
+[docs/RESULTS.md §14](docs/RESULTS.md).
 
 **5. What the *Dangerous* share contains.** On yes/no questions about 36–42% is a **chance floor**: answers that
 would match with and without the image even if the two were unrelated. Cohen's κ corrects for it (the
@@ -154,11 +202,12 @@ before it was run ([docs/PREREGISTRATION.md](docs/PREREGISTRATION.md)). Failed p
 ### What to take away
 
 1. A *Dangerous* share measured by image removal says more about refusal policy and priors than about image use.
-   Don't compare models with it.
-2. Probe reliance **in format** (best: an image whose correct answer is the opposite), and run the probe on data
-   **outside** each model's training set.
-3. Report the *Dangerous* share with its chance floor (or as κ), and split it by correctness.
-4. Let models abstain, and treat declining without an image as desirable, not as a format failure.
+   Don't rank models with it.
+2. Probe reliance **in format**, with an image whose correct answer is the opposite, on data **outside** each
+   model's training set. Test whether two probes agree directly; don't compare their significance.
+3. Read pair accuracy against single-image accuracy, and report how much accuracy comes from unchanged answers.
+4. Report the *Dangerous* share with its chance floor (or as κ), and split it by correctness.
+5. Let models abstain, and treat declining without an image as desirable, not as a format failure.
 
 ## Method
 
@@ -167,7 +216,7 @@ flowchart LR
     Q[Question + image] --> O[original image]
     Q --> P[validated paraphrases]
     Q --> N[image removed]
-    Q --> S[wrong image]
+    Q --> S[different image]
     Q --> K[black image]
     Q --> X[opposite-answer image]
     Q --> U[image removed,<br/>'unknown' allowed]
@@ -179,10 +228,10 @@ flowchart LR
 | Probe | What changes | Role |
 |---|---|---|
 | **Image removed** | image tokens omitted, text identical | the taxonomy's reference probe (main run) |
-| **Wrong image** | another image, same dataset and modality | second probe (main run) |
-| **Black image** (R1) | a black image in the image slot | in format, no content |
+| **Different image** ("wrong image" in file names) | another image, same dataset and modality | second probe (main run); weak, because the partner often has the same answer |
+| **Black image** (R1) | a black image in the image slot | in format, no content; not a neutral input |
 | **"Unknown" allowed** (R2) | image removed, instruction allows "unknown" | separates refusal from blind answering |
-| **Opposite-answer image** (R3 SLAKE, R4 PathVQA) | another image on which the same question has the opposite gold answer | an image-reliant model must change its answer; R4 is outside every medical model's training data |
+| **Opposite-answer image** (R3 SLAKE, R4 PathVQA) | another image on which the same question has the opposite gold answer | the reference probe: an image-reliant model must change its answer, and to the right one; R4 is outside every medical model's training data |
 
 - **Models.** Three pairs, each a medical model and the general model it shares an architecture with:
   [`google/medgemma-4b-it`](https://huggingface.co/google/medgemma-4b-it) and
@@ -203,7 +252,8 @@ flowchart LR
   validator. **Every one of the 4,890 unique (question, paraphrase) pairs was judged for equivalence** against a
   written rubric: 1,208 were rejected, each with a reason, and unjudged pairs are rejected by construction.
 - **Statistics.** Cluster bootstrap over images (B = 2,000), Holm correction within families, Cohen's κ for
-  chance agreement, and template-clustered sensitivity checks for the opposite-answer probes.
+  chance agreement, a difference-of-differences test for disagreement between probes, and template-clustered
+  sensitivity checks for the opposite-answer probes.
 
 ## Engineering
 
@@ -230,7 +280,7 @@ pandas · NumPy · scikit-learn · matplotlib · pytest · LaTeX (CVPR kit)
 - **CLI and configs.** `medvlm prepare | paraphrase | pipeline | probes | contrast | analyze | compare | posthoc |
   replication | contamination | format-check | regress | status | doctor`. Configs layer base → profile → model
   → hardware, and every command writes a timestamped log with progress, ETA and GPU memory.
-- **103 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
+- **104 unit tests + 7 real-model GPU tests**, including scoring edge cases, crash-safe resume, batching
   equivalence, the construction of opposite-answer partners and an oracle-vs-blind check of pair accuracy.
 - **Registrations are git tags** (`prereg-main`, `prereg-probes`, `prereg-replication`, `prereg-contrast`), so
   anyone can check that each plan predates its results.
@@ -238,12 +288,12 @@ pandas · NumPy · scikit-learn · matplotlib · pytest · LaTeX (CVPR kit)
 ## Reproduce
 
 ```bash
-pip install -e ".[model,dev]" && pytest                         # 103 fast tests, no GPU needed
+pip install -e ".[model,dev]" && pytest                         # 104 fast tests, no GPU needed
 medvlm pipeline --profile main --model medgemma4b --hardware rtx4080 --parts 2     # each of the five models
 medvlm probes   --profile main --model medgemma4b --hardware rtx4080               # each of the five models
 medvlm contrast --model all --hardware rtx4080 && medvlm contrast --analyze        # probe R4
 medvlm posthoc  --profile main --model medgemma4b --model-b gemma3_4b              # each pair
-medvlm replication --profile main                                                  # cross-pair tables and figures
+medvlm replication --profile main                                                  # cross-pair tables, probe-disagreement test, figures
 ```
 
 Full instructions, including gated-model access and pre-flight checks: [docs/REPRODUCE.md](docs/REPRODUCE.md).
@@ -268,11 +318,14 @@ tests/                   fast unit tests and -m slow real-model tests
 
 - **Three pairs, two families.** They show that image removal *can* disagree with in-format probes and suggest
   why; they do not say how often this happens across the field.
-- **Post hoc parts.** The refusal and prior-agreement explanations and the per-dataset breakdown were formed after
-  the primary results. Of the dataset-specific comparisons, only R4 was registered.
+- **No ground truth.** No probe is the true measure of image reliance. The reference probe (opposite-answer
+  image) exists only on SLAKE and PathVQA; on VQA-RAD image removal is compared with two weaker probes.
+- **Post hoc parts.** The refusal and prior-agreement explanations, the per-dataset breakdown, the direct test of
+  probe disagreement and the comparison of pair accuracy with accuracy were formed after the primary results. Of
+  the dataset-specific comparisons, only R4 was registered.
 - **R4 is one modality.** Pathology is a domain where every model is weak (pair accuracy 36–43%). R4 argues
   against a general "the medical model uses the image more" but cannot rule out such an advantage in every
-  domain.
+  domain, and it cannot tell equal reliance from equal difficulty.
 - **Checkpoints, not causes.** Each medical model differs from its base in its whole post-training, not only in
   medical data.
 - **Training exposure.** MedGemma-4B trained on SLAKE and VQA-RAD (whose test images mostly occur in its train
@@ -312,7 +365,7 @@ Tri Thai Huu and Hung Nguyen Le, VinUniversity · 23tri.th@vinuni.edu.vn, 23hung
 
 ```bibtex
 @misc{thaihuu2026consistentblind,
-  title  = {Consistent but Blind? Image Removal Does Not Measure Image Reliance in Medical Vision-Language Models},
+  title  = {Consistent but Blind? Image Removal Does Not Rank Medical Vision-Language Models by Image Reliance},
   author = {Thai Huu, Tri and Nguyen Le, Hung},
   year   = {2026},
   note   = {VinUniversity. https://github.com/thaitri2005/Medvlm-Image-Reliance}

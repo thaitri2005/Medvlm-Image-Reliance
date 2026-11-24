@@ -855,6 +855,61 @@ def by_dataset(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> p
     return pd.DataFrame(rows)
 
 
+def did_row(D: pd.DataFrame, B: int, seed: int) -> dict:
+    """Difference of differences for one cell. `D` has one row per question: `removal` and `probe` are the paired
+    medical - general differences in "answer changed" under image removal and under the in-format probe."""
+    r = _ci(D, lambda x: float((x.removal - x.probe).mean()), B, seed)
+    return {"n": len(D), "n_images": D.image_id.nunique(), "d_removal": float(D.removal.mean()),
+            "d_probe": float(D.probe.mean()), "did": r["est"], "lo": r["lo"], "hi": r["hi"], "p": r["p"]}
+
+
+def probe_disagreement(cfg, paths, pairs: list[tuple[str, str]], B: int, seed: int) -> pd.DataFrame:
+    """Post hoc: does image removal rank a pair differently from an in-format probe? Tested directly, as a
+    difference of differences on the same questions:
+
+        did = (medical - general answer-change rate, image removed) - (the same difference, in-format probe)
+
+    "Removal finds a difference and the other probe does not" is not evidence that the probes disagree; the
+    interval of `did` is. Wrong and black images use the test yes/no questions; the opposite-answer image uses the
+    SLAKE R3 questions (R4 on PathVQA was run without an image-removed condition, so it has no row). Holm
+    adjustment is over all rows of the table."""
+    from .contrast import contrast_frame
+    from .stats import holm
+
+    rows = []
+    for a, b in pairs:
+        _, samples, raws = _tables(cfg, paths, [a, b])
+        t = samples[a]
+        test_yn = t.index[(t.answer_type == "yesno") & (t.split == "test")]
+        ch = {}
+        for m in (a, b):
+            p = _wide(raws[m], "p_yes")
+            o = p["orig"] >= .5
+            pb = _wide(load_results(paths.run_dir(f"{m}__blank", cfg["profile"])), "p_yes")["blank"]
+            ch[m] = {"noimg": (o != (p["noimg"] >= .5)).astype(float), "shuf": (o != (p["shuf"] >= .5)).astype(float),
+                     "blank": (o.reindex(pb.index) != (pb >= .5)).astype(float)}
+            f = contrast_frame(paths, m, cfg["profile"])
+            if len(f):
+                ch[m]["opp"] = f.loc[f.dataset == "slake", "follow"].astype(float)
+        for probe in ("shuf", "blank", "opp"):
+            if probe not in ch[a] or probe not in ch[b]:
+                continue
+            base = ch[a]["opp"].index.intersection(ch[b]["opp"].index) if probe == "opp" else test_yn
+            for ds in ("pathvqa", "vqa_rad", "slake"):
+                sel = base[t.loc[base, "dataset"] == ds]
+                if not len(sel):
+                    continue
+                D = pd.DataFrame({"removal": ch[a]["noimg"][sel] - ch[b]["noimg"][sel],
+                                  "probe": ch[a][probe][sel] - ch[b][probe][sel],
+                                  "image_id": t.loc[sel, "image_id"]}).dropna()
+                rows.append({"pair": f"{a} - {b}", "dataset": ds, "probe": probe, **did_row(D, B, seed)})
+    out = pd.DataFrame(rows)
+    if len(out):
+        out["p_holm"] = holm(out.p.tolist())
+        out["disagree"] = out.p_holm < 0.05
+    return out
+
+
 def by_dataset_figure(tab: pd.DataFrame, pairs, out_dir, paper_dir) -> list:
     """fig10: medical - general difference under each probe, by dataset (marker) and pair (panel)."""
     import matplotlib

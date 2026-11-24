@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "medvlm"
-version = "1.0.0"
+version = "1.1.0"
 license = {text = "MIT"}
 authors = [{name = "Tri Thai Huu", email = "23tri.th@vinuni.edu.vn"},
            {name = "Hung Nguyen Le", email = "23hung.nl@vinuni.edu.vn"}]

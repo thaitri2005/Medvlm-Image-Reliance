@@ -88,6 +88,11 @@ def _mean(col):
     return lambda x: float(x[col].astype(float).mean())
 
 
+def _vs_product(x) -> float:
+    """Pair accuracy minus the product of the two single-image accuracies."""
+    return float(x.both_right.mean() - x.correct_orig.mean() * x.correct_partner.mean())
+
+
 def _paired(col):
     return lambda x: float((x[f"{col}_a"].astype(float) - x[f"{col}_b"].astype(float)).mean())
 
@@ -106,6 +111,13 @@ def summarize_contrast(paths: Paths, models=MODELS, pairs=PAIRS, sets=SETS, B: i
         for col in METRICS:
             r = cluster_bootstrap(d, _mean(col), B=B, seed=seed)
             row.update({col: r["est"], f"{col}_lo": r["lo"], f"{col}_hi": r["hi"]})
+        # Post hoc: is pair accuracy more than accuracy? If being right on one image said nothing about being
+        # right on the other, pair accuracy would be the product of the two accuracies. A model that answers from
+        # the question alone falls far below that product (it is right on exactly one image of every pair).
+        r = cluster_bootstrap(d, _vs_product, B=B, seed=seed)
+        row.update(both_right_expected=float(d.correct_orig.mean() * d.correct_partner.mean()),
+                   both_right_minus_expected=r["est"], both_right_minus_expected_lo=r["lo"],
+                   both_right_minus_expected_hi=r["hi"])
         rows.append(row)
     per_model = pd.DataFrame(rows)
 

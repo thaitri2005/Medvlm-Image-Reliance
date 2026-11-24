@@ -238,6 +238,12 @@ def _replication(cfg, paths, args):
     bd_dir = paths.results / f"replication_{cfg['profile']}"
     bd.to_csv(bd_dir / "by_dataset.csv", index=False)
     figs += by_dataset_figure(bd, all_pairs, bd_dir, paths.root / "report" / "figures")
+    from .analysis.posthoc import probe_disagreement
+
+    pdis = probe_disagreement(cfg, paths, all_pairs, cfg["analysis"]["bootstrap_B"], cfg["seed"])
+    pdis.to_csv(bd_dir / "probe_disagreement.csv", index=False)
+    print("[replication] image removal minus in-format probe (medical - general, difference of differences):\n"
+          + pdis.round(3).to_string(index=False))
     print(f"[replication] -> {out}; figures: {', '.join(str(f) for f in figs)}")
 
 
